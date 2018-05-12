@@ -38,9 +38,6 @@ contract("Game", function([owner, donor]){
         const hash = Web3Utils.soliditySha3({type: 'string', value: "66"}, {type: 'string', value: "3"});
         // console.log(hash)
 
-        // const res = await game.getSha("66", "3");
-        // console.log(res)
-        
         //Commit/Reveal
         await game.commit(hash, { value: 1, from: donor });
         await game.reveal("66", "3", {from: donor});
@@ -61,7 +58,11 @@ contract("Game", function([owner, donor]){
             web3.eth.getAccounts( function (err, accounts) { resolve(accounts) })
         });
 
-        console.log(accounts)
+        await game.set_MAX_PLAYERS(2);
+
+        console.log(accounts);
+        console.log(donor);
+        console.log(accounts[2]);
 
         await game.commit(hash1, { value: 1, from: accounts[2] });
         await game.commit(hash2, { value: 1, from: accounts[6] });
@@ -69,17 +70,14 @@ contract("Game", function([owner, donor]){
         await game.reveal("80", "3", {from: accounts[2]});   
         await game.reveal("20", "3", {from: accounts[6]});
 
-        // console.log(hash)
+        // //console.log(hash)
 
-        // const res = await game.getSha("66", "3");
-        // console.log(res)
-        
-        //Commit/Reveal
+        // //Commit/Reveal
         await game.find_winner();
 
-        const winner = await game.winners(0);
-        console.log(winner);
+        // const winner = await game.winners(0);
+        // console.log(winner);
         
-        assert.equal(winner, accounts[6], "Winner isn't correctly selected");
+        // assert.equal(winner, accounts[6], "Winner isn't correctly selected");
     })
 });

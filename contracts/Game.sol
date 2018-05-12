@@ -14,7 +14,7 @@ contract Game is Ownable {
     
     address OUR_ADDRESS = 0x2540099e9ed04aF369d557a40da2D8f9c2ab928D; //Address 
     uint public constant GAME_FEE_PERCENT = 1;
-    uint public constant MAX_PLAYERS = 2;
+    uint public MAX_PLAYERS = 1;
     uint public constant MIN_GUESS = 0;
     uint public constant MAX_GUESS = 100; 
 
@@ -22,6 +22,10 @@ contract Game is Ownable {
     uint public curr_number_bets = 0;
     uint public curr_number_reveals = 0;
     uint public number_reveals = 0;
+
+    function set_MAX_PLAYERS(uint new_val) public onlyOwner {
+        MAX_PLAYERS = new_val;
+    }
 
     // Commit your guess. 
     function commit(bytes32 hashed_com) public payable{
@@ -45,6 +49,7 @@ contract Game is Ownable {
     // returns (string)
     //DEBUG: remove return
     function reveal(string guess, string random) public  {
+        
         require(game_state == GameState.REVEAL_STATE);
         
         uint guess_num = stringToUint(guess);
@@ -72,13 +77,16 @@ contract Game is Ownable {
             guess_sum += tmp;
         }
 
-        uint twothirdsavg = ((guess_sum/player_addrs.length)*2)/3;
+        uint average = guess_sum/player_addrs.length;
+        uint twothirdsavg = (average * 2) / 3;
 
         uint min_diff = MAX_GUESS;
-        for(uint j = 0; j < player_addrs.length; i++) {
+        uint cur_diff;
+        for(i = 0; i < player_addrs.length; i++) {
+            
             uint cur_guess = game_data[player_addrs[i]];
-            uint cur_diff = MAX_GUESS;
 
+            // Find the difference between the guess and the average
             if(twothirdsavg > cur_guess){
                 cur_diff = twothirdsavg - cur_guess;
             }
@@ -86,12 +94,18 @@ contract Game is Ownable {
                 cur_diff = cur_guess - twothirdsavg;
             }
             
+            // If the difference is less than the smallest difference,
+            // we delete all the winners and add the new candidate
             if(cur_diff < min_diff) {
                 delete winners;
                 winners.push(player_addrs[i]);
                 min_diff = cur_diff;
+            // Else, if the difference are the same, we add the candidate to the 
+            // list of winners
             } else if(cur_diff == min_diff){
                 winners.push(player_addrs[i]);
+            } else {
+                
             }
         }
 
@@ -101,7 +115,7 @@ contract Game is Ownable {
 
         uint prize = address(this).balance/winners.length;
 
-        for(uint k = 0; k < winners.length; k++){
+        for(i = 0; i < winners.length; i++){
             winners[i].transfer(prize); 
         }
     }
