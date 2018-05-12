@@ -10,13 +10,17 @@ contract Game is Ownable {
     mapping (address => bytes32) public commits;
     mapping (address => uint) public game_data;
     address[] public player_addrs;
+    address[] public winners;
     
-    uint public constant MAX_PLAYERS = 1;
+    address OUR_ADDRESS = 0x2540099e9ed04aF369d557a40da2D8f9c2ab928D; //Address 
+    uint public constant GAME_FEE_PERCENT = 1;
+    uint public constant MAX_PLAYERS = 2;
     uint public constant MIN_GUESS = 0;
     uint public constant MAX_GUESS = 100; 
 
-    uint public BET_SIZE = 1;//0.01 ether;
+    uint public BET_SIZE = 1; //0.01 ether;
     uint public curr_number_bets = 0;
+    uint public curr_number_reveals = 0;
     uint public number_reveals = 0;
 
     // Commit your guess. 
@@ -54,19 +58,14 @@ contract Game is Ownable {
         game_data[msg.sender] = guess_num;
         player_addrs.push(msg.sender);
         number_reveals++;
+
+        if(curr_number_reveals == MAX_PLAYERS){
+            find_winner();
+        }
     }
 
 
-
-
-
-
-
-
-
-
-
-    function find_winner() private {
+    function find_winner() public {
         uint guess_sum = 0;
         for(uint i = 0; i < player_addrs.length; i++){
             uint tmp = game_data[player_addrs[i]];
@@ -75,20 +74,42 @@ contract Game is Ownable {
 
         uint twothirdsavg = ((guess_sum/player_addrs.length)*2)/3;
 
-        uint min_diff = 100;
+        uint min_diff = MAX_GUESS;
         for(uint j = 0; j < player_addrs.length; i++) {
             uint cur_guess = game_data[player_addrs[i]];
+            uint cur_diff = MAX_GUESS;
+
+            if(twothirdsavg > cur_guess){
+                cur_diff = twothirdsavg - cur_guess;
+            }
+            else{
+                cur_diff = cur_guess - twothirdsavg;
+            }
             
+            if(cur_diff < min_diff) {
+                delete winners;
+                winners.push(player_addrs[i]);
+                min_diff = cur_diff;
+            } else if(cur_diff == min_diff){
+                winners.push(player_addrs[i]);
+            }
+        }
+
+        uint gamefee = (address(this).balance/100) * GAME_FEE_PERCENT;
+
+        OUR_ADDRESS.transfer(gamefee);
+
+        uint prize = address(this).balance/winners.length;
+
+        for(uint k = 0; k < winners.length; k++){
+            winners[i].transfer(prize); 
         }
     }
-
-
-
 
     // Move to helper
     function bytes32ToString (bytes32 data) private returns (string) {
         bytes memory bytesString = new bytes(32);
-        for (uint j=0; j<32; j++) {
+        for (uint j = 0; j < 32 ;j++) {
             byte char = byte(bytes32(uint(data) * 2 ** (8 * j)));
             if (char != 0) {
                 bytesString[j] = char;

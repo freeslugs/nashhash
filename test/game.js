@@ -7,6 +7,8 @@ var Game = artifacts.require("./Game.sol");
   
 contract("Game", function([owner, donor]){
 
+    var accounts;
+
     let game
 
     beforeEach('setup contract for each test', async () => {
@@ -50,6 +52,34 @@ contract("Game", function([owner, donor]){
         console.log(guess);
     })
 
+    it("Should find winner and distribute prizes", async () => {
+        // keccak256 , web3.sha3
+        const hash1 = Web3Utils.soliditySha3({type: 'string', value: "80"}, {type: 'string', value: "3"});
+        const hash2 = Web3Utils.soliditySha3({type: 'string', value: "20"}, {type: 'string', value: "3"});
 
+        const accounts = await new Promise(function(resolve, reject) {
+            web3.eth.getAccounts( function (err, accounts) { resolve(accounts) })
+        });
 
+        console.log(accounts)
+
+        await game.commit(hash1, { value: 1, from: accounts[2] });
+        await game.commit(hash2, { value: 1, from: accounts[6] });
+
+        await game.reveal("80", "3", {from: accounts[2]});   
+        await game.reveal("20", "3", {from: accounts[6]});
+
+        // console.log(hash)
+
+        // const res = await game.getSha("66", "3");
+        // console.log(res)
+        
+        //Commit/Reveal
+        await game.find_winner();
+
+        const winner = await game.winners(0);
+        console.log(winner);
+        
+        assert.equal(winner, accounts[6], "Winner isn't correctly selected");
+    })
 });
