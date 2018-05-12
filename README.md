@@ -20,6 +20,7 @@ Game theory games on the blockchain
 
 1. `truffle develop`
   1. `compile; deploy`
-  
+
+1. `yarn start`  
 
 
