@@ -1,18 +1,31 @@
 {
   "name": "pet-shop",
   "version": "1.0.0",
+  "private": true,
   "description": "",
   "main": "truffle.js",
   "directories": {
     "test": "test"
   },
   "scripts": {
-    "dev": "lite-server",
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "start": "react-scripts start",
+    "build": "react-scripts build",
+    "eject": "react-scripts eject"
   },
   "author": "",
   "license": "ISC",
   "devDependencies": {
+    "flow-bin": "^0.72.0",
     "lite-server": "^2.3.0"
+  },
+  "dependencies": {
+    "react": "^16.3.2",
+    "react-dom": "^16.3.2",
+    "react-router": "^4.2.0",
+    "react-router-dom": "^4.2.2",
+    "react-scripts": "1.1.4",
+    "semantic-ui-react": "^0.80.0",
+    "styled-components": "^3.2.6",
+    "web3": "^1.0.0-beta.34"
   }
 }
