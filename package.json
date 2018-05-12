@@ -14,5 +14,10 @@
   "license": "ISC",
   "devDependencies": {
     "lite-server": "^2.3.0"
+  },
+  "dependencies": {
+    "js-sha3": "^0.7.0",
+    "keccak": "^1.4.0",
+    "web3-utils": "^1.0.0-beta.34"
   }
 }
