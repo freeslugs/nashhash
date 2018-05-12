@@ -210,3 +210,4 @@ yarn-debug.log*
 yarn-error.log*
 
 build/contracts/*
+.env
