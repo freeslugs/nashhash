@@ -4,7 +4,10 @@ pragma solidity ^0.4.23;
 
 /*
 !!!!!!!!!!! KNOWN BUGS !!!!!!!!!!!!!!!
-1) 2/3 average not consistent with the js results. NEEDS FIXING.
+1) 2/3 average consistent with the js results. BUT. The way we calculate it
+in solidity seems to be rounded down at the taking of the average step, and then
+again rounded down after division by 3. It is better to fix this because this skews
+the average ever so slightly south. 
 2) Protect against repeated reveal call
 
 !!!!!!!!!!!! POTENTIAL BUGS !!!!!!!!!!!!!!!!
@@ -43,7 +46,7 @@ contract Game is Ownable, GameHelper {
     uint public BET_SIZE = 1 ether; 
     
     // Rules
-    uint public MAX_PLAYERS = 1;
+    uint public MAX_PLAYERS = 10;
     uint public constant MIN_GUESS = 0;
     uint public constant MAX_GUESS = 100;
 
@@ -71,7 +74,6 @@ contract Game is Ownable, GameHelper {
         if(block.number > final_commit_block + REVEAL_PERIOD){
             find_winner();
         }
-
 
     }
 

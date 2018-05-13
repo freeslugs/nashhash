@@ -43,6 +43,7 @@ contract("Game", function([owner, donor]){
         // console.log(hash)
 
         //Commit/Reveal
+        await game.set_MAX_PLAYERS(1);
         await game.commit(hash, { value: bet, from: donor });
         await game.reveal("66", "3", {from: donor});
         
@@ -109,17 +110,13 @@ contract("Game", function([owner, donor]){
 
         // Round 1-4
         await runGame(bet, num_players, accounts, game);
-
         await runGame(bet, num_players, accounts, game);
-
         await runGame(bet, num_players, accounts, game);
-
         await runGame(bet, num_players, accounts, game);
-
     })
 
 
-
+    
 });
 
 /////////////////////// HELPERS /////////////////////////
