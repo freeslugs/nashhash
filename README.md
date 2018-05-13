@@ -26,6 +26,9 @@ Game theory games on the blockchain
 
 ## API i need to connect to 
 
+NOTICE: 
+When creating a new game, make sure you manually set the number of MAX_PLAYERS. I could not find how to test a constructor with params in trufle, so was not ready to include it in. 
+
 P1: 
 1. `commit(hashed guess` √ 
 I added an event called SuccesfulCommit to allow you to update the UI.

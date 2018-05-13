@@ -1,7 +1,9 @@
 var Web3Utils = require('web3-utils');
 
 // var keccak256 = require('js-sha3').keccak256;
-
+const FIXED_BET = web3.toWei(1,'ether');
+const MAX_PLAYERS = 10;
+const HASHNASH_ADDRESS = 0x2540099e9ed04aF369d557a40da2D8f9c2ab928D;
 
 var Game = artifacts.require("./Game.sol");
   
@@ -76,7 +78,7 @@ contract("Game", function([owner, donor]){
         // //console.log(hash)
 
         const winner = await game.last_winners(0);
-        console.log(winner);
+        //console.log(winner);
         
         assert.equal(winner, accounts[6], "Winner isn't correctly selected");
     })
@@ -107,13 +109,13 @@ contract("Game", function([owner, donor]){
 
         // Round 1-4
         await runGame(bet, num_players, accounts, game);
-        console.log("Round 1 good.");
+        //console.log("Round 1 good.");
         await runGame(bet, num_players, accounts, game);
-        console.log("Round 2 good.")
+        //console.log("Round 2 good.")
         await runGame(bet, num_players, accounts, game);
-        console.log("Round 3 good.")
+        //console.log("Round 3 good.")
         await runGame(bet, num_players, accounts, game);
-        console.log("Round 4 good.")
+        //console.log("Round 4 good.")
     })
 
 
@@ -166,15 +168,15 @@ async function runGame(bet, num_players, accounts, game) {
 
     // Grab all the winners
     var number_of_winners = await game.num_last_winners();
-    console.log(loc_winners.length);
-    console.log(number_of_winners);
+    //console.log(loc_winners.length);
+    //console.log(number_of_winners);
     assert(loc_winners.length == number_of_winners.toNumber(), "Number of winners varies");
 
     for (i = 0; i < number_of_winners; i++){
         var winner = await game.last_winners(i);
         
-        console.log("From Contract: " + winner);
-        console.log("Locally " + loc_winners[i]);
+        //console.log("From Contract: " + winner);
+        //console.log("Locally " + loc_winners[i]);
 
         assert(winner == loc_winners[i]);
     }

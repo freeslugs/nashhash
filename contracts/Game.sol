@@ -30,8 +30,8 @@ contract Game is Ownable, GameHelper {
     // Commit/Reveal Protocol vars
     mapping (address => bytes32) public commits;
     mapping (address => uint) public game_data;
-    address[] public player_addrs;
-    address[] public winners;
+    address[] internal player_addrs;
+    address[] internal winners;
     uint public curr_number_bets = 0;
     uint public curr_number_reveals = 0;
     
@@ -60,14 +60,12 @@ contract Game is Ownable, GameHelper {
 
     ////
 
-
-
-
-
-
-
-
-
+    // constructor(uint num_players, uint bet_size) public {
+    //     MAX_PLAYERS = num_players;
+    //     BET_SIZE = bet_size;
+    //    // OUR_ADDRESS = fee_addr;
+    //     owner = msg.sender;
+    // }
 
     // Commit your guess. 
     event SuccesfulCommit(
