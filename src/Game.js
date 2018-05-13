@@ -13,7 +13,8 @@ class Game extends Component<props> {
   state = {
     state: null, // COMMIT, COMMITTED, REVEAL, REVEALED, PAYOUT
     stake: null, // 1, 0.1, 0.001
-    guess: 66
+    guess: 66,
+    balance: null
   }
 
   render() {
@@ -26,7 +27,7 @@ class Game extends Component<props> {
             })
           }
         } {...props} {...this.state} /> )} />
-        <Route exact path="/games/two-thirds/commit" render={(props) => ( <CommitForm setGuess={ (guess) => this.setState({guess: guess}) } {...this.props} {...this.state} /> )} />
+        <Route exact path="/games/two-thirds/commit" render={(props) => ( <CommitForm setBalance={(balance) => this.setState({balance})} setGuess={ (guess) => this.setState({guess: guess}) } {...this.props} {...this.state} /> )} />
         <Route exact path="/games/two-thirds/reveal" render={(props) => ( <RevealForm {...this.props} {...this.state} /> )} />
         <Route exact path="/games/two-thirds/payout" render={(props) => ( <PayoutPage {...this.props} {...this.state} /> )} />
       </div>

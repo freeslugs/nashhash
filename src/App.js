@@ -56,7 +56,7 @@ class App extends Component<props> {
         const network = await this.state.web3.eth.net.getNetworkType();
         if(network !== "rinkeby")
           throw(new Error("Game has not been deployed to detected network (network/artifact mismatch)"))
-        instance = Game.at("0xa9a547abb048a35df0956ea9fa1768ceb118d86a") 
+        instance = Game.at("0xfc72c65a63c28d03c99d40cbebc3b31fcf8b83b9") 
         // console.log(instance)
       } catch (e) {
         console.log(e)
@@ -75,9 +75,15 @@ class App extends Component<props> {
         }
       }
       this.setState({ accounts: accounts, GameInstance: instance });
-      // console.log(instance.curr_number_bets)
-      // const result = await instance.curr_number_bets();
-      // const result = await instance.BET_SIZE();
+      const game = instance;
+      // await game.reset();
+      // console.log(game)
+
+      let curr_number_bets = await game.curr_number_bets();
+      console.log('current bets: ' + parseInt(curr_number_bets))
+      let state = await game.game_state_debug();
+      console.log('current state: ' +  parseInt(state))
+
       // console.log(parseInt(result))
     })
   }
@@ -91,7 +97,7 @@ class App extends Component<props> {
             <Menu pointing secondary>
               <Logo name='NashHash' as={Link} to="/" onClick={this.handleItemClick} />
               <Menu.Menu position='right'>
-                <Menu.Item name='FAQ' active={activeItem === 'FAQ'} onClick={this.handleItemClick} />
+                <Menu.Item name='FAQ' active={activeItem === 'FAQ'} as={Link} to="/games/two-thirds/payout" onClick={this.handleItemClick} />
                 <Menu.Item name='friends' active={activeItem === 'friends'} onClick={this.handleItemClick} />
                 <Menu.Item name='logout' active={activeItem === 'logout'} onClick={this.handleItemClick} />
               </Menu.Menu>

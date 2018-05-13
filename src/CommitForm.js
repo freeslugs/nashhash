@@ -25,6 +25,15 @@ class CommitForm extends Component<props> {
     loading: false
   }
 
+  componentDidMount = async () => {
+    const web3 = this.props.web3;
+    const account = this.props.accounts[0]
+    // console.log(this.props.balance);
+    const balance = await web3.eth.getBalance(account);
+    // console.log(balance)
+    this.props.setBalance(balance)
+  }
+
   commit = async () => {
     const account = this.props.accounts[0]
     // console.log(account)
