@@ -17,13 +17,14 @@ contract("Game", function([owner, donor]){
 
     it("init", async () => {
         const count = await game.BET_SIZE();
-        assert.equal(count, 1);
+        assert.equal(count.toNumber(), web3.toWei(1,'ether'));
     });
 
     it("Should commit hashed guess with stake", async () => {
+        const bet = await game.BET_SIZE();
         const hash = Web3Utils.soliditySha3({type: 'string', value: "66"}, {type: 'string', value: "3"});
 
-        await game.commit(hash, { value: 1, from: donor });
+        await game.commit(hash, { value: bet, from: donor });
         const curr_number_bets = await game.curr_number_bets();
         const guess_commit = await game.commits(donor);
 
@@ -35,11 +36,12 @@ contract("Game", function([owner, donor]){
 
     it("Should reveal hashed guess", async () => {
         // keccak256 , web3.sha3
+        const bet = await game.BET_SIZE();
         const hash = Web3Utils.soliditySha3({type: 'string', value: "66"}, {type: 'string', value: "3"});
         // console.log(hash)
 
         //Commit/Reveal
-        await game.commit(hash, { value: 1, from: donor });
+        await game.commit(hash, { value: bet, from: donor });
         await game.reveal("66", "3", {from: donor});
         
         const guess = await game.game_data(donor);
@@ -51,6 +53,7 @@ contract("Game", function([owner, donor]){
 
     it("Should find winner and distribute prizes", async () => {
         // keccak256 , web3.sha3
+        const bet = await game.BET_SIZE();
         const hash1 = Web3Utils.soliditySha3({type: 'string', value: "80"}, {type: 'string', value: "3"});
         const hash2 = Web3Utils.soliditySha3({type: 'string', value: "20"}, {type: 'string', value: "3"});
 
@@ -64,8 +67,8 @@ contract("Game", function([owner, donor]){
         //console.log(donor);
         //console.log(accounts[2]);
 
-        await game.commit(hash1, { value: 1, from: accounts[2] });
-        await game.commit(hash2, { value: 1, from: accounts[6] });
+        await game.commit(hash1, { value: bet, from: accounts[2] });
+        await game.commit(hash2, { value: bet, from: accounts[6] });
 
         await game.reveal("80", "3", {from: accounts[2]});   
         await game.reveal("20", "3", {from: accounts[6]});
@@ -85,6 +88,7 @@ contract("Game", function([owner, donor]){
         
         // MAX IS 10, because max account number is 10
         const num_players = 10;
+        const bet = await game.BET_SIZE();
         
         const accounts = await new Promise(function(resolve, reject) {
             web3.eth.getAccounts( function (err, accounts) { resolve(accounts) })
@@ -97,7 +101,7 @@ contract("Game", function([owner, donor]){
         var i;
         for(i = 0; i < num_players; i++){
             const hash = Web3Utils.soliditySha3({type: 'string', value: guesses[1][i].toString()}, {type: 'string', value: "3"});
-            await game.commit(hash, { value: 1, from: accounts[i] });
+            await game.commit(hash, { value: bet, from: accounts[i] });
         }
 
         var state = await game.game_state_debug();
@@ -110,7 +114,11 @@ contract("Game", function([owner, donor]){
         state = await game.game_state_debug();
         assert(state.toNumber() == 0, "Bad state transition, should be in COMMIT_STATE");
 
-        // 
+        // Lets check the balances
+        for(i = 0; i < num_players; i++){
+            var balance = web3.fromWei(web3.eth.getBalance(accounts[i]),'ether').toString()
+            console.log(balance);
+        }
 
 
 

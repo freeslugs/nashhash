@@ -20,7 +20,7 @@ contract Game is Ownable {
     uint public constant MIN_GUESS = 0;
     uint public constant MAX_GUESS = 100; 
 
-    uint public BET_SIZE = 1; //0.01 ether;
+    uint public BET_SIZE = 1 ether; //0.01 ether;
     uint public curr_number_bets = 0;
     uint public curr_number_reveals = 0;
 
