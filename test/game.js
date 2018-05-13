@@ -60,9 +60,9 @@ contract("Game", function([owner, donor]){
 
         await game.set_MAX_PLAYERS(2);
 
-        console.log(accounts);
-        console.log(donor);
-        console.log(accounts[2]);
+        //console.log(accounts);
+        //console.log(donor);
+        //console.log(accounts[2]);
 
         await game.commit(hash1, { value: 1, from: accounts[2] });
         await game.commit(hash2, { value: 1, from: accounts[6] });
@@ -80,4 +80,57 @@ contract("Game", function([owner, donor]){
         
         // assert.equal(winner, accounts[6], "Winner isn't correctly selected");
     })
+
+    it("Should run with random input correctly", async () => {
+        
+        // MAX IS 10, because max account number is 10
+        const num_players = 10;
+        
+        const accounts = await new Promise(function(resolve, reject) {
+            web3.eth.getAccounts( function (err, accounts) { resolve(accounts) })
+        });
+
+        var guesses = createRandomGuesses(num_players, accounts);
+
+        await game.set_MAX_PLAYERS(num_players);
+
+        var i;
+        for(i = 0; i < num_players; i++){
+            const hash = Web3Utils.soliditySha3({type: 'string', value: guesses[1][i].toString()}, {type: 'string', value: "3"});
+            await game.commit(hash, { value: 1, from: accounts[i] });
+        }
+
+        //assert(game.game_state() == game.GameState.REVEAL_STATE);
+
+        // for(i = 0; i < num_players; i++){
+        //     await game.reveal(guesses[1][i].toString, "3", {from: accounts[i]});
+        // }
+
+
+
+        
+
+
+
+    })
 });
+
+function createRandomGuesses(max_players, accounts){
+
+    var guesses = new Array(2);
+    guesses[0] = new Array(max_players);
+    guesses[1] = new Array(max_players);
+    
+    var i;
+    for(i = 0; i < max_players; i++){
+        guesses[0][i] = accounts[i];
+        guesses[1][i] = Math.floor(Math.random() * 101);
+    }
+
+    console.log(guesses);
+    return guesses;
+}
+
+function computeTwoThirdsAverage(guesses){
+    return guesses.reduce(function(acc, val) { return acc + val; }) * (2/3);    
+}

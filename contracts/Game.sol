@@ -5,7 +5,9 @@ import "./Ownable.sol";
 contract Game is Ownable {
 
     enum GameState {COMMIT_STATE, REVEAL_STATE}
-    GameState game_state = GameState.COMMIT_STATE;
+    GameState public game_state = GameState.COMMIT_STATE;
+    //DEBUG: Enums cannot be tested. Value mirrors the enum
+    uint public game_state_debug = 0;
 
     mapping (address => bytes32) public commits;
     mapping (address => uint) public game_data;
@@ -21,7 +23,6 @@ contract Game is Ownable {
     uint public BET_SIZE = 1; //0.01 ether;
     uint public curr_number_bets = 0;
     uint public curr_number_reveals = 0;
-    uint public number_reveals = 0;
 
     function set_MAX_PLAYERS(uint new_val) public onlyOwner {
         MAX_PLAYERS = new_val;
@@ -62,7 +63,7 @@ contract Game is Ownable {
         // When they do, we add the revealed guess to game data
         game_data[msg.sender] = guess_num;
         player_addrs.push(msg.sender);
-        number_reveals++;
+        curr_number_reveals++;
 
         if(curr_number_reveals == MAX_PLAYERS){
             find_winner();
@@ -104,8 +105,6 @@ contract Game is Ownable {
             // list of winners
             } else if(cur_diff == min_diff){
                 winners.push(player_addrs[i]);
-            } else {
-                
             }
         }
 
@@ -118,6 +117,15 @@ contract Game is Ownable {
         for(i = 0; i < winners.length; i++){
             winners[i].transfer(prize); 
         }
+    }
+
+    function toCommitState() internal {
+        game_state = GameState.COMMIT_STATE;
+        game_state_debug = 0;
+        delete winners;
+        curr_number_bets = 0;
+        curr_number_reveals = 0;
+
     }
 
     // Move to helper
