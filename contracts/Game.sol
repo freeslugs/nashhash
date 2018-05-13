@@ -6,9 +6,10 @@ pragma solidity ^0.4.23;
 !!!!!!!!!!!KNOWN BUGS!!!!!!!!!!!!!!!
 1) 2/3 average not consistent with the js results. NEEDS FIXING.
 
-*/
+!!!!!!!!!!!! POTENTIAL BUGS !!!!!!!!!!!!!!!!
+1) Ether being brought over to the next round due to rounding issues. 
+Check that this is not the case. 
 
-/*
 !!!!!!!!!! LOGICAL IMPROVEMENTS !!!!!!!!!!!!
 1) Send money to HOME address only once the fees reach a certain amount.
 
@@ -67,6 +68,7 @@ contract Game is Ownable, GameHelper {
         
         require(game_state == GameState.REVEAL_STATE);
         
+        // DEBUG: Need to make sure it throws if the guess is not integer
         uint guess_num = stringToUint(guess);
         
         require(guess_num >= MIN_GUESS && guess_num <= MAX_GUESS);
@@ -86,18 +88,21 @@ contract Game is Ownable, GameHelper {
 
 
     function find_winner() public {
+        
+        // Calculate the 2/3 average
         uint guess_sum = 0;
         for(uint i = 0; i < player_addrs.length; i++){
             uint tmp = game_data[player_addrs[i]];
             guess_sum += tmp;
         }
-
         uint average = div(guess_sum, player_addrs.length);
         uint twothirdsavg = div(mul(average, 2), 3);
 
         //DEBUG
         average23 = twothirdsavg;
 
+
+        // Find the guessers who are the closest to the 2/3 average
         uint min_diff = MAX_GUESS;
         uint cur_diff;
         for(i = 0; i < player_addrs.length; i++) {
@@ -125,20 +130,25 @@ contract Game is Ownable, GameHelper {
             }
         }
 
+        // Lets pay ourselves some money
         uint gamefee = (address(this).balance/100) * GAME_FEE_PERCENT;
-
         OUR_ADDRESS.transfer(gamefee);
 
+        // Split the rest equally among winners
         uint prize = address(this).balance/winners.length;
-
         for(i = 0; i < winners.length; i++){
             winners[i].transfer(prize); 
         }
+
+        // DEBUG: Make sure no ether is lost due to rounding. 
+
+
 
         // RESET STATE
         toCommitState();
     }
 
+    // Call this funtion to get to COMMIT_STATE
     function toCommitState() internal {
         game_state = GameState.COMMIT_STATE;
         game_state_debug = 0;
@@ -150,6 +160,7 @@ contract Game is Ownable, GameHelper {
         curr_number_reveals = 0;
     }
 
+    // Call this function to get to REVEAL_STATE
     function toRevealState() internal {
         game_state = GameState.REVEAL_STATE;
         game_state_debug = 1;
