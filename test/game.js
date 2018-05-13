@@ -124,15 +124,60 @@ contract("Game", function([owner, donor]){
         console.log(average);
 
         var average23 = await game.average23();
+
+        console.log(average23.toNumber());
+        console.log(Math.floor(average));
         
         assert(Math.floor(average) == average23.toNumber(), "Average23 miscalculated...");
-        
-        console.log(average23.toNumber);
+
+        findWinner(accounts, guesses[1], average23);
 
 
 
     })
 });
+
+
+
+/////////////////////// TESTER FUNCTIONS /////////////////
+
+const MAX_GUESS = 100;
+
+function findWinner(player_addrs, guesses, avrg){
+    
+    var twothirdsavg = computeTwoThirdsAverage(guesses);
+
+    var min_diff = MAX_GUESS;
+    var cur_diff;
+
+    var winner = [];
+    for(i = 0; i < player_addrs.length; i++) {
+        
+        var cur_guess = guesses[i];
+
+        // Find the difference between the guess and the average
+        if(twothirdsavg > cur_guess){
+            cur_diff = twothirdsavg - cur_guess;
+        }
+        else{
+            cur_diff = cur_guess - twothirdsavg;
+        }
+        
+        // If the difference is less than the smallest difference,
+        // we delete all the winners and add the new candidate
+        if(cur_diff < min_diff) {
+            winners = [];
+            winners.push(player_addrs[i]);
+            min_diff = cur_diff;
+        // Else, if the difference are the same, we add the candidate to the 
+        // list of winners
+        } else if(cur_diff == min_diff){
+            winners.push(player_addrs[i]);
+        }
+    }
+
+    console.log(winners);
+}
 
 function createRandomGuesses(max_players, accounts){
 
@@ -151,5 +196,9 @@ function createRandomGuesses(max_players, accounts){
 }
 
 function computeTwoThirdsAverage(guesses){
-    return (guesses.reduce(function(acc, val) { return acc + val; })) / guesses.length * (2/3);    
+    var sum = guesses.reduce(function(acc, val) { return acc + val; });
+    var average = sum / guesses.length;
+    var average23 = (average * 2) / 3;
+
+    return  average23;    
 }

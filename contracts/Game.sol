@@ -1,8 +1,17 @@
 pragma solidity ^0.4.23;
 
-import "./Ownable.sol";
 
-contract Game is Ownable {
+
+/*
+!!!!!!!!!!!KNOWN BUGS!!!!!!!!!!!!!!!
+1) 2/3 average not consistent with the js results. NEEDS FIXING.
+
+*/
+
+import "./Ownable.sol";
+import "./GameHelper.sol";
+
+contract Game is Ownable, GameHelper {
 
     enum GameState {COMMIT_STATE, REVEAL_STATE}
     GameState public game_state = GameState.COMMIT_STATE;
@@ -81,8 +90,8 @@ contract Game is Ownable {
             guess_sum += tmp;
         }
 
-        uint average = guess_sum/player_addrs.length;
-        uint twothirdsavg = (average * 2) / 3;
+        uint average = div(guess_sum, player_addrs.length);
+        uint twothirdsavg = div(mul(average, 2), 3);
 
         //DEBUG
         average23 = twothirdsavg;
@@ -124,7 +133,7 @@ contract Game is Ownable {
             winners[i].transfer(prize); 
         }
 
-        // Reset state
+        // RESET STATE
         toCommitState();
     }
 
