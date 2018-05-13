@@ -5,6 +5,7 @@ pragma solidity ^0.4.23;
 /*
 !!!!!!!!!!! KNOWN BUGS !!!!!!!!!!!!!!!
 1) 2/3 average not consistent with the js results. NEEDS FIXING.
+2) Protect against repeated reveal call
 
 !!!!!!!!!!!! POTENTIAL BUGS !!!!!!!!!!!!!!!!
 1) Ether being brought over to the next round due to rounding issues. 
@@ -118,6 +119,8 @@ contract Game is Ownable, GameHelper {
         }
     }
 
+    event DebugWinner(address addr, uint n);
+
 
     function find_winner() public {
         
@@ -154,6 +157,7 @@ contract Game is Ownable, GameHelper {
             if(cur_diff < min_diff) {
                 delete winners;
                 winners.push(player_addrs[i]);
+
                 min_diff = cur_diff;
             // Else, if the difference are the same, we add the candidate to the 
             // list of winners
@@ -170,27 +174,32 @@ contract Game is Ownable, GameHelper {
         uint prize = address(this).balance/winners.length;
         for(i = 0; i < winners.length; i++){
             winners[i].transfer(prize); 
+            //emit DebugWinner(winners[i], winners.length);
         }
         last_prize = prize;
 
         // DEBUG: Make sure no ether is lost due to rounding. 
-
-
 
         // RESET STATE
         toCommitState();
     }
 
     // Call this funtion to get to COMMIT_STATE
+    event DebugCommitState(uint last_win_l, uint win_l);
+
     function toCommitState() internal {
-        game_state = GameState.COMMIT_STATE;
         game_state_debug = 0;
 
+        delete player_addrs;
+        delete last_winners;
         last_winners = winners;
         num_last_winners = winners.length;
         delete winners;
         curr_number_bets = 0;
         curr_number_reveals = 0;
+
+        game_state = GameState.COMMIT_STATE;
+        //DebugCommitState(num_last_winners, winners.length);
     }
 
     // Call this function to get to REVEAL_STATE

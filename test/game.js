@@ -30,8 +30,8 @@ contract("Game", function([owner, donor]){
 
         assert.equal(curr_number_bets, 1, "Number of bets did not increment");
         assert.equal(guess_commit, hash, "Hashes do not match");
-        console.log(hash);
-        console.log(guess_commit);
+        //console.log(hash);
+        //console.log(guess_commit);
     })
 
     it("Should reveal hashed guess", async () => {
@@ -45,10 +45,10 @@ contract("Game", function([owner, donor]){
         await game.reveal("66", "3", {from: donor});
         
         const guess = await game.game_data(donor);
-        console.log(guess);
+        //console.log(guess);
 
         assert.equal(guess, '66', "Revealed guesses do not match");
-        console.log(guess);
+        //console.log(guess);
     })
 
     it("Should find winner and distribute prizes", async () => {
@@ -75,13 +75,10 @@ contract("Game", function([owner, donor]){
 
         // //console.log(hash)
 
-        // //Commit/Reveal
-        await game.find_winner();
-
-        // const winner = await game.winners(0);
-        // console.log(winner);
+        const winner = await game.last_winners(0);
+        console.log(winner);
         
-        // assert.equal(winner, accounts[6], "Winner isn't correctly selected");
+        assert.equal(winner, accounts[6], "Winner isn't correctly selected");
     })
 
     it("Should play a full game with random input correctly", async () => {
@@ -94,59 +91,96 @@ contract("Game", function([owner, donor]){
             web3.eth.getAccounts( function (err, accounts) { resolve(accounts) })
         });
 
-        var guesses = createRandomGuesses(num_players, accounts);
-
-        await game.set_MAX_PLAYERS(num_players);
-
-        var i;
-        for(i = 0; i < num_players; i++){
-            const hash = Web3Utils.soliditySha3({type: 'string', value: guesses[1][i].toString()}, {type: 'string', value: "3"});
-            await game.commit(hash, { value: bet, from: accounts[i] });
-        }
-
-        var state = await game.game_state_debug();
-        
-        assert(state.toNumber() == 1, "Bad state transition, should be in REVEAL_STATE");
-        for(i = 0; i < num_players; i++){
-            await game.reveal(guesses[1][i].toString(), "3", {from: accounts[i]});
-        }
-
-        state = await game.game_state_debug();
-        assert(state.toNumber() == 0, "Bad state transition, should be in COMMIT_STATE");
-
-        // Lets check the balances
-        for(i = 0; i < num_players; i++){
-            var balance = web3.fromWei(web3.eth.getBalance(accounts[i]),'ether').toString()
-            console.log(balance);
-        }
-
-        var average = computeTwoThirdsAverage(guesses[1]);
-        console.log(average);
-
-        var average23 = await game.average23();
-
-        console.log(average23.toNumber());
-        console.log(Math.floor(average));
-        
-        // DEBUG: Put this one back in. There is a known problem here.
-        //assert(Math.floor(average) == average23.toNumber(), "Average23 miscalculated...");
-
-        var loc_winners = findWinner(accounts, guesses[1], average23);
-        console.log(loc_winners);
-
-        // Grab all the winners
-        var number_of_winners = await game.num_last_winners();
-        assert(loc_winners.length == number_of_winners, "Number of winners varies");
-        
-        for (i = 0; i < number_of_winners; i++){
-            var winner = await game.last_winners(i);
-            assert(winner == loc_winners[i]);
-            console.log(winner);
-        }
-
-
+        // Round 1
+        await runGame(bet, num_players, accounts, game);
     })
+
+    it("Should reset correctly", async () => {
+        
+        // MAX IS 10, because max account number is 10
+        const num_players = 10;
+        const bet = await game.BET_SIZE();
+        
+        const accounts = await new Promise(function(resolve, reject) {
+            web3.eth.getAccounts( function (err, accounts) { resolve(accounts) })
+        });
+
+        // Round 1-4
+        await runGame(bet, num_players, accounts, game);
+        console.log("Round 1 good.");
+        await runGame(bet, num_players, accounts, game);
+        console.log("Round 2 good.")
+        await runGame(bet, num_players, accounts, game);
+        console.log("Round 3 good.")
+        await runGame(bet, num_players, accounts, game);
+        console.log("Round 4 good.")
+    })
+
+
+
 });
+
+/////////////////////// HELPERS /////////////////////////
+
+async function runGame(bet, num_players, accounts, game) {
+
+    var guesses = createRandomGuesses(num_players, accounts);
+
+    await game.set_MAX_PLAYERS(num_players);
+
+    var i;
+    for(i = 0; i < num_players; i++){
+        const hash = Web3Utils.soliditySha3({type: 'string', value: guesses[1][i].toString()}, {type: 'string', value: "3"});
+        await game.commit(hash, { value: bet, from: accounts[i] });
+    }
+
+    var state = await game.game_state_debug();
+    
+    assert(state.toNumber() == 1, "Bad state transition, should be in REVEAL_STATE");
+    for(i = 0; i < num_players; i++){
+        await game.reveal(guesses[1][i].toString(), "3", {from: accounts[i]});
+    }
+
+    state = await game.game_state_debug();
+    assert(state.toNumber() == 0, "Bad state transition, should be in COMMIT_STATE");
+
+    // Lets check the balances
+    for(i = 0; i < num_players; i++){
+        var balance = web3.fromWei(web3.eth.getBalance(accounts[i]),'ether').toString()
+        //console.log(balance);
+    }
+
+    var average = computeTwoThirdsAverage(guesses[1]);
+    //console.log(average);
+
+    var average23 = await game.average23();
+
+    //console.log(average23.toNumber());
+    //console.log(Math.floor(average));
+    
+    // DEBUG: Put this one back in. There is a known problem here.
+    //assert(Math.floor(average) == average23.toNumber(), "Average23 miscalculated...");
+
+    var loc_winners = findWinner(accounts, guesses[1], average23);
+    //console.log(loc_winners);
+
+    // Grab all the winners
+    var number_of_winners = await game.num_last_winners();
+    console.log(loc_winners.length);
+    console.log(number_of_winners);
+    assert(loc_winners.length == number_of_winners.toNumber(), "Number of winners varies");
+
+    for (i = 0; i < number_of_winners; i++){
+        var winner = await game.last_winners(i);
+        
+        console.log("From Contract: " + winner);
+        console.log("Locally " + loc_winners[i]);
+
+        assert(winner == loc_winners[i]);
+    }
+    //console.log("Done.");
+}
+
 
 
 
@@ -202,7 +236,7 @@ function createRandomGuesses(max_players, accounts){
         guesses[1][i] = Math.floor(Math.random() * 101);
     }
 
-    console.log(guesses);
+    //console.log(guesses);
     return guesses;
 }
 
