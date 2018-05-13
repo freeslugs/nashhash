@@ -1,8 +1,17 @@
 pragma solidity ^0.4.23;
 
-import "./Ownable.sol";
 
-contract Game is Ownable {
+
+/*
+!!!!!!!!!!!KNOWN BUGS!!!!!!!!!!!!!!!
+1) 2/3 average not consistent with the js results. NEEDS FIXING.
+
+*/
+
+import "./Ownable.sol";
+import "./GameHelper.sol";
+
+contract Game is Ownable, GameHelper {
 
     enum GameState {COMMIT_STATE, REVEAL_STATE}
     GameState public game_state = GameState.COMMIT_STATE;
@@ -20,9 +29,12 @@ contract Game is Ownable {
     uint public constant MIN_GUESS = 0;
     uint public constant MAX_GUESS = 100; 
 
-    uint public BET_SIZE = 1; //0.01 ether;
+    uint public BET_SIZE = 1 ether; //0.01 ether;
     uint public curr_number_bets = 0;
     uint public curr_number_reveals = 0;
+
+    // DEBUG vars
+    uint public average23 = 0;
 
     function set_MAX_PLAYERS(uint new_val) public onlyOwner {
         MAX_PLAYERS = new_val;
@@ -39,7 +51,7 @@ contract Game is Ownable {
         // If we received the MAX_PLAYER number of commits, it is time for
         // us to change state.
         if (curr_number_bets == MAX_PLAYERS) {
-            game_state = GameState.REVEAL_STATE;
+            toRevealState();
         }
     }
 
@@ -78,8 +90,11 @@ contract Game is Ownable {
             guess_sum += tmp;
         }
 
-        uint average = guess_sum/player_addrs.length;
-        uint twothirdsavg = (average * 2) / 3;
+        uint average = div(guess_sum, player_addrs.length);
+        uint twothirdsavg = div(mul(average, 2), 3);
+
+        //DEBUG
+        average23 = twothirdsavg;
 
         uint min_diff = MAX_GUESS;
         uint cur_diff;
@@ -117,6 +132,9 @@ contract Game is Ownable {
         for(i = 0; i < winners.length; i++){
             winners[i].transfer(prize); 
         }
+
+        // RESET STATE
+        toCommitState();
     }
 
     function toCommitState() internal {
@@ -125,7 +143,11 @@ contract Game is Ownable {
         delete winners;
         curr_number_bets = 0;
         curr_number_reveals = 0;
+    }
 
+    function toRevealState() internal {
+        game_state = GameState.REVEAL_STATE;
+        game_state_debug = 1;
     }
 
     // Move to helper
