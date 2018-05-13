@@ -3,7 +3,7 @@ pragma solidity ^0.4.23;
 
 
 /*
-!!!!!!!!!!!KNOWN BUGS!!!!!!!!!!!!!!!
+!!!!!!!!!!! KNOWN BUGS !!!!!!!!!!!!!!!
 1) 2/3 average not consistent with the js results. NEEDS FIXING.
 
 !!!!!!!!!!!! POTENTIAL BUGS !!!!!!!!!!!!!!!!
@@ -20,27 +20,32 @@ import "./GameHelper.sol";
 
 contract Game is Ownable, GameHelper {
 
+    // Tracks the state of the game. 
     enum GameState {COMMIT_STATE, REVEAL_STATE}
     GameState public game_state = GameState.COMMIT_STATE;
     //DEBUG: Enums cannot be tested. Value mirrors the enum
     uint public game_state_debug = 0;
 
+    // Commit/Reveal Protocol vars
     mapping (address => bytes32) public commits;
     mapping (address => uint) public game_data;
     address[] public player_addrs;
     address[] public winners;
+    uint public curr_number_bets = 0;
+    uint public curr_number_reveals = 0;
     
+    // Money Specifics
     address OUR_ADDRESS = 0x2540099e9ed04aF369d557a40da2D8f9c2ab928D; //Address 
     uint public constant GAME_FEE_PERCENT = 5;
+    uint public BET_SIZE = 1 ether; 
+    
+    // Rules
     uint public MAX_PLAYERS = 1;
     uint public constant MIN_GUESS = 0;
     uint public constant MAX_GUESS = 100; 
 
-    uint public BET_SIZE = 1 ether; //0.01 ether;
-    uint public curr_number_bets = 0;
-    uint public curr_number_reveals = 0;
 
-    // DEBUG vars
+    ////// DEBUG vars and debug functions
     uint public average23 = 0;
     address[] public last_winners;
     uint public num_last_winners;
@@ -49,13 +54,31 @@ contract Game is Ownable, GameHelper {
         MAX_PLAYERS = new_val;
     }
 
+    ////
+
+
+
+
+
+
+
+
+
+
     // Commit your guess. 
+    event SuccesfulCommit(
+        bytes32 hashed_commit
+    );
+
     function commit(bytes32 hashed_com) public payable{
         require(game_state == GameState.COMMIT_STATE);
         require(msg.value == BET_SIZE);
 
         commits[msg.sender] = hashed_com;
         curr_number_bets++;
+
+        // Notify the user that their bet reached us
+        emit SuccesfulCommit(hashed_com);
 
         // If we received the MAX_PLAYER number of commits, it is time for
         // us to change state.
@@ -64,6 +87,10 @@ contract Game is Ownable, GameHelper {
         }
     }
 
+    event SuccesfulReveal(
+        string guess,
+        string random
+    );
     function reveal(string guess, string random) public  {
         
         require(game_state == GameState.REVEAL_STATE);
@@ -80,6 +107,8 @@ contract Game is Ownable, GameHelper {
         game_data[msg.sender] = guess_num;
         player_addrs.push(msg.sender);
         curr_number_reveals++;
+
+        emit SuccesfulReveal(guess, random);
 
         if(curr_number_reveals == MAX_PLAYERS){
             find_winner();
