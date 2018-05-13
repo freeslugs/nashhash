@@ -63,10 +63,6 @@ contract Game is Ownable, GameHelper {
         }
     }
 
-    function getSha(string one, string two) public view returns(bytes32) {
-        return keccak256(one, two);
-    }
-
     function reveal(string guess, string random) public  {
         
         require(game_state == GameState.REVEAL_STATE);
@@ -157,29 +153,6 @@ contract Game is Ownable, GameHelper {
     function toRevealState() internal {
         game_state = GameState.REVEAL_STATE;
         game_state_debug = 1;
-    }
-
-    // Move to helper
-    function bytes32ToString (bytes32 data) private returns (string) {
-        bytes memory bytesString = new bytes(32);
-        for (uint j = 0; j < 32 ;j++) {
-            byte char = byte(bytes32(uint(data) * 2 ** (8 * j)));
-            if (char != 0) {
-                bytesString[j] = char;
-            }
-        }
-        return string(bytesString);
-    }
-
-    function stringToUint(string s) constant private returns (uint) {
-        bytes memory b = bytes(s);
-        uint result = 0;
-        for (uint i = 0; i < b.length; i++) { // c = b[i] was not needed
-            if (b[i] >= 48 && b[i] <= 57) {
-                result = result * 10 + (uint(b[i]) - 48); // bytes and int are not compatible with the operator -.
-            }
-        }
-        return result; // this was missing
     }
 
 }
