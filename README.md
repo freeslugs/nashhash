@@ -38,13 +38,13 @@ Do not forget to check for errors.
 3. `get_payout`=> how much did i win!
 To get the payout there are few things you have to do:
     
-    var number_of_winners = await game.num_last_winners();
-    for (i = 0; i < number_of_winners; i++){
-      var winner = await game.last_winners(i);
-      if(winner == the_address_of_the_player){
-        var prize = await game.last_prize();
+      var number_of_winners = await game.num_last_winners();
+      for (i = 0; i < number_of_winners; i++){
+        var winner = await game.last_winners(i);
+        if(winner == the_address_of_the_player){
+          var prize = await game.last_prize();
+        }
       }
-    }
 
 P2: 
 4. `get_status` => e.g. commit, reveal, payout
