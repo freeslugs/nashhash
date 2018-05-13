@@ -4,10 +4,16 @@ import { BrowserRouter as Router, Route, Link } from 'react-router-dom';
 import getWeb3 from './utils/getWeb3';
 
 import Landing from './Landing'
-import SelectPool from './SelectPool'
+import Game from './Game'
 
 import { Button, Container, Header, Menu, Card } from 'semantic-ui-react'
 import styled from 'styled-components';
+
+import { ToastContainer, toast } from 'react-toastify';
+import 'react-toastify/dist/ReactToastify.css';
+
+const GameContract = require('./contracts/Game.json');
+const contract = require('truffle-contract');
 
 const Logo = styled(Menu.Item)`
   font-family: 'Lobster Two', cursive;
@@ -27,10 +33,55 @@ const FullPage = styled.div`
 type props = {};
 
 class App extends Component<props> {
+  state = {
+    web3: null,
+    accounts: null,
+    GameInstance: null
+  }
+
+  async componentDidMount() { 
+    const results = await getWeb3;
+    this.setState({ web3: results.web3 })
+
+    const Game = contract(GameContract)
+    // const Game = GameContract.at("0xe4bf6b739f547a3d1d44501923048d11721a8d01")
+    Game.setProvider(this.state.web3.currentProvider)
+
+    this.state.web3.eth.getAccounts(async (error, accounts) => {
+      const instance = Game.at("0xe4bf6b739f547a3d1d44501923048d11721a8d01") 
+
+    //   let instance
+    //   try {
+    //     instance = await Game.deployed();  
+    //   } catch (e) {
+    //     console.log(e)
+    //     if(e.message == "Game has not been deployed to detected network (network/artifact mismatch)") {
+    //       toast.error('Make sure Metamask is set to 127.0.0.1:9545.', {
+    //         position: "top-right",
+    //         autoClose: false,
+    //         hideProgressBar: false,
+    //         closeOnClick: true,
+    //         draggable: false,
+    //         draggablePercent: 0
+    //       })
+    //       // return false;
+    //     } else {
+    //       throw(e)
+    //     }
+    //   }
+      this.setState({ accounts: accounts, GameInstance: instance });
+      // console.log(instance.curr_number_bets)
+      // const result = await instance.curr_number_bets();
+      // const result = await instance.BET_SIZE();
+      // console.log(parseInt(result))
+    })
+  }
+
   render() {
     return (
       <Router>
         <FullPage>
+          <ToastContainer />
           <Container>
             <Menu pointing secondary>
               <Logo name='NashHash' as={Link} to="/" onClick={this.handleItemClick} />
@@ -42,7 +93,7 @@ class App extends Component<props> {
             </Menu>
         
             <Route exact path="/" render={(props) => ( <Landing {...props} {...this.state} /> )} />
-            <Route path="/games/" render={(props) => ( <SelectPool {...props} {...this.state} /> )} />
+            <Route path="/games/two-thirds" render={(props) => ( <Game {...props} {...this.state} /> )} />
           </Container>
         </FullPage>
       </Router>
