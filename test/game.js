@@ -175,7 +175,7 @@ async function runGame(bet, num_players, accounts, game) {
         console.log("From Contract: " + winner);
         console.log("Locally " + loc_winners[i]);
 
-        assert(winner == loc_winners[i], );
+        assert(winner == loc_winners[i]);
     }
     //console.log("Done.");
 }

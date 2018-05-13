@@ -48,7 +48,7 @@ const Games = styled.div`
   }
 `;
 
-const SelectPool = () => <Wrapper>
+const SelectPool = ({ setStake }) => <Wrapper>
   <Header as='h1'>2/3 Average</Header>      
   <Header as='h2'>Select a number between 0-100 with the intention of guessing 2/3 of the average guess.</Header>      
 
@@ -80,21 +80,21 @@ const SelectPool = () => <Wrapper>
     <Header as='h2'>Select your pool.</Header>  
 
     <Card.Group itemsPerRow={3}>
-      <Card color='blue' as={Link} to="/games/chicken">
+      <Card color='blue' onClick={() => setStake(0.01)}>
         <Card.Content>
           <Card.Header>.01 ETH</Card.Header>
           <Card.Description>5 / 10 players</Card.Description>
         </Card.Content>
       </Card>
 
-      <Card color='purple' as={Link} to="/games/lowest-unique">
+      <Card color='purple' onClick={() => setStake(0.1)}>
         <Card.Content>
           <Card.Header>.1 ETH</Card.Header>
           <Card.Description>5 / 10 players</Card.Description>
         </Card.Content>
       </Card>
 
-      <Card color='red' as={Link} to="/games/two-thirds">  
+      <Card color='red' onClick={() => setStake(1)}>
         <Card.Content>
           <Card.Header>1 ETH</Card.Header>
           <Card.Description>5 / 10 players</Card.Description>
