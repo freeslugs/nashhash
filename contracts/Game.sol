@@ -8,6 +8,12 @@ pragma solidity ^0.4.23;
 
 */
 
+/*
+!!!!!!!!!! LOGICAL IMPROVEMENTS !!!!!!!!!!!!
+1) Send money to HOME address only once the fees reach a certain amount.
+
+*/
+
 import "./Ownable.sol";
 import "./GameHelper.sol";
 
@@ -24,7 +30,7 @@ contract Game is Ownable, GameHelper {
     address[] public winners;
     
     address OUR_ADDRESS = 0x2540099e9ed04aF369d557a40da2D8f9c2ab928D; //Address 
-    uint public constant GAME_FEE_PERCENT = 1;
+    uint public constant GAME_FEE_PERCENT = 5;
     uint public MAX_PLAYERS = 1;
     uint public constant MIN_GUESS = 0;
     uint public constant MAX_GUESS = 100; 
@@ -35,6 +41,7 @@ contract Game is Ownable, GameHelper {
 
     // DEBUG vars
     uint public average23 = 0;
+    address[] public last_winners;
 
     function set_MAX_PLAYERS(uint new_val) public onlyOwner {
         MAX_PLAYERS = new_val;
@@ -59,8 +66,6 @@ contract Game is Ownable, GameHelper {
         return keccak256(one, two);
     }
 
-    // returns (string)
-    //DEBUG: remove return
     function reveal(string guess, string random) public  {
         
         require(game_state == GameState.REVEAL_STATE);
@@ -140,6 +145,8 @@ contract Game is Ownable, GameHelper {
     function toCommitState() internal {
         game_state = GameState.COMMIT_STATE;
         game_state_debug = 0;
+
+        last_winners = winners;
         delete winners;
         curr_number_bets = 0;
         curr_number_reveals = 0;
