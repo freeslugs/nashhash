@@ -42,6 +42,7 @@ contract Game is Ownable, GameHelper {
     // DEBUG vars
     uint public average23 = 0;
     address[] public last_winners;
+    uint public num_last_winners;
 
     function set_MAX_PLAYERS(uint new_val) public onlyOwner {
         MAX_PLAYERS = new_val;
@@ -147,6 +148,7 @@ contract Game is Ownable, GameHelper {
         game_state_debug = 0;
 
         last_winners = winners;
+        num_last_winners = winners.length;
         delete winners;
         curr_number_bets = 0;
         curr_number_reveals = 0;

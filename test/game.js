@@ -84,7 +84,7 @@ contract("Game", function([owner, donor]){
         // assert.equal(winner, accounts[6], "Winner isn't correctly selected");
     })
 
-    it("Should run with random input correctly", async () => {
+    it("Should play a full game with random input correctly", async () => {
         
         // MAX IS 10, because max account number is 10
         const num_players = 10;
@@ -131,11 +131,18 @@ contract("Game", function([owner, donor]){
         // DEBUG: Put this one back in. There is a known problem here.
         //assert(Math.floor(average) == average23.toNumber(), "Average23 miscalculated...");
 
-        findWinner(accounts, guesses[1], average23);
-        var winner = await game.last_winners(0);
-        console.log(winner);
-        
+        var loc_winners = findWinner(accounts, guesses[1], average23);
+        console.log(loc_winners);
 
+        // Grab all the winners
+        var number_of_winners = await game.num_last_winners();
+        assert(loc_winners.length == number_of_winners, "Number of winners varies");
+        
+        for (i = 0; i < number_of_winners; i++){
+            var winner = await game.last_winners(i);
+            assert(winner == loc_winners[i]);
+            console.log(winner);
+        }
 
 
     })
@@ -180,7 +187,7 @@ function findWinner(player_addrs, guesses, avrg){
         }
     }
 
-    console.log(winners);
+    return winners;
 }
 
 function createRandomGuesses(max_players, accounts){
