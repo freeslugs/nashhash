@@ -24,6 +24,9 @@ contract Game is Ownable {
     uint public curr_number_bets = 0;
     uint public curr_number_reveals = 0;
 
+    // DEBUG vars
+    uint public average23 = 0;
+
     function set_MAX_PLAYERS(uint new_val) public onlyOwner {
         MAX_PLAYERS = new_val;
     }
@@ -39,7 +42,7 @@ contract Game is Ownable {
         // If we received the MAX_PLAYER number of commits, it is time for
         // us to change state.
         if (curr_number_bets == MAX_PLAYERS) {
-            game_state = GameState.REVEAL_STATE;
+            toRevealState();
         }
     }
 
@@ -117,6 +120,9 @@ contract Game is Ownable {
         for(i = 0; i < winners.length; i++){
             winners[i].transfer(prize); 
         }
+
+        // Reset state
+        toCommitState();
     }
 
     function toCommitState() internal {
@@ -125,7 +131,11 @@ contract Game is Ownable {
         delete winners;
         curr_number_bets = 0;
         curr_number_reveals = 0;
+    }
 
+    function toRevealState() internal {
+        game_state = GameState.REVEAL_STATE;
+        game_state_debug = 1;
     }
 
     // Move to helper

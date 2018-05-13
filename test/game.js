@@ -100,15 +100,17 @@ contract("Game", function([owner, donor]){
             await game.commit(hash, { value: 1, from: accounts[i] });
         }
 
-        //assert(game.game_state() == game.GameState.REVEAL_STATE);
-
-        // for(i = 0; i < num_players; i++){
-        //     await game.reveal(guesses[1][i].toString, "3", {from: accounts[i]});
-        // }
-
-
-
+        var state = await game.game_state_debug();
         
+        assert(state.toNumber() == 1, "Bad state transition, should be in REVEAL_STATE");
+        for(i = 0; i < num_players; i++){
+            await game.reveal(guesses[1][i].toString(), "3", {from: accounts[i]});
+        }
+
+        state = await game.game_state_debug();
+        assert(state.toNumber() == 0, "Bad state transition, should be in COMMIT_STATE");
+
+        // 
 
 
 
