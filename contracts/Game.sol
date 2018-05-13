@@ -42,13 +42,16 @@ contract Game is Ownable, GameHelper {
     // Rules
     uint public MAX_PLAYERS = 1;
     uint public constant MIN_GUESS = 0;
-    uint public constant MAX_GUESS = 100; 
+    uint public constant MAX_GUESS = 100;
+
+    // UI vars
+    address[] public last_winners;
+    uint public num_last_winners = 0;
+    uint public last_prize = 0;
 
 
     ////// DEBUG vars and debug functions
     uint public average23 = 0;
-    address[] public last_winners;
-    uint public num_last_winners;
 
     function set_MAX_PLAYERS(uint new_val) public onlyOwner {
         MAX_PLAYERS = new_val;
@@ -168,6 +171,7 @@ contract Game is Ownable, GameHelper {
         for(i = 0; i < winners.length; i++){
             winners[i].transfer(prize); 
         }
+        last_prize = prize;
 
         // DEBUG: Make sure no ether is lost due to rounding. 
 
