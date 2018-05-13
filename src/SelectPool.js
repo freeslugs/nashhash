@@ -77,7 +77,7 @@ const SelectPool = ({ setStake }) => <Wrapper>
   </Step.Group>
 
   <Games>
-    <Header as='h2'>Select your pool.</Header>  
+    <Header as='h2'>Select your stake.</Header>  
 
     <Card.Group itemsPerRow={3}>
       <Card color='blue' onClick={() => setStake(0.01)}>

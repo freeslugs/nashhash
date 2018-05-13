@@ -56,7 +56,7 @@ class App extends Component<props> {
         const network = await this.state.web3.eth.net.getNetworkType();
         if(network !== "rinkeby")
           throw(new Error("Game has not been deployed to detected network (network/artifact mismatch)"))
-        instance = Game.at("0xf5d74913d026c218523b5afc3cd2e8bc261450fb") 
+        instance = Game.at("0xa9a547abb048a35df0956ea9fa1768ceb118d86a") 
         // console.log(instance)
       } catch (e) {
         console.log(e)

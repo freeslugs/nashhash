@@ -30,7 +30,7 @@ class CommitForm extends Component<props> {
     // console.log(account)
     const game = this.props.GameInstance;
     const bet = await game.BET_SIZE();
-    const hash = Web3Utils.soliditySha3({type: 'string', value: 66 /*this.state.local_guess*/}, {type: 'string', value: "3"});
+    const hash = Web3Utils.soliditySha3({type: 'string', value: this.state.local_guess}, {type: 'string', value: "3"});
 
     this.props.setGuess(this.state.local_guess)
 
