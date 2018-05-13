@@ -74,7 +74,14 @@ contract Game is Ownable, GameHelper {
         if(block.number > final_commit_block + REVEAL_PERIOD){
             find_winner();
         }
+    }
 
+    // Reset the contract to the initial state
+    function reset() public onlyOwner {  
+        toCommitState();
+        delete last_winners;
+        num_last_winners = 0;
+        last_prize = 0;
     }
 
     ////

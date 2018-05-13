@@ -115,8 +115,53 @@ contract("Game", function([owner, donor]){
         await runGame(bet, num_players, accounts, game);
     })
 
+    it("Should go back to init", async () => {
+        
+        // MAX IS 10, because max account number is 10
+        const bet = await game.BET_SIZE();
+        
+        const accounts = await new Promise(function(resolve, reject) {
+            web3.eth.getAccounts( function (err, accounts) { resolve(accounts) })
+        });
 
-    
+        
+        const hash1 = Web3Utils.soliditySha3({type: 'string', value: "80"}, {type: 'string', value: "3"});
+        const hash2 = Web3Utils.soliditySha3({type: 'string', value: "20"}, {type: 'string', value: "3"});
+
+
+        await game.set_MAX_PLAYERS(3);
+        await game.commit(hash1, { value: bet, from: accounts[2] });
+        await game.commit(hash2, { value: bet, from: accounts[6] });
+
+        var cur_bets = await game.curr_number_bets();
+        assert(cur_bets == 2, "Number of commits does not mathc");
+
+        await game.reset();
+
+        cur_bets = await game.curr_number_bets();
+        assert(cur_bets == 0, "State was not reset properly");
+
+        await game.set_MAX_PLAYERS(2);
+        await game.commit(hash1, { value: bet, from: accounts[2] });
+        await game.commit(hash2, { value: bet, from: accounts[6] });
+
+        await game.reveal("80", "3", {from: accounts[2]});
+
+        cur_bets = await game.curr_number_bets();
+        assert(cur_bets == 2, "Number of commits does not match in REVEAL_STATE");
+
+        var cur_reveals = await game.curr_number_reveals();
+        assert(cur_reveals == 1, "Number of reveals does not match in REVEAL_STATE");
+
+        await game.reset();
+
+        cur_bets = await game.curr_number_bets();
+        assert(cur_bets == 0, "failed to reset: commits");
+        var cur_reveals = await game.curr_number_reveals();
+        assert(cur_reveals == 0, "failed to reset: reveals");
+
+    })
+
 });
 
 /////////////////////// HELPERS /////////////////////////
@@ -175,7 +220,7 @@ async function runGame(bet, num_players, accounts, game) {
         console.log("From Contract: " + winner);
         console.log("Locally " + loc_winners[i]);
 
-        assert(winner == loc_winners[i]);
+        assert(winner == loc_winners[i], "Wrong winner");
     }
     //console.log("Done.");
 }
