@@ -120,6 +120,15 @@ contract("Game", function([owner, donor]){
             console.log(balance);
         }
 
+        var average = computeTwoThirdsAverage(guesses[1]);
+        console.log(average);
+
+        var average23 = await game.average23();
+        
+        assert(Math.floor(average) == average23.toNumber(), "Average23 miscalculated...");
+        
+        console.log(average23.toNumber);
+
 
 
     })
@@ -142,5 +151,5 @@ function createRandomGuesses(max_players, accounts){
 }
 
 function computeTwoThirdsAverage(guesses){
-    return guesses.reduce(function(acc, val) { return acc + val; }) * (2/3);    
+    return (guesses.reduce(function(acc, val) { return acc + val; })) / guesses.length * (2/3);    
 }

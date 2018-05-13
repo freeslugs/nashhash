@@ -84,6 +84,9 @@ contract Game is Ownable {
         uint average = guess_sum/player_addrs.length;
         uint twothirdsavg = (average * 2) / 3;
 
+        //DEBUG
+        average23 = twothirdsavg;
+
         uint min_diff = MAX_GUESS;
         uint cur_diff;
         for(i = 0; i < player_addrs.length; i++) {
