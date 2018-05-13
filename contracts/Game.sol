@@ -34,6 +34,8 @@ contract Game is Ownable, GameHelper {
     address[] internal winners;
     uint public curr_number_bets = 0;
     uint public curr_number_reveals = 0;
+    uint public final_commit_block = 0;
+    uint constant REVEAL_PERIOD = 5;
     
     // Money Specifics
     address OUR_ADDRESS = 0x2540099e9ed04aF369d557a40da2D8f9c2ab928D; //Address 
@@ -56,6 +58,21 @@ contract Game is Ownable, GameHelper {
 
     function set_MAX_PLAYERS(uint new_val) public onlyOwner {
         MAX_PLAYERS = new_val;
+    }
+
+    // function is used to trigger a payout in a situation where somone
+    // forgets to send the reveal.
+    function trigger_payout() public onlyOwner {
+        require(game_state == GameState.REVEAL_STATE);
+
+        // If the REVEAL_PERIOD blocks has gone by, while unfair, 
+        // keep the money of nonrevealers, play the game with the
+        // rest of the players.
+        if(block.number > final_commit_block + REVEAL_PERIOD){
+            find_winner();
+        }
+
+
     }
 
     ////
@@ -120,7 +137,9 @@ contract Game is Ownable, GameHelper {
     event DebugWinner(address addr, uint n);
 
 
-    function find_winner() public {
+    function find_winner() private {
+
+        emit DebugWinner(5, player_addrs.length);
         
         // Calculate the 2/3 average
         uint guess_sum = 0;
@@ -204,6 +223,7 @@ contract Game is Ownable, GameHelper {
     function toRevealState() internal {
         game_state = GameState.REVEAL_STATE;
         game_state_debug = 1;
+        final_commit_block = block.number;
     }
 
 }

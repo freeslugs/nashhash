@@ -109,13 +109,13 @@ contract("Game", function([owner, donor]){
 
         // Round 1-4
         await runGame(bet, num_players, accounts, game);
-        //console.log("Round 1 good.");
+
         await runGame(bet, num_players, accounts, game);
-        //console.log("Round 2 good.")
+
         await runGame(bet, num_players, accounts, game);
-        //console.log("Round 3 good.")
+
         await runGame(bet, num_players, accounts, game);
-        //console.log("Round 4 good.")
+
     })
 
 
@@ -161,24 +161,24 @@ async function runGame(bet, num_players, accounts, game) {
     //console.log(Math.floor(average));
     
     // DEBUG: Put this one back in. There is a known problem here.
-    //assert(Math.floor(average) == average23.toNumber(), "Average23 miscalculated...");
+    assert(Math.floor(average) == average23.toNumber(), "Average23 miscalculated...");
 
     var loc_winners = findWinner(accounts, guesses[1], average23);
     //console.log(loc_winners);
 
     // Grab all the winners
     var number_of_winners = await game.num_last_winners();
-    //console.log(loc_winners.length);
-    //console.log(number_of_winners);
+    console.log("HELLO" + loc_winners.length);
+    console.log(number_of_winners);
     assert(loc_winners.length == number_of_winners.toNumber(), "Number of winners varies");
 
     for (i = 0; i < number_of_winners; i++){
         var winner = await game.last_winners(i);
         
-        //console.log("From Contract: " + winner);
-        //console.log("Locally " + loc_winners[i]);
+        console.log("From Contract: " + winner);
+        console.log("Locally " + loc_winners[i]);
 
-        assert(winner == loc_winners[i]);
+        assert(winner == loc_winners[i], );
     }
     //console.log("Done.");
 }
@@ -244,7 +244,7 @@ function createRandomGuesses(max_players, accounts){
 
 function computeTwoThirdsAverage(guesses){
     var sum = guesses.reduce(function(acc, val) { return acc + val; });
-    var average = sum / guesses.length;
+    var average = Math.floor(sum / guesses.length);
     var average23 = (average * 2) / 3;
 
     return  average23;    

@@ -29,6 +29,8 @@ Game theory games on the blockchain
 NOTICE: 
 When creating a new game, make sure you manually set the number of MAX_PLAYERS. I could not find how to test a constructor with params in trufle, so was not ready to include it in. 
 
+I added the function trigger_payout(). This function will trigger the move to payout procedure if REVEAL_PERIOD blocks have gone by since the blocktime of the last commit.
+
 P1: 
 1. `commit(hashed guess` √ 
 I added an event called SuccesfulCommit to allow you to update the UI.
