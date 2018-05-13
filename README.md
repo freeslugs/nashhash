@@ -36,6 +36,7 @@ to dedeuce that the user was late with their bet.
 Same here, except SuccesfulReveal
 Do not forget to check for errors.
 3. `get_payout`=> how much did i win!
+
 To get the payout there are few things you have to do:
     
       var number_of_winners = await game.num_last_winners();
