@@ -156,8 +156,11 @@ contract Game is Ownable, GameHelper {
             uint tmp = game_data[player_addrs[i]];
             guess_sum += tmp;
         }
+
+        guess_sum = guess_sum * 10000;
         uint average = div(guess_sum, player_addrs.length);
         uint twothirdsavg = div(mul(average, 2), 3);
+        twothirdsavg = twothirdsavg / 10000;
 
         //DEBUG
         average23 = twothirdsavg;

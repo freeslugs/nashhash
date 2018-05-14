@@ -28,7 +28,7 @@ contract("Game", function([owner, donor]){
 
         // await game.commit(hash, { value: bet, from: donor });
 
-        await commitBet(game, donor, "66", "3");
+        await commitGuess(game, donor, "66", "3");
 
         const curr_number_bets = await game.curr_number_bets();
         const guess_commit = await game.commits(donor);
@@ -48,10 +48,10 @@ contract("Game", function([owner, donor]){
         //Commit/Reveal
         await game.set_MAX_PLAYERS(1);
 
-        await commitBet(game, donor, "66", "3");
+        await commitGuess(game, donor, "66", "3");
 
         //await game.commit(hash, { value: bet, from: donor });
-        await revealBet(game, donor, "66", "3");
+        await revealGuess(game, donor, "66", "3");
         
         //await game.reveal("66", "3", {from: donor});
         
@@ -74,11 +74,11 @@ contract("Game", function([owner, donor]){
 
         await game.set_MAX_PLAYERS(2);
 
-        await commitBet(game, accounts[2], "80", "3");
-        await commitBet(game, accounts[6], "20", "3");
+        await commitGuess(game, accounts[2], "80", "3");
+        await commitGuess(game, accounts[6], "20", "3");
 
-        await revealBet(game, accounts[2], "80", "3");   
-        await revealBet(game, accounts[6], "20", "3");
+        await revealGuess(game, accounts[2], "80", "3");   
+        await revealGuess(game, accounts[6], "20", "3");
 
         // //console.log(hash)
 
@@ -115,8 +115,8 @@ contract("Game", function([owner, donor]){
         // Round 1-4
         await runGame(bet, num_players, accounts, game);
         await runGame(bet, num_players, accounts, game);
-        await runGame(bet, num_players, accounts, game);
-        await runGame(bet, num_players, accounts, game);
+       // await runGame(bet, num_players, accounts, game);
+        //await runGame(bet, num_players, accounts, game);
     })
 
     it("Should go back to init", async () => {
@@ -128,14 +128,11 @@ contract("Game", function([owner, donor]){
             web3.eth.getAccounts( function (err, accounts) { resolve(accounts) })
         });
 
-        
-        const hash1 = Web3Utils.soliditySha3({type: 'string', value: "80"}, {type: 'string', value: "3"});
-        const hash2 = Web3Utils.soliditySha3({type: 'string', value: "20"}, {type: 'string', value: "3"});
-
 
         await game.set_MAX_PLAYERS(3);
-        await game.commit(hash1, { value: bet, from: accounts[2] });
-        await game.commit(hash2, { value: bet, from: accounts[6] });
+
+        await commitGuess(game, accounts[2], "30", "3");
+        await commitGuess(game, accounts[6], "25", "3");
 
         var cur_bets = await getCurrentCommits(game);
         assert(cur_bets == 2, "Number of commits does not mathc");
@@ -146,10 +143,10 @@ contract("Game", function([owner, donor]){
         assert(cur_bets == 0, "State was not reset properly");
 
         await game.set_MAX_PLAYERS(2);
-        await game.commit(hash1, { value: bet, from: accounts[2] });
-        await game.commit(hash2, { value: bet, from: accounts[6] });
+        await commitGuess(game, accounts[2], "30", "3");
+        await commitGuess(game, accounts[6], "25", "3");
 
-        await game.reveal("80", "3", {from: accounts[2]});
+        await revealGuess(game, accounts[2], "30", "3");
 
         cur_bets = await getCurrentCommits(game);
         assert(cur_bets == 2, "Number of commits does not match in REVEAL_STATE");
@@ -165,6 +162,27 @@ contract("Game", function([owner, donor]){
         assert(cur_reveals == 0, "failed to reset: reveals");
 
     })
+
+    it("Should make a correct payout", async () => {
+        
+        // MAX IS 10, because max account number is 10
+        const num_players = 3;
+        const bet = await getBetSize(game);
+        
+        const accounts = await new Promise(function(resolve, reject) {
+            web3.eth.getAccounts( function (err, accounts) { resolve(accounts) })
+        });
+
+        // Round 1-4
+        await runGame(bet, num_players, accounts, game);
+
+        var prize = await getPrizeAmount(game);
+        var fee = await getGameFeeAmount(game);
+      
+        var expected_prize = (bet*num_players) - ((bet*num_players) / 100.0) * fee;
+        assert(prize == expected_prize);
+    })
+    
 
 });
 
@@ -205,13 +223,13 @@ async function resetGame(game){
     game.reset();
 }
 
-async function commitBet(game, usr_addr, guess, random){
+async function commitGuess(game, usr_addr, guess, random){
     const bet = await getBetSize(game);
     const hash = hashGuess(guess, random);
-    await game.commit(hash, { value: bet, from: usr_addr });
+    await game.commit(hash, { value: web3.toWei(bet,'ether'), from: usr_addr });
 }
 
-async function revealBet(game, usr_addr, guess, random){
+async function revealGuess(game, usr_addr, guess, random){
     await game.reveal(guess, random, {from: usr_addr});
 }
 
@@ -221,7 +239,7 @@ function hashGuess(guess, random){
 
 async function getBetSize(game){
     var bet = await game.BET_SIZE();
-    return bet.toNumber();
+    return web3.fromWei(bet.toNumber(), 'ether');
 }
 
 async function getWinners(game){
@@ -246,10 +264,20 @@ async function getPayout(game, usr_addr){
     var i;
     for (i = 0; i < winners.length; i++){
         if(winners[i] == usr_addr){
-            return prize;
+            return web3.fromWei(prize.toNumber(), 'ether');
         }
     }
     return 0;
+}
+
+async function getPrizeAmount(game){
+     var prize = await game.last_prize();
+     return web3.fromWei(prize.toNumber(), 'ether');
+}
+
+async function getGameFeeAmount(game){
+    var fee = await game.GAME_FEE_PERCENT();
+    return fee.toNumber();
 }
 
 
@@ -267,14 +295,14 @@ async function runGame(bet, num_players, accounts, game) {
     var i;
     for(i = 0; i < num_players; i++){
         //const hash = Web3Utils.soliditySha3({type: 'string', value: guesses[1][i].toString()}, {type: 'string', value: "3"});
-        await commitBet(game, accounts[i], guesses[1][i].toString(), "3");
+        await commitGuess(game, accounts[i], guesses[1][i].toString(), "3");
     }
 
     var state = await isInRevealState(game);
     
     assert(state == true, "Bad state transition, should be in REVEAL_STATE");
     for(i = 0; i < num_players; i++){
-        await revealBet(game, accounts[i], guesses[1][i].toString(), "3");
+        await revealGuess(game, accounts[i], guesses[1][i].toString(), "3");
     }
 
     state = await isInCommitState(game);
@@ -378,8 +406,10 @@ function createRandomGuesses(max_players, accounts){
 
 function computeTwoThirdsAverage(guesses){
     var sum = guesses.reduce(function(acc, val) { return acc + val; });
+    sum = sum * 10000;
     var average = Math.floor(sum / guesses.length);
-    var average23 = (average * 2) / 3;
+    var average23 = Math.floor((average * 2) / 3);
+    average23 = Math.floor(average23/10000)
 
     return  average23;    
 }
