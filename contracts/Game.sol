@@ -127,44 +127,20 @@ contract Game is Ownable, GameHelper {
     }
 
 
-
-
-    // Tracks the state of the game. 
-    GameState public game_state = GameState.COMMIT_STATE;
-    //DEBUG: Enums cannot be tested. Value mirrors the enum
-    uint public game_state_debug = 0;
-
     // Commit/Reveal Protocol vars
     mapping (address => bytes32) public commits;
     mapping (address => uint) public game_data;
     address[] internal player_addrs;
     address[] internal winners;
-    uint public curr_number_bets = 0;
-    uint public curr_number_reveals = 0;
-    uint public final_commit_block = 0;
-    uint constant REVEAL_PERIOD = 5;
-    
-    // Money Specifics
-    address OUR_ADDRESS = 0x2540099e9ed04aF369d557a40da2D8f9c2ab928D; //Address 
-    uint public constant GAME_FEE_PERCENT = 5;
-    uint public BET_SIZE = 1 ether; 
-    
-    // Rules
-    uint public MAX_PLAYERS = 10;
-    uint public constant MIN_GUESS = 0;
-    uint public constant MAX_GUESS = 100;
 
     // UI vars
     address[] public last_winners;
-    uint public num_last_winners = 0;
-    uint public last_prize = 0;
-
 
     ////// DEBUG vars and debug functions
     uint public average23 = 0;
 
     function set_MAX_PLAYERS(uint new_val) public onlyOwner {
-        MAX_PLAYERS = new_val;
+        //MAX_PLAYERS = new_val;
         config.MAX_PLAYERS = new_val;
     }
 
@@ -184,22 +160,9 @@ contract Game is Ownable, GameHelper {
     // Reset the contract to the initial state
     function reset() public onlyOwner {  
         toCommitState();
-        delete last_winners;
-        num_last_winners = 0;
-        last_prize = 0;
-
         info.lastPrize = 0;
         delete info.lastWinners;
     }
-
-    ////
-
-    // constructor(uint num_players, uint bet_size) public {
-    //     MAX_PLAYERS = num_players;
-    //     BET_SIZE = bet_size;
-    //    // OUR_ADDRESS = fee_addr;
-    //     owner = msg.sender;
-    // }
 
     // Commit your guess. 
     event SuccesfulCommit(
@@ -211,10 +174,9 @@ contract Game is Ownable, GameHelper {
         //require(game_state == GameState.COMMIT_STATE);
         require(state.gameState == GameState.COMMIT_STATE);
 
-        require(msg.value == BET_SIZE);
+        require(msg.value == config.STAKE_SIZE);
 
         commits[msg.sender] = hashedCommit;
-        curr_number_bets++;
         state.currNumberCommits++;
 
         // Notify the user that their bet reached us
@@ -247,7 +209,6 @@ contract Game is Ownable, GameHelper {
         // When they do, we add the revealed guess to game data
         game_data[msg.sender] = guess_num;
         player_addrs.push(msg.sender);
-        curr_number_reveals++;
         state.currNumberReveals++;
 
         emit SuccesfulReveal(guess, random);
@@ -310,7 +271,7 @@ contract Game is Ownable, GameHelper {
         }
 
         // Lets pay ourselves some money
-        uint gamefee = (address(this).balance/100) * GAME_FEE_PERCENT;
+        uint gamefee = (address(this).balance/100) * config.GAME_FEE_PERCENT;
         config.FEE_ADDRESS.transfer(gamefee);
 
         // Split the rest equally among winners
@@ -319,7 +280,6 @@ contract Game is Ownable, GameHelper {
             winners[i].transfer(prize); 
             //emit DebugWinner(winners[i], winners.length);
         }
-        last_prize = prize;
         info.lastPrize = prize;
 
         // DEBUG: Make sure no ether is lost due to rounding. 
@@ -332,24 +292,16 @@ contract Game is Ownable, GameHelper {
     event DebugCommitState(uint last_win_l, uint win_l);
 
     function toCommitState() internal {
-        game_state_debug = 0;
-        game_state = GameState.COMMIT_STATE;
 
         state.gameState = GameState.COMMIT_STATE;
         state.gameStateDebug = 0;
 
         delete player_addrs;
-        
-        delete last_winners;
         delete info.lastWinners;
         
-        last_winners = winners;
         info.lastWinners = winners;
 
-        num_last_winners = winners.length;
         delete winners;
-        curr_number_bets = 0;
-        curr_number_reveals = 0;
         
         state.currNumberCommits = 0;
         state.currNumberReveals = 0;
@@ -359,9 +311,6 @@ contract Game is Ownable, GameHelper {
 
     // Call this function to get to REVEAL_STATE
     function toRevealState() internal {
-        game_state = GameState.REVEAL_STATE;
-        game_state_debug = 1;
-        final_commit_block = block.number;
 
         state.gameState = GameState.REVEAL_STATE;
         state.gameStateDebug = 1;

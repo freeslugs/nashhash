@@ -30,7 +30,7 @@ contract("Game", function([owner, donor]){
 
         await commitGuess(game, donor, "66", "3");
 
-        const curr_number_bets = await game.curr_number_bets();
+        const curr_number_bets = await game.getCurrentCommits();
         const guess_commit = await game.commits(donor);
 
         assert.equal(curr_number_bets, 1, "Number of bets did not increment");
@@ -82,7 +82,7 @@ contract("Game", function([owner, donor]){
 
         // //console.log(hash)
 
-        const winner = await game.last_winners(0);
+        const winner = await game.getLastWinners(0);
         //console.log(winner);
         
         assert.equal(winner, accounts[6], "Winner isn't correctly selected");
