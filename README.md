@@ -40,46 +40,108 @@ to dedeuce that the user was late with their bet.
 2. `reveal(key, guess)` √
 Same here, except SuccesfulReveal
 Do not forget to check for errors.
-3. `get_payout`=> how much did i win!
 
-To get the payout there are few things you have to do:
-    
-      var number_of_winners = await game.num_last_winners();
-      for (i = 0; i < number_of_winners; i++){
-        var winner = await game.last_winners(i);
-        if(winner == the_address_of_the_player){
-          var prize = await game.last_prize();
+Here is the amazing js interface I created for you Gilad:
+
+    ////////////////////// GILADS API ///////////////////////
+    async function isInCommitState(game){
+        var state = await game.game_state_debug();
+        if(state.toNumber() == 0){
+            return true;
+        }else{
+            return false;
         }
-      }
-
-P2: 
-4. `get_status` => e.g. commit, reveal, payout
-The easiest way to do this is by assigining a number to state.
-0 --- COMMIT_STATE
-1 --- REVEAL_STATE
-
-Under current implementation, the contract has only two states, because the 
-PAYOUT_STATE happens to be redundant i.e one function call will make transition REVEAL_STATE -> PAYOUT_STATE -> REVEAL_STATE, and since eth is fully sequential, we might as well skip the PAYOUT_STATE as the contract will never be found in it. Hope this makes sense.
-
-So,
-
-    var state = await game.game_state_debug();
-    if (state.toNumber() == 0){
-      // We are still accepting commits, the game is accepting bets
-    }else if (state.toNumber() == 1){
-      // We are waiting to get all the reveals
-    }else{
-      // We are so fucked
     }
 
+    async function isInRevealState(game){
+        var state = await game.game_state_debug();
+        if(state.toNumber() == 1){
+            return true;
+        }else{
+            return false;
+        }
+    }
 
+    async function getCurrentCommits(game){
+        const curr_number_bets = await game.curr_number_bets();
+        return curr_number_bets.toNumber();
+    }
 
-5. `get_curr_users` => how many people have committed for htis game? 
-Also a public variable, so you can get it by simply
+    async function getCurrentReveals(game){
+        var cur_reveals = await game.curr_number_reveals();
+        return cur_reveals.toNumber();
+    }
+
+    async function resetGame(game){
+        game.reset();
+    }
+
+    async function commitGuess(game, usr_addr, guess, random){
+        const bet = await getBetSize(game);
+        const hash = hashGuess(guess, random);
+        await game.commit(hash, { value: web3.toWei(bet,'ether'), from: usr_addr });
+    }
+
+    async function revealGuess(game, usr_addr, guess, random){
+        await game.reveal(guess, random, {from: usr_addr});
+    }
+
+    function hashGuess(guess, random){
+        return hash = Web3Utils.soliditySha3({type: 'string', value: guess}, {type: 'string', value: random});
+    }
+
+    async function getBetSize(game){
+        var bet = await game.BET_SIZE();
+        return web3.fromWei(bet.toNumber(), 'ether');
+    }
+
+    async function getWinners(game){
+
+        var winners = new Array();
+
+        var nw = await game.num_last_winners();
+        var number_of_winners = nw.toNumber();
+        var i;
+        for (i = 0; i < number_of_winners; i++){
+            var winner = await game.last_winners(i);
+            winners.push(winner);
+        }
+
+        return winners;
+    }
+
+    async function getPayout(game, usr_addr){
+
+        var winners = getWinners(game);
+        var prize = await game.last_prize();
+        var i;
+        for (i = 0; i < winners.length; i++){
+            if(winners[i] == usr_addr){
+                return web3.fromWei(prize.toNumber(), 'ether');
+            }
+        }
+        return 0;
+    }
+
+    async function getPrizeAmount(game){
+        var prize = await game.last_prize();
+        return web3.fromWei(prize.toNumber(), 'ether');
+    }
+
+    async function getGameFeeAmount(game){
+        var fee = await game.GAME_FEE_PERCENT();
+        return fee.toNumber();
+    }
+
+Simply amazing...
+
 
 P2.5:
 1. bot to always complete game 
 
 P3: 
 1. `when will we move ot next stage in game?` => maybe save variable of when game start (block #)  and game end (blcok #)
+
+
+
 
