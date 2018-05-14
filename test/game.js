@@ -137,12 +137,12 @@ contract("Game", function([owner, donor]){
         await game.commit(hash1, { value: bet, from: accounts[2] });
         await game.commit(hash2, { value: bet, from: accounts[6] });
 
-        var cur_bets = await game.curr_number_bets();
+        var cur_bets = await getCurrentCommits(game);
         assert(cur_bets == 2, "Number of commits does not mathc");
 
         await game.reset();
 
-        cur_bets = await game.curr_number_bets();
+        cur_bets = await getCurrentCommits(game);
         assert(cur_bets == 0, "State was not reset properly");
 
         await game.set_MAX_PLAYERS(2);
@@ -151,17 +151,17 @@ contract("Game", function([owner, donor]){
 
         await game.reveal("80", "3", {from: accounts[2]});
 
-        cur_bets = await game.curr_number_bets();
+        cur_bets = await getCurrentCommits(game);
         assert(cur_bets == 2, "Number of commits does not match in REVEAL_STATE");
 
-        var cur_reveals = await game.curr_number_reveals();
+        var cur_reveals = await getCurrentReveals(game);
         assert(cur_reveals == 1, "Number of reveals does not match in REVEAL_STATE");
 
         await game.reset();
 
-        cur_bets = await game.curr_number_bets();
+        cur_bets = await getCurrentCommits(game);
         assert(cur_bets == 0, "failed to reset: commits");
-        var cur_reveals = await game.curr_number_reveals();
+        var cur_reveals = await getCurrentReveals(game);
         assert(cur_reveals == 0, "failed to reset: reveals");
 
     })
@@ -191,9 +191,14 @@ async function isInRevealState(game){
     }
 }
 
-async function getCurrentPlayers(game){
+async function getCurrentCommits(game){
     const curr_number_bets = await game.curr_number_bets();
     return curr_number_bets.toNumber();
+}
+
+async function getCurrentReveals(game){
+    var cur_reveals = await game.curr_number_reveals();
+    return cur_reveals.toNumber();
 }
 
 async function resetGame(game){
