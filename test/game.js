@@ -18,7 +18,7 @@ contract("Game", function([owner, donor]){
     })
 
     it("init", async () => {
-        const count = await game.BET_SIZE();
+        const count = await game.getStakeSize();
         assert.equal(count.toNumber(), web3.toWei(1,'ether'));
     });
 
@@ -41,7 +41,7 @@ contract("Game", function([owner, donor]){
 
     it("Should reveal hashed guess", async () => {
         // keccak256 , web3.sha3
-        const bet = await game.BET_SIZE();
+        const bet = await game.getStakeSize();
         const hash = Web3Utils.soliditySha3({type: 'string', value: "66"}, {type: 'string', value: "3"});
         // console.log(hash)
 
@@ -64,7 +64,7 @@ contract("Game", function([owner, donor]){
 
     it("Should find winner and distribute prizes", async () => {
         // keccak256 , web3.sha3
-        const bet = await game.BET_SIZE();
+        const bet = await game.getStakeSize();
         const hash1 = Web3Utils.soliditySha3({type: 'string', value: "80"}, {type: 'string', value: "3"});
         const hash2 = Web3Utils.soliditySha3({type: 'string', value: "20"}, {type: 'string', value: "3"});
 
@@ -92,7 +92,7 @@ contract("Game", function([owner, donor]){
         
         // MAX IS 10, because max account number is 10
         const num_players = 10;
-        const bet = await game.BET_SIZE();
+        const bet = await game.getStakeSize();
         
         const accounts = await new Promise(function(resolve, reject) {
             web3.eth.getAccounts( function (err, accounts) { resolve(accounts) })
@@ -106,7 +106,7 @@ contract("Game", function([owner, donor]){
         
         // MAX IS 10, because max account number is 10
         const num_players = 10;
-        const bet = await game.BET_SIZE();
+        const bet = await game.getStakeSize();
         
         const accounts = await new Promise(function(resolve, reject) {
             web3.eth.getAccounts( function (err, accounts) { resolve(accounts) })
@@ -122,7 +122,7 @@ contract("Game", function([owner, donor]){
     it("Should go back to init", async () => {
         
         // MAX IS 10, because max account number is 10
-        const bet = await getBetSize(game);
+        const bet = await getStakeSize(game);
 
         const accounts = await new Promise(function(resolve, reject) {
             web3.eth.getAccounts( function (err, accounts) { resolve(accounts) })
@@ -167,7 +167,7 @@ contract("Game", function([owner, donor]){
         
         // MAX IS 10, because max account number is 10
         const num_players = 3;
-        const bet = await getBetSize(game);
+        const bet = await getStakeSize(game);
         
         const accounts = await new Promise(function(resolve, reject) {
             web3.eth.getAccounts( function (err, accounts) { resolve(accounts) })
@@ -187,7 +187,7 @@ contract("Game", function([owner, donor]){
         
         // MAX IS 10, because max account number is 10
         const num_players = 2;
-        const bet = await getBetSize(game);
+        const bet = await getStakeSize(game);
         
         const accounts = await new Promise(function(resolve, reject) {
             web3.eth.getAccounts( function (err, accounts) { resolve(accounts) })
@@ -257,7 +257,7 @@ async function resetGame(game){
 }
 
 async function commitGuess(game, usr_addr, guess, random){
-    const bet = await getBetSize(game);
+    const bet = await getStakeSize(game);
     const hash = hashGuess(guess, random);
     await game.commit(hash, { value: web3.toWei(bet,'ether'), from: usr_addr });
 }
@@ -270,8 +270,8 @@ function hashGuess(guess, random){
     return hash = Web3Utils.soliditySha3({type: 'string', value: guess}, {type: 'string', value: random});
 }
 
-async function getBetSize(game){
-    var bet = await game.BET_SIZE();
+async function getStakeSize(game){
+    var bet = await game.getStakeSize();
     return web3.fromWei(bet.toNumber(), 'ether');
 }
 
@@ -279,11 +279,12 @@ async function getWinners(game){
 
     var winners = new Array();
 
-    var nw = await game.num_last_winners();
+    var nw = await game.getNumberOfWinners();
     var number_of_winners = nw.toNumber();
     var i;
     for (i = 0; i < number_of_winners; i++){
-        var winner = await game.last_winners(i);
+        //var winner = await game.last_winners(i);
+        var winner = await game.getLastWinners(i);
         winners.push(winner);
     }
 
@@ -293,7 +294,7 @@ async function getWinners(game){
 async function getPayout(game, usr_addr){
 
     var winners = await getWinners(game);
-    var prize = await game.last_prize();
+    var prize = await game.getLastPrize();
     var i;
     for (i = 0; i < winners.length; i++){
         if(winners[i] == usr_addr){
@@ -304,12 +305,12 @@ async function getPayout(game, usr_addr){
 }
 
 async function getPrizeAmount(game){
-     var prize = await game.last_prize();
+     var prize = await game.getLastPrize();
      return web3.fromWei(prize.toNumber(), 'ether');
 }
 
 async function getGameFeeAmount(game){
-    var fee = await game.GAME_FEE_PERCENT();
+    var fee = await game.getGameFee();
     return fee.toNumber();
 }
 

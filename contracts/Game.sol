@@ -106,6 +106,27 @@ contract Game is Ownable, GameHelper {
         return state.currNumberReveals;
     }
 
+    function getStakeSize() public view returns(uint) {
+        return config.STAKE_SIZE;
+    }
+
+    function getNumberOfWinners() public view returns(uint) {
+        return info.lastWinners.length;
+    }
+
+    function getLastWinners(uint i) public view returns(address){
+        return info.lastWinners[i];
+    }
+
+    function getLastPrize() public view returns(uint){
+        return info.lastPrize;
+    }
+
+    function getGameFee() public view returns(uint){
+        return config.GAME_FEE_PERCENT;
+    }
+
+
 
 
     // Tracks the state of the game. 
