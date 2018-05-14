@@ -19,7 +19,8 @@ Check that this is not the case.
 
 !!!!!!!!!! REFACTORING GOALS !!!!!!!!!!!!!!!!!
 1) Get a goddamn constructor in here with a reasonable amount of arguments
-2) Maybe put all the state related variable into a State struct? Work around that object.
+2) Maybe put all the state related variable into a State struct? Work around that object. 
+I started the idea....
 3) Give normal names to everything. Also, change to cammelcase. 
 Apparently, the lower_case_underscore is not that popular in Solidity...
 
@@ -29,10 +30,32 @@ Apparently, the lower_case_underscore is not that popular in Solidity...
 import "./Ownable.sol";
 import "./GameHelper.sol";
 
+
 contract Game is Ownable, GameHelper {
+    
+    enum GameState {COMMIT_STATE, REVEAL_STATE}
+
+    // This is the idea.
+    struct State {
+        GameState gameState;
+        uint currNumberCommits;
+        uint currNumberReveals;
+        uint finalCommitBlock;
+    }
+
+    struct Config {
+        uint REVEAL_PERIOD;
+        uint MAX_PLAYERS;
+        uint MIN_GUESS;
+        uint MAX_GUESS;
+
+        address OUR_ADDRESS;
+        uint GAME_FEE_PERCENT;
+        uint STAKE_SIZE;
+    }
+
 
     // Tracks the state of the game. 
-    enum GameState {COMMIT_STATE, REVEAL_STATE}
     GameState public game_state = GameState.COMMIT_STATE;
     //DEBUG: Enums cannot be tested. Value mirrors the enum
     uint public game_state_debug = 0;

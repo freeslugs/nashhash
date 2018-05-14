@@ -46,12 +46,12 @@ contract GameHelper {
         return c;
     }
 
-    function getSha(string one, string two) public view returns(bytes32) {
+    function getSha(string one, string two) internal pure returns(bytes32) {
         return keccak256(one, two);
     }
 
     // Move to helper
-    function bytes32ToString (bytes32 data) internal returns (string) {
+    function bytes32ToString (bytes32 data) internal pure returns (string) {
         bytes memory bytesString = new bytes(32);
         for (uint j = 0; j < 32 ;j++) {
             byte char = byte(bytes32(uint(data) * 2 ** (8 * j)));
@@ -62,7 +62,7 @@ contract GameHelper {
         return string(bytesString);
     }
 
-    function stringToUint(string s) constant internal returns (uint) {
+    function stringToUint(string s) internal pure returns (uint) {
         bytes memory b = bytes(s);
         uint result = 0;
         for (uint i = 0; i < b.length; i++) { // c = b[i] was not needed
