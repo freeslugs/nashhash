@@ -48,31 +48,42 @@ class App extends Component<props> {
     Game.setProvider(this.state.web3.currentProvider)
 
     this.state.web3.eth.getAccounts(async (error, accounts) => {
-      const instance = Game.at("0xe4bf6b739f547a3d1d44501923048d11721a8d01") 
 
-    //   let instance
-    //   try {
-    //     instance = await Game.deployed();  
-    //   } catch (e) {
-    //     console.log(e)
-    //     if(e.message == "Game has not been deployed to detected network (network/artifact mismatch)") {
-    //       toast.error('Make sure Metamask is set to 127.0.0.1:9545.', {
-    //         position: "top-right",
-    //         autoClose: false,
-    //         hideProgressBar: false,
-    //         closeOnClick: true,
-    //         draggable: false,
-    //         draggablePercent: 0
-    //       })
-    //       // return false;
-    //     } else {
-    //       throw(e)
-    //     }
-    //   }
+      let instance
+      try {
+        // console.log(this.stateweb3)
+        // instance = await Game.deployed();  
+        const network = await this.state.web3.eth.net.getNetworkType();
+        if(network !== "rinkeby")
+          throw(new Error("Game has not been deployed to detected network (network/artifact mismatch)"))
+        instance = Game.at("0xfc72c65a63c28d03c99d40cbebc3b31fcf8b83b9") 
+        // console.log(instance)
+      } catch (e) {
+        console.log(e)
+        if(e.message == "Game has not been deployed to detected network (network/artifact mismatch)") {
+          toast.error('Make sure Metamask is set to Rinkeby.', {
+            position: "top-right",
+            autoClose: false,
+            hideProgressBar: false,
+            closeOnClick: true,
+            draggable: false,
+            draggablePercent: 0
+          })
+          // return false;
+        } else {
+          console.log(e)
+        }
+      }
       this.setState({ accounts: accounts, GameInstance: instance });
-      // console.log(instance.curr_number_bets)
-      // const result = await instance.curr_number_bets();
-      // const result = await instance.BET_SIZE();
+      const game = instance;
+      // await game.reset();
+      // console.log(game)
+
+      let curr_number_bets = await game.curr_number_bets();
+      console.log('current bets: ' + parseInt(curr_number_bets))
+      let state = await game.game_state_debug();
+      console.log('current state: ' +  parseInt(state))
+
       // console.log(parseInt(result))
     })
   }
@@ -86,7 +97,7 @@ class App extends Component<props> {
             <Menu pointing secondary>
               <Logo name='NashHash' as={Link} to="/" onClick={this.handleItemClick} />
               <Menu.Menu position='right'>
-                <Menu.Item name='FAQ' active={activeItem === 'FAQ'} onClick={this.handleItemClick} />
+                <Menu.Item name='FAQ' active={activeItem === 'FAQ'} as={Link} to="/games/two-thirds/payout" onClick={this.handleItemClick} />
                 <Menu.Item name='friends' active={activeItem === 'friends'} onClick={this.handleItemClick} />
                 <Menu.Item name='logout' active={activeItem === 'logout'} onClick={this.handleItemClick} />
               </Menu.Menu>
