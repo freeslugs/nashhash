@@ -9,6 +9,8 @@ in solidity seems to be rounded down at the taking of the average step, and then
 again rounded down after division by 3. It is better to fix this because this skews
 the average ever so slightly south. 
 2) Protect against repeated reveal call. This is just simply broken as of now.
+3) Reveal is broken. Someone can commit hash in the previous round of the game,
+and the keep revealing the same number without staking the bet in all the next rounds.
 
 !!!!!!!!!!!! POTENTIAL BUGS !!!!!!!!!!!!!!!!
 1) Ether being brought over to the next round due to rounding issues. 
