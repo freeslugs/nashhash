@@ -11,6 +11,8 @@ the average ever so slightly south.
 2) Protect against repeated reveal call. This is just simply broken as of now.
 3) Reveal is broken. Someone can commit hash in the previous round of the game,
 and the keep revealing the same number without staking the bet in all the next rounds.
+4) In the current implementaition the user that is last to reveal will pay for the whole findWinners
+function. What happens if the transaction runs out of gas....
 
 !!!!!!!!!!!! POTENTIAL BUGS !!!!!!!!!!!!!!!!
 1) Ether being brought over to the next round due to rounding issues. 
@@ -18,6 +20,10 @@ Check that this is not the case.
 
 !!!!!!!!!! LOGICAL IMPROVEMENTS !!!!!!!!!!!!
 1) Send money to HOME address only once the fees reach a certain amount.
+
+!!!!!!!!!! PERFORMANCE INMPROVEMENTS !!!!!!!!!!!!!!!!
+1) Change the body of findWinners to use an in memory array to find the winners. 
+Then copy those winners to info.lastWinners
 
 !!!!!!!!!! REFACTORING GOALS !!!!!!!!!!!!!!!!!
 1) Get a goddamn constructor in here with a reasonable amount of arguments
@@ -40,6 +46,7 @@ contract Game is Ownable, GameHelper {
     // This is the idea.
     struct State {
         GameState gameState;
+        uint gameStateDebug;
         uint currNumberCommits;
         uint currNumberReveals;
         uint finalCommitBlock;
@@ -51,11 +58,38 @@ contract Game is Ownable, GameHelper {
         uint MIN_GUESS;
         uint MAX_GUESS;
 
-        address OUR_ADDRESS;
+        address FEE_ADDRESS;
         uint GAME_FEE_PERCENT;
         uint STAKE_SIZE;
     }
 
+    struct GameInfo {
+        address[] lastWinners;
+        uint lastPrize;
+    }
+
+    Config internal config;
+    State internal state;
+    GameInfo internal info;
+
+    constructor(uint maxp) public {
+        owner = msg.sender;
+
+        config.REVEAL_PERIOD = 5;
+        config.GAME_FEE_PERCENT = 5;
+        config.MAX_PLAYERS = maxp;
+        config.MIN_GUESS = 0;
+        config.MAX_GUESS = 100;
+        config.STAKE_SIZE = 1 ether;
+        config.FEE_ADDRESS = 0x2540099e9ed04aF369d557a40da2D8f9c2ab928D;
+
+        state.gameState = GameState.COMMIT_STATE;
+        state.currNumberCommits = 0;
+        state.currNumberReveals = 0;
+        state.finalCommitBlock = 0;
+
+        info.lastPrize = 0;
+    }
 
     // Tracks the state of the game. 
     GameState public game_state = GameState.COMMIT_STATE;
@@ -93,20 +127,21 @@ contract Game is Ownable, GameHelper {
 
     function set_MAX_PLAYERS(uint new_val) public onlyOwner {
         MAX_PLAYERS = new_val;
+        config.MAX_PLAYERS = new_val;
     }
 
     // function is used to trigger a payout in a situation where somone
     // forgets to send the reveal.
-    function trigger_payout() public onlyOwner {
-        require(game_state == GameState.REVEAL_STATE);
+    // function trigger_payout() public onlyOwner {
+    //     require(game_state == GameState.REVEAL_STATE);
 
-        // If the REVEAL_PERIOD blocks has gone by, while unfair, 
-        // keep the money of nonrevealers, play the game with the
-        // rest of the players.
-        if(block.number > final_commit_block + REVEAL_PERIOD){
-            find_winner();
-        }
-    }
+    //     // If the REVEAL_PERIOD blocks has gone by, while unfair, 
+    //     // keep the money of nonrevealers, play the game with the
+    //     // rest of the players.
+    //     if(block.number > final_commit_block + REVEAL_PERIOD){
+    //         find_winner();
+    //     }
+    // }
 
     // Reset the contract to the initial state
     function reset() public onlyOwner {  
@@ -114,6 +149,9 @@ contract Game is Ownable, GameHelper {
         delete last_winners;
         num_last_winners = 0;
         last_prize = 0;
+
+        info.lastPrize = 0;
+        delete info.lastWinners;
     }
 
     ////
@@ -130,19 +168,23 @@ contract Game is Ownable, GameHelper {
         bytes32 hashed_commit
     );
 
-    function commit(bytes32 hashed_com) public payable{
-        require(game_state == GameState.COMMIT_STATE);
+    function commit(bytes32 hashedCommit) public payable{
+        
+        //require(game_state == GameState.COMMIT_STATE);
+        require(state.gameState == GameState.COMMIT_STATE);
+
         require(msg.value == BET_SIZE);
 
-        commits[msg.sender] = hashed_com;
+        commits[msg.sender] = hashedCommit;
         curr_number_bets++;
+        state.currNumberCommits++;
 
         // Notify the user that their bet reached us
-        emit SuccesfulCommit(hashed_com);
+        emit SuccesfulCommit(hashedCommit);
 
         // If we received the MAX_PLAYER number of commits, it is time for
         // us to change state.
-        if (curr_number_bets == MAX_PLAYERS) {
+        if (state.currNumberCommits == config.MAX_PLAYERS) {
             toRevealState();
         }
     }
@@ -153,12 +195,13 @@ contract Game is Ownable, GameHelper {
     );
     function reveal(string guess, string random) public  {
         
-        require(game_state == GameState.REVEAL_STATE);
+        //require(game_state == GameState.REVEAL_STATE);
+        require(state.gameState == GameState.REVEAL_STATE);
         
         // DEBUG: Need to make sure it throws if the guess is not integer
         uint guess_num = stringToUint(guess);
         
-        require(guess_num >= MIN_GUESS && guess_num <= MAX_GUESS);
+        require(guess_num >= config.MIN_GUESS && guess_num <= config.MAX_GUESS);
 
         // Check that the hashes match
         require(commits[msg.sender] == keccak256(guess, random));
@@ -167,10 +210,11 @@ contract Game is Ownable, GameHelper {
         game_data[msg.sender] = guess_num;
         player_addrs.push(msg.sender);
         curr_number_reveals++;
+        state.currNumberReveals++;
 
         emit SuccesfulReveal(guess, random);
 
-        if(curr_number_reveals == MAX_PLAYERS){
+        if(state.currNumberReveals == config.MAX_PLAYERS){
             find_winner();
         }
     }
@@ -199,7 +243,7 @@ contract Game is Ownable, GameHelper {
 
 
         // Find the guessers who are the closest to the 2/3 average
-        uint min_diff = MAX_GUESS;
+        uint min_diff = config.MAX_GUESS;
         uint cur_diff;
         for(i = 0; i < player_addrs.length; i++) {
             
@@ -229,7 +273,7 @@ contract Game is Ownable, GameHelper {
 
         // Lets pay ourselves some money
         uint gamefee = (address(this).balance/100) * GAME_FEE_PERCENT;
-        OUR_ADDRESS.transfer(gamefee);
+        config.FEE_ADDRESS.transfer(gamefee);
 
         // Split the rest equally among winners
         uint prize = address(this).balance/winners.length;
@@ -238,6 +282,7 @@ contract Game is Ownable, GameHelper {
             //emit DebugWinner(winners[i], winners.length);
         }
         last_prize = prize;
+        info.lastPrize = prize;
 
         // DEBUG: Make sure no ether is lost due to rounding. 
 
@@ -250,16 +295,27 @@ contract Game is Ownable, GameHelper {
 
     function toCommitState() internal {
         game_state_debug = 0;
+        game_state = GameState.COMMIT_STATE;
+
+        state.gameState = GameState.COMMIT_STATE;
+        state.gameStateDebug = 0;
 
         delete player_addrs;
+        
         delete last_winners;
+        delete info.lastWinners;
+        
         last_winners = winners;
+        info.lastWinners = winners;
+
         num_last_winners = winners.length;
         delete winners;
         curr_number_bets = 0;
         curr_number_reveals = 0;
+        
+        state.currNumberCommits = 0;
+        state.currNumberReveals = 0;
 
-        game_state = GameState.COMMIT_STATE;
         //DebugCommitState(num_last_winners, winners.length);
     }
 
@@ -268,6 +324,11 @@ contract Game is Ownable, GameHelper {
         game_state = GameState.REVEAL_STATE;
         game_state_debug = 1;
         final_commit_block = block.number;
+
+        state.gameState = GameState.REVEAL_STATE;
+        state.gameStateDebug = 1;
+        state.finalCommitBlock = block.number;
+
     }
 
 }

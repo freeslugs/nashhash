@@ -14,7 +14,7 @@ contract("Game", function([owner, donor]){
     let game
 
     beforeEach('setup contract for each test', async () => {
-        game = await Game.new(owner);
+        game = await Game.new(10);
     })
 
     it("init", async () => {
