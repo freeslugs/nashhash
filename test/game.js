@@ -225,7 +225,7 @@ contract("Game", function([owner, donor]){
 
 ////////////////////// GILADS API ///////////////////////
 async function isInCommitState(game){
-    var state = await game.game_state_debug();
+    var state = await game.getGameState();
     if(state.toNumber() == 0){
         return true;
     }else{
@@ -234,7 +234,7 @@ async function isInCommitState(game){
 }
 
 async function isInRevealState(game){
-    var state = await game.game_state_debug();
+    var state = await game.getGameState();
     if(state.toNumber() == 1){
         return true;
     }else{
@@ -243,13 +243,13 @@ async function isInRevealState(game){
 }
 
 async function getCurrentCommits(game){
-    const curr_number_bets = await game.curr_number_bets();
-    return curr_number_bets.toNumber();
+    const currNumberCommits = await game.getCurrentCommits();
+    return currNumberCommits.toNumber();
 }
 
 async function getCurrentReveals(game){
-    var cur_reveals = await game.curr_number_reveals();
-    return cur_reveals.toNumber();
+    var curNumberReveals = await game.getCurrentReveals();
+    return curNumberReveals.toNumber();
 }
 
 async function resetGame(game){

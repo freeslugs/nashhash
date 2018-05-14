@@ -20,6 +20,8 @@ Check that this is not the case.
 
 !!!!!!!!!! LOGICAL IMPROVEMENTS !!!!!!!!!!!!
 1) Send money to HOME address only once the fees reach a certain amount.
+2) I have this idea of introducing a system of rounds so our players get a receit.
+They can then use this receit to look up info about their game.
 
 !!!!!!!!!! PERFORMANCE INMPROVEMENTS !!!!!!!!!!!!!!!!
 1) Change the body of findWinners to use an in memory array to find the winners. 
@@ -90,6 +92,21 @@ contract Game is Ownable, GameHelper {
 
         info.lastPrize = 0;
     }
+
+    // Contrcact public API
+    function getGameState() public view returns(uint) {
+        return state.gameStateDebug;
+    }
+
+    function getCurrentCommits() public view returns(uint) {
+        return state.currNumberCommits;
+    }
+
+    function getCurrentReveals() public view returns(uint) {
+        return state.currNumberReveals;
+    }
+
+
 
     // Tracks the state of the game. 
     GameState public game_state = GameState.COMMIT_STATE;
