@@ -112,7 +112,7 @@ Here is the amazing js interface I created for you Gilad:
 
     async function getPayout(game, usr_addr){
 
-        var winners = getWinners(game);
+        var winners = await getWinners(game);
         var prize = await game.last_prize();
         var i;
         for (i = 0; i < winners.length; i++){

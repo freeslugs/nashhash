@@ -182,7 +182,40 @@ contract("Game", function([owner, donor]){
         var expected_prize = (bet*num_players) - ((bet*num_players) / 100.0) * fee;
         assert(prize == expected_prize);
     })
+
+    it("Everyone betting the same number", async () => {
+        
+        // MAX IS 10, because max account number is 10
+        const num_players = 2;
+        const bet = await getBetSize(game);
+        
+        const accounts = await new Promise(function(resolve, reject) {
+            web3.eth.getAccounts( function (err, accounts) { resolve(accounts) })
+        });
+
+
+        await game.set_MAX_PLAYERS(num_players);
+
+        await commitGuess(game, accounts[2], "30", "3");
+        await commitGuess(game, accounts[6], "30", "3");
+
+
+
+        await revealGuess(game, accounts[2], "30", "3");
+        await revealGuess(game, accounts[6], "30", "3");
+
+        var payout1 = await getPayout(game, accounts[2]);
+
+        var payout2 = await getPayout(game, accounts[6]);
+        var prize = await getPrizeAmount(game);
+
+        assert(payout1 == prize, "Wrong prize amount");
+        assert(payout2 == prize, "Wrong prize amount");
+    })
     
+    
+
+
 
 });
 
@@ -259,7 +292,7 @@ async function getWinners(game){
 
 async function getPayout(game, usr_addr){
 
-    var winners = getWinners(game);
+    var winners = await getWinners(game);
     var prize = await game.last_prize();
     var i;
     for (i = 0; i < winners.length; i++){

@@ -8,7 +8,7 @@ pragma solidity ^0.4.23;
 in solidity seems to be rounded down at the taking of the average step, and then
 again rounded down after division by 3. It is better to fix this because this skews
 the average ever so slightly south. 
-2) Protect against repeated reveal call
+2) Protect against repeated reveal call. This is just simply broken as of now.
 
 !!!!!!!!!!!! POTENTIAL BUGS !!!!!!!!!!!!!!!!
 1) Ether being brought over to the next round due to rounding issues. 
@@ -16,6 +16,13 @@ Check that this is not the case.
 
 !!!!!!!!!! LOGICAL IMPROVEMENTS !!!!!!!!!!!!
 1) Send money to HOME address only once the fees reach a certain amount.
+
+!!!!!!!!!! REFACTORING GOALS !!!!!!!!!!!!!!!!!
+1) Get a goddamn constructor in here with a reasonable amount of arguments
+2) Maybe put all the state related variable into a State struct? Work around that object.
+3) Give normal names to everything. Also, change to cammelcase. 
+Apparently, the lower_case_underscore is not that popular in Solidity...
+
 
 */
 
