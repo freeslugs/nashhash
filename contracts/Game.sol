@@ -37,6 +37,16 @@ Apparently, the lower_case_underscore is not that popular in Solidity...
 
 */
 
+
+/*
+Dear all, games should oinherit form this contract because this contract has the commit/reveal protocol
+The specific game will have to only define two functions:
+
+-- guessCheck(string guess): the function has to error out in if the guess is not compliant with the rules
+-- findWinners(): the function determined the winners and distributes the payouts. 
+
+*/
+
 import "./Pausable.sol";
 import "./GameHelper.sol";
 

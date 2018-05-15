@@ -43,6 +43,7 @@ Do not forget to check for errors.
 
 Here is the amazing js interface I created for you Gilad:
 
+
         ////////////////////// GILADS API ///////////////////////
         async function isInCommitState(game){
             var state = await game.getGameState();
@@ -60,6 +61,16 @@ Here is the amazing js interface I created for you Gilad:
             }else{
                 return false;
             }
+        }
+
+        async function isInPayoutState(game){
+            var state =  await game.getGameState();
+            if(state.toNumber() == 2){
+                return true;
+            }else{
+                return false;
+            }
+            
         }
 
         async function getCurrentCommits(game){
@@ -168,8 +179,23 @@ Here is the amazing js interface I created for you Gilad:
                     assert(true == false, "event handler failed to be installed");
                 }
             });
+        }
+
+        function watchEvent(ev, handler){
+            
+            var event = ev({}, {fromBlock: 0, toBlock: 'latest'});
+            event.watch(function(error, result){
+                if(!error){
+                    handler();
+                }else{
+                    console.log(error);
+                    assert(true == false, "event handler failed to be installed");
+                }
+            });
 
         }
+
+
 
 Simply amazing...
 
