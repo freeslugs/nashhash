@@ -5,7 +5,7 @@ const FIXED_BET = web3.toWei(1,'ether');
 const MAX_PLAYERS = 10;
 const HASHNASH_ADDRESS = 0x2540099e9ed04aF369d557a40da2D8f9c2ab928D;
 
-var Game = artifacts.require("./Game.sol");
+var Game = artifacts.require("./TwoThirdsAverage.sol");
 
 // function testHandler(args){
 //     console.log(args);
@@ -142,7 +142,7 @@ contract("Game", function([owner, donor]){
         cur_bets = await getCurrentCommits(game);
         assert(cur_bets == 0, "State was not reset properly");
 
-        await game.set_MAX_PLAYERS(2);
+        await setMaxPlayers(game, 2);
         await commitGuess(game, accounts[2], "30", "3");
         await commitGuess(game, accounts[6], "25", "3");
 
@@ -431,7 +431,7 @@ async function runGame(bet, num_players, accounts, game) {
 
     var guesses = createRandomGuesses(num_players, accounts);
 
-    await game.set_MAX_PLAYERS(num_players);
+    await setMaxPlayers(game, num_players);
 
     var i;
     for(i = 0; i < num_players; i++){
