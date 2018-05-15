@@ -37,13 +37,13 @@ Apparently, the lower_case_underscore is not that popular in Solidity...
 
 */
 
-import "./Ownable.sol";
+import "./Pausable.sol";
 import "./GameHelper.sol";
 
 
-contract Game is Ownable, GameHelper {
+contract Game is Pausable, GameHelper {
     
-    enum GameState {COMMIT_STATE, REVEAL_STATE}
+    enum GameState {COMMIT_STATE, REVEAL_STATE, PAYOUT_STATE}
 
     // This is the idea.
     struct State {
@@ -168,7 +168,7 @@ contract Game is Ownable, GameHelper {
         bytes32 hashed_commit
     );
 
-    function commit(bytes32 hashedCommit) public payable{
+    function commit(bytes32 hashedCommit) public payable whenNotPaused {
         
         //require(game_state == GameState.COMMIT_STATE);
         require(state.gameState == GameState.COMMIT_STATE);
@@ -196,7 +196,7 @@ contract Game is Ownable, GameHelper {
     event DebugEvent(
         string error
     );
-    function reveal(string guess, string random) public  {
+    function reveal(string guess, string random) public whenNotPaused {
         
         //require(game_state == GameState.REVEAL_STATE);
         emit DebugEvent("Entered reveal");
