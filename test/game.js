@@ -70,7 +70,7 @@ contract("Game", function([owner, donor]){
             web3.eth.getAccounts( function (err, accounts) { resolve(accounts) })
         });
 
-         await setMaxPlayers(game, 2);
+        await setMaxPlayers(game, 2);
 
         await commitGuess(game, accounts[2], "80", "3");
         await commitGuess(game, accounts[6], "20", "3");

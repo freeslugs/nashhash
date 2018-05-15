@@ -85,9 +85,6 @@ contract TwoThirdsAverage is Game {
         info.lastPrize = prize;
 
         // DEBUG: Make sure no ether is lost due to rounding. 
-
-        // RESET STATE
-        toCommitState();
     }
 
 }

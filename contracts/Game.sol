@@ -210,6 +210,8 @@ contract Game is Pausable, GameHelper {
     function payout() public onlyOwner whenNotPaused {
         require(state.gameState == GameState.PAYOUT_STATE);
         findWinners();
+        // RESET STATE
+        toCommitState();
     }
 
 
@@ -227,16 +229,10 @@ contract Game is Pausable, GameHelper {
         state.gameStateDebug = 0;
 
         delete player_addrs;
-        //delete info.lastWinners;
-        
-        //info.lastWinners = winners;
-
-        //delete winners;
         
         state.currNumberCommits = 0;
         state.currNumberReveals = 0;
 
-        //DebugCommitState(num_last_winners, winners.length);
     }
 
     // Call this function to get to REVEAL_STATE
