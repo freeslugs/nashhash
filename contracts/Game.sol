@@ -60,12 +60,14 @@ contract Game is Pausable, GameHelper {
     struct Config {
         uint REVEAL_PERIOD;
         uint MAX_PLAYERS;
-        uint MIN_GUESS;
-        uint MAX_GUESS;
 
         address FEE_ADDRESS;
         uint GAME_FEE_PERCENT;
         uint STAKE_SIZE;
+
+        uint MIN_GUESS;
+        uint MAX_GUESS;
+
     }
 
     struct GameInfo {
@@ -189,7 +191,7 @@ contract Game is Pausable, GameHelper {
         // DEBUG: Need to make sure it throws if the guess is not integer
         uint guess_num = stringToUint(guess);
         
-        require(guess_num >= config.MIN_GUESS && guess_num <= config.MAX_GUESS);
+        checkGuess(guess);
 
         // Check that the hashes match
         require(commits[msg.sender] == keccak256(guess, random));
@@ -201,16 +203,19 @@ contract Game is Pausable, GameHelper {
 
         if(state.currNumberReveals == config.MAX_PLAYERS){
             emit RevealsSubmitted();
-            //find_winner();
             state.gameState = GameState.PAYOUT_STATE;
             state.gameStateDebug = 2;
         }
     }
 
+    function checkGuess(string guess) private view {
+        uint guess_num = stringToUint(guess);
+        require(guess_num >= config.MIN_GUESS && guess_num <= config.MAX_GUESS);
+    }
+
     function payout() public onlyOwner whenNotPaused {
         require(state.gameState == GameState.PAYOUT_STATE);
         findWinners();
-        // RESET STATE
         toCommitState();
     }
 
