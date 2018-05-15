@@ -220,6 +220,15 @@ contract Game is Pausable, GameHelper {
         toCommitState();
     }
 
+    function performPayout(address[] winners, uint numWinners, uint prize) internal {
+        uint i = 0;
+        for(i = 0; i < numWinners; i++){
+            winners[i].transfer(prize); 
+            info.lastWinners.push(winners[i]);
+        }
+        info.lastPrize = prize;
+    } 
+
 
 
     event DebugWinner(address addr, uint n);
@@ -255,5 +264,7 @@ contract Game is Pausable, GameHelper {
         state.finalCommitBlock = block.number;
 
     }
+
+
 
 }

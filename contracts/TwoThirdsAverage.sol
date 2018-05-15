@@ -93,14 +93,8 @@ contract TwoThirdsAverage is Game {
 
         // Split the rest equally among winners
         uint prize = address(this).balance/winIndex;
-        for(i = 0; i < winIndex; i++){
-            winners[i].transfer(prize); 
-            info.lastWinners.push(winners[i]);
-            //emit DebugWinner(winners[i], winners.length);
-        }
-        info.lastPrize = prize;
-
-        // DEBUG: Make sure no ether is lost due to rounding. 
+        performPayout(winners, winIndex, prize);
+        
     }
 
 }
