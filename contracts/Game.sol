@@ -8,11 +8,8 @@ pragma solidity ^0.4.23;
 in solidity seems to be rounded down at the taking of the average step, and then
 again rounded down after division by 3. It is better to fix this because this skews
 the average ever so slightly south. 
-2) Protect against repeated reveal call. This is just simply broken as of now.
-3) Reveal is broken. Someone can commit hash in the previous round of the game,
-and the keep revealing the same number without staking the bet in all the next rounds.
-4) In the current implementaition the user that is last to reveal will pay for the whole findWinners
-function. What happens if the transaction runs out of gas....
+2) Protect against repeated reveal call. (SOLVED, needs testing)
+
 
 !!!!!!!!!!!! POTENTIAL BUGS !!!!!!!!!!!!!!!!
 1) Ether being brought over to the next round due to rounding issues. 
