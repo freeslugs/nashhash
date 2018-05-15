@@ -218,14 +218,21 @@ contract Game is Pausable, GameHelper {
 
         if(state.currNumberReveals == config.MAX_PLAYERS){
             emit RevealsSubmitted();
-            find_winner();
+            //find_winner();
+            state.gameState = GameState.PAYOUT_STATE;
+            state.gameStateDebug = 2;
         }
+    }
+
+    function payout() public  {
+        require(state.gameState == GameState.PAYOUT_STATE);
+        findWinners();
     }
 
     event DebugWinner(address addr, uint n);
 
 
-    function find_winner() private {
+    function findWinners() private {
 
         emit DebugWinner(1, player_addrs.length);
         

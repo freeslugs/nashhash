@@ -7,11 +7,9 @@ const HASHNASH_ADDRESS = 0x2540099e9ed04aF369d557a40da2D8f9c2ab928D;
 
 var Game = artifacts.require("./Game.sol");
 
-function testHandler(args){
-    console.log(args);
-}
-
-
+// function testHandler(args){
+//     console.log(args);
+// }
   
 contract("Game", function([owner, donor]){
 
@@ -21,7 +19,8 @@ contract("Game", function([owner, donor]){
 
     beforeEach('setup contract for each test', async () => {
         game = await Game.new(10);
-        //watchEvent(game.CommitsSubmitted, testHandler, ["All commits submitted"]);
+
+        //watchEvent(game.RevealsSubmitted, function(){game.payout();} );
     })
 
     it("init", async () => {
@@ -66,8 +65,6 @@ contract("Game", function([owner, donor]){
     it("Should find winner and distribute prizes", async () => {
         // keccak256 , web3.sha3
         const bet = await game.getStakeSize();
-        const hash1 = Web3Utils.soliditySha3({type: 'string', value: "80"}, {type: 'string', value: "3"});
-        const hash2 = Web3Utils.soliditySha3({type: 'string', value: "20"}, {type: 'string', value: "3"});
 
         const accounts = await new Promise(function(resolve, reject) {
             web3.eth.getAccounts( function (err, accounts) { resolve(accounts) })
@@ -80,6 +77,8 @@ contract("Game", function([owner, donor]){
 
         await revealGuess(game, accounts[2], "80", "3");   
         await revealGuess(game, accounts[6], "20", "3");
+
+        await game.payout();
 
         // //console.log(hash)
 
@@ -291,6 +290,16 @@ async function isInRevealState(game){
     }
 }
 
+async function isInPayoutState(game){
+    var state =  await game.getGameState();
+    if(state.toNumber() == 2){
+        return true;
+    }else{
+        return false;
+    }
+    
+}
+
 async function getCurrentCommits(game){
     const currNumberCommits = await game.getCurrentCommits();
     return currNumberCommits.toNumber();
@@ -397,6 +406,19 @@ function watchEvent(ev, handler, handler_args_list){
             assert(true == false, "event handler failed to be installed");
         }
     });
+}
+
+function watchEvent(ev, handler){
+    
+    var event = ev({}, {fromBlock: 0, toBlock: 'latest'});
+    event.watch(function(error, result){
+        if(!error){
+            handler();
+        }else{
+            console.log(error);
+            assert(true == false, "event handler failed to be installed");
+        }
+    });
 
 }
 
@@ -424,8 +446,8 @@ async function runGame(bet, num_players, accounts, game) {
         await revealGuess(game, accounts[i], guesses[1][i].toString(), "3");
     }
 
-    state = await isInCommitState(game);
-    assert(state == true, "Bad state transition, should be in COMMIT_STATE");
+    state = await isInPayoutState(game);
+    assert(state == true, "Bad state transition, should be in PAYOUT_STATE");
 
     // Lets check the balances
     for(i = 0; i < num_players; i++){
@@ -433,18 +455,19 @@ async function runGame(bet, num_players, accounts, game) {
         //console.log(balance);
     }
 
+    await game.payout();
+
     var average = computeTwoThirdsAverage(guesses[1]);
     //console.log(average);
 
     var average23 = await game.average23();
-
-    //console.log(average23.toNumber());
-    //console.log(Math.floor(average));
     
     // DEBUG: Put this one back in. There is a known problem here.
     assert(Math.floor(average) == average23.toNumber(), "Average23 miscalculated...");
 
+
     var loc_winners = findWinner(accounts, guesses[1], average23);
+
     //console.log(loc_winners);
 
     // Grab all the winners
@@ -461,6 +484,11 @@ async function runGame(bet, num_players, accounts, game) {
 
         assert(winner == loc_winners[i], "Wrong winner");
     }
+
+    state = await isInCommitState(game);
+    assert(state == true, "Bad state transition, should be in COMMIT_STATE");
+
+
     //console.log("Done.");
 }
 
