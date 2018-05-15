@@ -74,10 +74,6 @@ contract Game is Pausable, GameHelper {
         address FEE_ADDRESS;
         uint GAME_FEE_PERCENT;
         uint STAKE_SIZE;
-
-        // uint MIN_GUESS;
-        // uint MAX_GUESS;
-
     }
 
     struct GameInfo {
@@ -95,8 +91,6 @@ contract Game is Pausable, GameHelper {
         config.REVEAL_PERIOD = 5;
         config.GAME_FEE_PERCENT = 5;
         config.MAX_PLAYERS = maxp;
-        // config.MIN_GUESS = 0;
-        // config.MAX_GUESS = 100;
         config.STAKE_SIZE = 1 ether;
         config.FEE_ADDRESS = 0x2540099e9ed04aF369d557a40da2D8f9c2ab928D;
 
@@ -153,8 +147,11 @@ contract Game is Pausable, GameHelper {
 
     // Commit/Reveal Protocol vars
     mapping (address => bytes32) public commits;
+    address[] internal commitsKeys;
+
+
     mapping (address => string) public gameData;
-    address[] internal player_addrs;
+    address[] internal gameDataKeys;
 
     ////// DEBUG vars and debug functions
     uint public average23 = 0;
@@ -177,6 +174,7 @@ contract Game is Pausable, GameHelper {
         require(msg.value == config.STAKE_SIZE);
 
         commits[msg.sender] = hashedCommit;
+        commitsKeys.push(msg.sender);
         state.currNumberCommits++;
 
         // If we received the MAX_PLAYER number of commits, it is time for
@@ -207,7 +205,7 @@ contract Game is Pausable, GameHelper {
 
         // When they do, we add the revealed guess to game data
         gameData[msg.sender] = guess;
-        player_addrs.push(msg.sender);
+        gameDataKeys.push(msg.sender);
         state.currNumberReveals++;
 
         if(state.currNumberReveals == config.MAX_PLAYERS){
@@ -239,7 +237,13 @@ contract Game is Pausable, GameHelper {
         state.gameState = GameState.COMMIT_STATE;
         state.gameStateDebug = 0;
 
-        delete player_addrs;
+        uint i;
+        for(i = 0; i < commitsKeys.length; i++){
+            delete commits[commitsKeys[i]];
+        }
+        delete commitsKeys;
+
+        delete gameDataKeys;
         
         state.currNumberCommits = 0;
         state.currNumberReveals = 0;

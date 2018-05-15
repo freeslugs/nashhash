@@ -24,17 +24,17 @@ contract TwoThirdsAverage is Game {
 
     function findWinners() private {
 
-        emit DebugWinner(1, player_addrs.length);
+        emit DebugWinner(1, gameDataKeys.length);
         
         // Calculate the 2/3 average
         uint guess_sum = 0;
-        for(uint i = 0; i < player_addrs.length; i++){
-            uint tmp = stringToUint(gameData[player_addrs[i]]);
+        for(uint i = 0; i < gameDataKeys.length; i++){
+            uint tmp = stringToUint(gameData[gameDataKeys[i]]);
             guess_sum += tmp;
         }
 
         guess_sum = guess_sum * 10000;
-        uint average = div(guess_sum, player_addrs.length);
+        uint average = div(guess_sum, gameDataKeys.length);
         uint twothirdsavg = div(mul(average, 2), 3);
         twothirdsavg = twothirdsavg / 10000;
 
@@ -50,9 +50,9 @@ contract TwoThirdsAverage is Game {
         // Find the guessers who are the closest to the 2/3 average
         uint min_diff = ~uint256(0);
         uint cur_diff;
-        for(i = 0; i < player_addrs.length; i++) {
+        for(i = 0; i < gameDataKeys.length; i++) {
             
-            uint cur_guess = stringToUint(gameData[player_addrs[i]]);
+            uint cur_guess = stringToUint(gameData[gameDataKeys[i]]);
 
             // Find the difference between the guess and the average
             if(twothirdsavg > cur_guess){
@@ -70,19 +70,19 @@ contract TwoThirdsAverage is Game {
                 //delete winners; // WTF you might ask? There is no necessity to delete elements.
                 
                 winIndex = 0;
-                winners[winIndex] = player_addrs[i];
+                winners[winIndex] = gameDataKeys[i];
                 winIndex++;
 
                 min_diff = cur_diff;
             // Else, if the difference are the same, we add the candidate to the 
             // list of winners
             } else if(cur_diff == min_diff){
-                winners[winIndex] = player_addrs[i];
+                winners[winIndex] = gameDataKeys[i];
                 winIndex++;
             }
         }
 
-        emit DebugWinner(2, player_addrs.length);
+        emit DebugWinner(2, gameDataKeys.length);
 
         // winrIndex here has the number of winner in our array
         require(winIndex > 0);
