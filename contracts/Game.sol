@@ -126,6 +126,14 @@ contract Game is Pausable, GameHelper {
         return config.GAME_FEE_PERCENT;
     }
 
+    function getMaxPlayers() public view returns(uint){
+        return config.MAX_PLAYERS;
+    }
+
+    function setMaxPlayers(uint new_max) public onlyOwner {
+        config.MAX_PLAYERS = new_max;
+    }
+
 
     // Commit/Reveal Protocol vars
     mapping (address => bytes32) public commits;

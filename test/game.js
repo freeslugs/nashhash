@@ -213,7 +213,36 @@ contract("Game", function([owner, donor]){
         assert(payout2 == prize, "Wrong prize amount");
     })
     
-    
+    it("Should not be able to call commit or reveal", async () => {
+        const num_players = 2;
+        const bet = await getStakeSize(game);
+        
+        const accounts = await new Promise(function(resolve, reject) {
+            web3.eth.getAccounts( function (err, accounts) { resolve(accounts) })
+        });
+        
+        game.setMaxPlayers(1);
+
+        await pauseGame(game);
+
+        var error = false;
+        try {
+            await commitGuess(game, accounts[2], "30", "3");
+            error = true;
+        } catch (e) {
+        }
+
+        assert(error == false, "The commit executed in paused state")
+
+        try {
+             await revealGuess(game, accounts[2], "30", "3");
+             error = true;
+        } catch (e) {
+        }
+
+        assert(error == false, "The reveal executed in paused state")
+
+    })
 
 
 
@@ -312,6 +341,14 @@ async function getPrizeAmount(game){
 async function getGameFeeAmount(game){
     var fee = await game.getGameFee();
     return fee.toNumber();
+}
+
+async function pauseGame(game){
+    await game.pause();
+}
+
+async function unpauseGame(game){
+    await game.unpause();
 }
 
 
