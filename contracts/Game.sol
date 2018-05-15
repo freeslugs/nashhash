@@ -65,8 +65,8 @@ contract Game is Pausable, GameHelper {
         uint GAME_FEE_PERCENT;
         uint STAKE_SIZE;
 
-        uint MIN_GUESS;
-        uint MAX_GUESS;
+        // uint MIN_GUESS;
+        // uint MAX_GUESS;
 
     }
 
@@ -85,8 +85,8 @@ contract Game is Pausable, GameHelper {
         config.REVEAL_PERIOD = 5;
         config.GAME_FEE_PERCENT = 5;
         config.MAX_PLAYERS = maxp;
-        config.MIN_GUESS = 0;
-        config.MAX_GUESS = 100;
+        // config.MIN_GUESS = 0;
+        // config.MAX_GUESS = 100;
         config.STAKE_SIZE = 1 ether;
         config.FEE_ADDRESS = 0x2540099e9ed04aF369d557a40da2D8f9c2ab928D;
 
@@ -143,7 +143,7 @@ contract Game is Pausable, GameHelper {
 
     // Commit/Reveal Protocol vars
     mapping (address => bytes32) public commits;
-    mapping (address => uint) public gameData;
+    mapping (address => string) public gameData;
     address[] internal player_addrs;
 
     ////// DEBUG vars and debug functions
@@ -162,7 +162,6 @@ contract Game is Pausable, GameHelper {
 
     function commit(bytes32 hashedCommit) public payable whenNotPaused {
         
-        //require(game_state == GameState.COMMIT_STATE);
         require(state.gameState == GameState.COMMIT_STATE);
 
         require(msg.value == config.STAKE_SIZE);
@@ -189,7 +188,7 @@ contract Game is Pausable, GameHelper {
         require(state.gameState == GameState.REVEAL_STATE);
         
         // DEBUG: Need to make sure it throws if the guess is not integer
-        uint guess_num = stringToUint(guess);
+        //uint guess_num = stringToUint(guess);
         
         checkGuess(guess);
 
@@ -197,7 +196,7 @@ contract Game is Pausable, GameHelper {
         require(commits[msg.sender] == keccak256(guess, random));
 
         // When they do, we add the revealed guess to game data
-        gameData[msg.sender] = guess_num;
+        gameData[msg.sender] = guess;
         player_addrs.push(msg.sender);
         state.currNumberReveals++;
 
@@ -208,10 +207,7 @@ contract Game is Pausable, GameHelper {
         }
     }
 
-    function checkGuess(string guess) private view {
-        uint guess_num = stringToUint(guess);
-        require(guess_num >= config.MIN_GUESS && guess_num <= config.MAX_GUESS);
-    }
+    function checkGuess(string guess) private;
 
     function payout() public onlyOwner whenNotPaused {
         require(state.gameState == GameState.PAYOUT_STATE);

@@ -4,7 +4,23 @@ import "./Game.sol";
 
 contract TwoThirdsAverage is Game {
 
-    constructor(uint maxp) public Game(maxp) {}
+
+    struct Rules {
+        uint MIN_GUESS;
+        uint MAX_GUESS;
+    }
+
+    Rules public rules;
+
+    constructor(uint maxp) public Game(maxp) {
+        rules.MIN_GUESS = 0;
+        rules.MAX_GUESS = 100;
+    }
+
+    function checkGuess(string guess) private {
+        uint guess_num = stringToUint(guess);
+        require(guess_num >= rules.MIN_GUESS && guess_num <= rules.MAX_GUESS);
+    }
 
     function findWinners() private {
 
@@ -13,7 +29,7 @@ contract TwoThirdsAverage is Game {
         // Calculate the 2/3 average
         uint guess_sum = 0;
         for(uint i = 0; i < player_addrs.length; i++){
-            uint tmp = gameData[player_addrs[i]];
+            uint tmp = stringToUint(gameData[player_addrs[i]]);
             guess_sum += tmp;
         }
 
@@ -32,11 +48,11 @@ contract TwoThirdsAverage is Game {
 
 
         // Find the guessers who are the closest to the 2/3 average
-        uint min_diff = config.MAX_GUESS;
+        uint min_diff = ~uint256(0);
         uint cur_diff;
         for(i = 0; i < player_addrs.length; i++) {
             
-            uint cur_guess = gameData[player_addrs[i]];
+            uint cur_guess = stringToUint(gameData[player_addrs[i]]);
 
             // Find the difference between the guess and the average
             if(twothirdsavg > cur_guess){
