@@ -42,6 +42,8 @@ import "./GameHelper.sol";
 
 
 contract Game is Pausable, GameHelper {
+
+    uint public birthBlock = block.number;
     
     enum GameState {COMMIT_STATE, REVEAL_STATE, PAYOUT_STATE}
 
@@ -52,6 +54,7 @@ contract Game is Pausable, GameHelper {
         uint currNumberCommits;
         uint currNumberReveals;
         uint finalCommitBlock;
+        uint round;
     }
 
     struct Config {
@@ -133,16 +136,13 @@ contract Game is Pausable, GameHelper {
     function setMaxPlayers(uint new_max) public onlyOwner {
         config.MAX_PLAYERS = new_max;
     }
+    
 
 
     // Commit/Reveal Protocol vars
     mapping (address => bytes32) public commits;
-    mapping (address => uint) public game_data;
+    mapping (address => uint) public gameData;
     address[] internal player_addrs;
-    //address[] internal winners;
-
-    // UI vars
-    //address[] public last_winners;
 
     ////// DEBUG vars and debug functions
     uint public average23 = 0;
@@ -171,9 +171,8 @@ contract Game is Pausable, GameHelper {
         delete info.lastWinners;
     }
 
-    // Commit your guess. 
-    event SuccesfulCommit(
-        bytes32 hashed_commit
+    event CommitsSubmitted(
+        uint round
     );
 
     function commit(bytes32 hashedCommit) public payable whenNotPaused {
@@ -186,28 +185,22 @@ contract Game is Pausable, GameHelper {
         commits[msg.sender] = hashedCommit;
         state.currNumberCommits++;
 
-        // Notify the user that their bet reached us
-        emit SuccesfulCommit(hashedCommit);
-
         // If we received the MAX_PLAYER number of commits, it is time for
         // us to change state.
         if (state.currNumberCommits == config.MAX_PLAYERS) {
             toRevealState();
+            emit CommitsSubmitted(1);
         }
     }
 
-    event SuccesfulReveal(
-        string guess,
-        string random
-    );
+    event RevealsSubmitted();
 
     event DebugEvent(
         string error
     );
     function reveal(string guess, string random) public whenNotPaused {
         
-        //require(game_state == GameState.REVEAL_STATE);
-        emit DebugEvent("Entered reveal");
+
         require(state.gameState == GameState.REVEAL_STATE);
         
         // DEBUG: Need to make sure it throws if the guess is not integer
@@ -219,16 +212,12 @@ contract Game is Pausable, GameHelper {
         require(commits[msg.sender] == keccak256(guess, random));
 
         // When they do, we add the revealed guess to game data
-        game_data[msg.sender] = guess_num;
+        gameData[msg.sender] = guess_num;
         player_addrs.push(msg.sender);
         state.currNumberReveals++;
 
-        emit SuccesfulReveal(guess, random);
-
-        emit DebugEvent("All good here");
-
         if(state.currNumberReveals == config.MAX_PLAYERS){
-            emit SuccesfulReveal(guess, random);
+            emit RevealsSubmitted();
             find_winner();
         }
     }
@@ -243,7 +232,7 @@ contract Game is Pausable, GameHelper {
         // Calculate the 2/3 average
         uint guess_sum = 0;
         for(uint i = 0; i < player_addrs.length; i++){
-            uint tmp = game_data[player_addrs[i]];
+            uint tmp = gameData[player_addrs[i]];
             guess_sum += tmp;
         }
 
@@ -266,7 +255,7 @@ contract Game is Pausable, GameHelper {
         uint cur_diff;
         for(i = 0; i < player_addrs.length; i++) {
             
-            uint cur_guess = game_data[player_addrs[i]];
+            uint cur_guess = gameData[player_addrs[i]];
 
             // Find the difference between the guess and the average
             if(twothirdsavg > cur_guess){
@@ -296,7 +285,7 @@ contract Game is Pausable, GameHelper {
             }
         }
 
-         emit DebugWinner(2, player_addrs.length);
+        emit DebugWinner(2, player_addrs.length);
 
         // winrIndex here has the number of winner in our array
         require(winIndex > 0);

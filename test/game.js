@@ -6,6 +6,12 @@ const MAX_PLAYERS = 10;
 const HASHNASH_ADDRESS = 0x2540099e9ed04aF369d557a40da2D8f9c2ab928D;
 
 var Game = artifacts.require("./Game.sol");
+
+function testHandler(args){
+    console.log(args);
+}
+
+
   
 contract("Game", function([owner, donor]){
 
@@ -15,6 +21,7 @@ contract("Game", function([owner, donor]){
 
     beforeEach('setup contract for each test', async () => {
         game = await Game.new(10);
+        //watchEvent(game.CommitsSubmitted, testHandler, ["All commits submitted"]);
     })
 
     it("init", async () => {
@@ -26,8 +33,6 @@ contract("Game", function([owner, donor]){
         
         const hash = hashGuess("66", "3");
 
-        // await game.commit(hash, { value: bet, from: donor });
-
         await commitGuess(game, donor, "66", "3");
 
         const curr_number_bets = await game.getCurrentCommits();
@@ -35,18 +40,14 @@ contract("Game", function([owner, donor]){
 
         assert.equal(curr_number_bets, 1, "Number of bets did not increment");
         assert.equal(guess_commit, hash, "Hashes do not match");
-        //console.log(hash);
-        //console.log(guess_commit);
     })
 
     it("Should reveal hashed guess", async () => {
-        // keccak256 , web3.sha3
         const bet = await game.getStakeSize();
         const hash = Web3Utils.soliditySha3({type: 'string', value: "66"}, {type: 'string', value: "3"});
-        // console.log(hash)
 
         //Commit/Reveal
-        await game.set_MAX_PLAYERS(1);
+        await setMaxPlayers(game, 1);
 
         await commitGuess(game, donor, "66", "3");
 
@@ -55,7 +56,7 @@ contract("Game", function([owner, donor]){
         
         //await game.reveal("66", "3", {from: donor});
         
-        const guess = await game.game_data(donor);
+        const guess = await game.gameData(donor);
         //console.log(guess);
 
         assert.equal(guess, '66', "Revealed guesses do not match");
@@ -72,7 +73,7 @@ contract("Game", function([owner, donor]){
             web3.eth.getAccounts( function (err, accounts) { resolve(accounts) })
         });
 
-        await game.set_MAX_PLAYERS(2);
+         await setMaxPlayers(game, 2);
 
         await commitGuess(game, accounts[2], "80", "3");
         await commitGuess(game, accounts[6], "20", "3");
@@ -115,7 +116,7 @@ contract("Game", function([owner, donor]){
         // Round 1-4
         await runGame(bet, num_players, accounts, game);
         await runGame(bet, num_players, accounts, game);
-       // await runGame(bet, num_players, accounts, game);
+        await runGame(bet, num_players, accounts, game);
         //await runGame(bet, num_players, accounts, game);
     })
 
@@ -129,7 +130,7 @@ contract("Game", function([owner, donor]){
         });
 
 
-        await game.set_MAX_PLAYERS(3);
+         await setMaxPlayers(game, 3);
 
         await commitGuess(game, accounts[2], "30", "3");
         await commitGuess(game, accounts[6], "25", "3");
@@ -194,7 +195,7 @@ contract("Game", function([owner, donor]){
         });
 
 
-        await game.set_MAX_PLAYERS(num_players);
+        await setMaxPlayers(game, num_players);
 
         await commitGuess(game, accounts[2], "30", "3");
         await commitGuess(game, accounts[6], "30", "3");
@@ -213,7 +214,7 @@ contract("Game", function([owner, donor]){
         assert(payout2 == prize, "Wrong prize amount");
     })
     
-    it("Should not be able to call commit or reveal", async () => {
+    it("Should not be pausable and unpausable", async () => {
         const num_players = 2;
         const bet = await getStakeSize(game);
         
@@ -221,7 +222,7 @@ contract("Game", function([owner, donor]){
             web3.eth.getAccounts( function (err, accounts) { resolve(accounts) })
         });
         
-        game.setMaxPlayers(1);
+        await setMaxPlayers(game, 1);
 
         await pauseGame(game);
 
@@ -232,7 +233,11 @@ contract("Game", function([owner, donor]){
         } catch (e) {
         }
 
-        assert(error == false, "The commit executed in paused state")
+        assert(error == false, "The commit executed in paused state");
+
+        await unpauseGame(game);
+        await commitGuess(game, accounts[2], "30", "3");
+        await pauseGame(game);
 
         try {
              await revealGuess(game, accounts[2], "30", "3");
@@ -240,7 +245,22 @@ contract("Game", function([owner, donor]){
         } catch (e) {
         }
 
-        assert(error == false, "The reveal executed in paused state")
+        assert(error == false, "The reveal executed in paused state");
+    })
+
+    it("Should emmit events and API should watch for them", async () => {
+        
+        // MAX IS 10, because max account number is 10
+        const num_players = 2;
+        const bet = await getStakeSize(game);
+        
+        const accounts = await new Promise(function(resolve, reject) {
+            web3.eth.getAccounts( function (err, accounts) { resolve(accounts) })
+        });
+
+        watchEvent(game.CommitsSubmitted, function(args){}, ["All commits submitted"]);
+        watchEvent(game.RevealsSubmitted, function(args){}, ['All reveals submitted']);
+
 
     })
 
@@ -351,6 +371,34 @@ async function unpauseGame(game){
     await game.unpause();
 }
 
+async function setMaxPlayers(game, num){
+    await game.setMaxPlayers(num);
+}
+
+async function getMaxPlayers(game){
+    var num = await game.getMaxPlayers();
+    return num.toNumber();
+}
+
+/* Cool function. 
+    - ev is the event to watch for from the contract. EX. game.CommitsSubmitted
+    - handler is the function that is to be called when that event is emited by the contract
+    - handler_args_list is a list of argumetns to the handler
+
+*/
+function watchEvent(ev, handler, handler_args_list){
+    
+    var event = ev({}, {fromBlock: 0, toBlock: 'latest'});
+    event.watch(function(error, result){
+        if(!error){
+            handler.apply(this, handler_args_list);
+        }else{
+            console.log(error);
+            assert(true == false, "event handler failed to be installed");
+        }
+    });
+
+}
 
 
 
