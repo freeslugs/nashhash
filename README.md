@@ -45,7 +45,7 @@ Here is the amazing js interface I created for you Gilad:
 
     ////////////////////// GILADS API ///////////////////////
     async function isInCommitState(game){
-        var state = await game.game_state_debug();
+        var state = await game.getGameState();
         if(state.toNumber() == 0){
             return true;
         }else{
@@ -54,7 +54,7 @@ Here is the amazing js interface I created for you Gilad:
     }
 
     async function isInRevealState(game){
-        var state = await game.game_state_debug();
+        var state = await game.getGameState();
         if(state.toNumber() == 1){
             return true;
         }else{
@@ -63,13 +63,13 @@ Here is the amazing js interface I created for you Gilad:
     }
 
     async function getCurrentCommits(game){
-        const curr_number_bets = await game.curr_number_bets();
-        return curr_number_bets.toNumber();
+        const currNumberCommits = await game.getCurrentCommits();
+        return currNumberCommits.toNumber();
     }
 
     async function getCurrentReveals(game){
-        var cur_reveals = await game.curr_number_reveals();
-        return cur_reveals.toNumber();
+        var curNumberReveals = await game.getCurrentReveals();
+        return curNumberReveals.toNumber();
     }
 
     async function resetGame(game){
@@ -77,7 +77,7 @@ Here is the amazing js interface I created for you Gilad:
     }
 
     async function commitGuess(game, usr_addr, guess, random){
-        const bet = await getBetSize(game);
+        const bet = await getStakeSize(game);
         const hash = hashGuess(guess, random);
         await game.commit(hash, { value: web3.toWei(bet,'ether'), from: usr_addr });
     }
@@ -90,8 +90,8 @@ Here is the amazing js interface I created for you Gilad:
         return hash = Web3Utils.soliditySha3({type: 'string', value: guess}, {type: 'string', value: random});
     }
 
-    async function getBetSize(game){
-        var bet = await game.BET_SIZE();
+    async function getStakeSize(game){
+        var bet = await game.getStakeSize();
         return web3.fromWei(bet.toNumber(), 'ether');
     }
 
@@ -99,11 +99,12 @@ Here is the amazing js interface I created for you Gilad:
 
         var winners = new Array();
 
-        var nw = await game.num_last_winners();
+        var nw = await game.getNumberOfWinners();
         var number_of_winners = nw.toNumber();
         var i;
         for (i = 0; i < number_of_winners; i++){
-            var winner = await game.last_winners(i);
+            //var winner = await game.last_winners(i);
+            var winner = await game.getLastWinners(i);
             winners.push(winner);
         }
 
@@ -113,7 +114,7 @@ Here is the amazing js interface I created for you Gilad:
     async function getPayout(game, usr_addr){
 
         var winners = await getWinners(game);
-        var prize = await game.last_prize();
+        var prize = await game.getLastPrize();
         var i;
         for (i = 0; i < winners.length; i++){
             if(winners[i] == usr_addr){
@@ -124,14 +125,15 @@ Here is the amazing js interface I created for you Gilad:
     }
 
     async function getPrizeAmount(game){
-        var prize = await game.last_prize();
+        var prize = await game.getLastPrize();
         return web3.fromWei(prize.toNumber(), 'ether');
     }
 
     async function getGameFeeAmount(game){
-        var fee = await game.GAME_FEE_PERCENT();
+        var fee = await game.getGameFee();
         return fee.toNumber();
     }
+
 
 Simply amazing...
 
