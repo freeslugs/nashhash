@@ -88,6 +88,21 @@ class App extends Component<props> {
     })
   }
 
+  resetGame = async () =>  {
+    console.log(1)
+    const results = await getWeb3;
+    const web3 = results.web3
+    console.log(2)
+    const Game = contract(GameContract)
+    Game.setProvider(this.state.web3.currentProvider)
+    console.log(3)
+    // this.state.web3.eth.getAccounts(async (error, accounts) => {
+    let instance = Game.at("0x9f9673f06ff9cba08b1cd38704ea376ad989de8c") 
+    // await instance.resetGame()
+    console.log(4)
+    // })
+  }
+
   render() {
     return (
       <Router>
@@ -95,11 +110,11 @@ class App extends Component<props> {
           <ToastContainer />
           <Container>
             <Menu pointing secondary>
-              <Logo name='NashHash' as={Link} to="/" onClick={this.handleItemClick} />
+              <Logo name='NashHash' as={Link} to="/" />
               <Menu.Menu position='right'>
-                <Menu.Item name='FAQ' active={activeItem === 'FAQ'} as={Link} to="/games/two-thirds/payout" onClick={this.handleItemClick} />
-                <Menu.Item name='friends' active={activeItem === 'friends'} onClick={this.handleItemClick} />
-                <Menu.Item name='logout' active={activeItem === 'logout'} onClick={this.handleItemClick} />
+                <Menu.Item name='FAQ' active={activeItem === 'FAQ'} as={Link} to="/games/two-thirds/payout" />
+                <Menu.Item name='friends' active={activeItem === 'friends'} />
+                <Menu.Item name='logout' onClick={this.resetGame} active={activeItem === 'logout'} />
               </Menu.Menu>
             </Menu>
         
