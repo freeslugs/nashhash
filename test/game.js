@@ -254,7 +254,10 @@ contract("Game", function([owner, donor]){
             web3.eth.getAccounts( function (err, accounts) { resolve(accounts) })
         });
 
-        API.watchEvent(game.CommitsSubmitted, function(args){}, ["All commits submitted"]);
+        // todo: 
+        // API.watchEvent(game.CommitsSubmitted).then(() => console.log("All commits submitted"))
+        // API.watchEvent(game.RevealsSubmitted).then(() => console.log("All reveals submitted"))
+        API.watchEvent(game.CommitsSubmitted, function(args){}, ['All commits submitted']);
         API.watchEvent(game.RevealsSubmitted, function(args){}, ['All reveals submitted']);
     })
 });
