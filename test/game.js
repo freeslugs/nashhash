@@ -77,14 +77,14 @@ contract("2/3 of the Average Game", function([owner, donor]){
         await API.revealGuess(game, accounts[2], "80", "3");   
         await API.revealGuess(game, accounts[6], "20", "3");
 
-        await game.payout();
+        await API.payout(game);
 
         // //console.log(hash)
 
-        const winner = await game.getLastWinners(0);
+        const winners = await API.getWinners(game);
         //console.log(winner);
         
-        assert.equal(winner, accounts[6], "Winner isn't correctly selected");
+        assert.equal(winners[0], accounts[6], "Winner isn't correctly selected");
     })
 
     it("Should play a full game with random input correctly", async () => {
@@ -136,7 +136,7 @@ contract("2/3 of the Average Game", function([owner, donor]){
         var cur_bets = await API.getCurrentCommits(game);
         assert(cur_bets == 2, "Number of commits does not mathc");
 
-        await game.resetGame();
+        await API.resetGame(game);
 
         cur_bets = await API.getCurrentCommits(game);
         assert(cur_bets == 0, "State was not reset properly");
@@ -153,7 +153,7 @@ contract("2/3 of the Average Game", function([owner, donor]){
         var cur_reveals = await API.getCurrentReveals(game);
         assert(cur_reveals == 1, "Number of reveals does not match in REVEAL_STATE");
 
-        await game.resetGame();
+        await API.resetGame(game);
 
         cur_bets = await API.getCurrentCommits(game);
         assert(cur_bets == 0, "failed to reset: commits");
@@ -276,16 +276,16 @@ contract("2/3 of the Average Game", function([owner, donor]){
         await API.commitGuess(game, accounts[2], "45", "3");
         await API.commitGuess(game, accounts[6], "30", "3");
 
-        await game.forceToRevealState();
+        await API.forceToRevealState(game);
 
         var commitNumber = await API.getCurrentCommits(game);
         assert(commitNumber == 2, "Wrong commit number");
 
         await API.revealGuess(game, accounts[2], "45", "3");
 
-        await game.forceToPayoutState();
+        await API.forceToPayoutState(game);
 
-        await game.payout();
+        await API.payout(game);
 
         var winners = await API.getWinners(game);
 

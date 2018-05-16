@@ -39,7 +39,7 @@ class API {
   }
 
   static async resetGame(game) {
-    game.resetGame();
+    await game.resetGame();
   }
 
   static async commitGuess(game, usr_addr, guess, random) {
@@ -114,6 +114,19 @@ class API {
     const num = await game.getMaxPlayers();
     return num.toNumber();
   }
+
+  static async payout(game){
+    await game.payout();
+  }
+
+  static async forceToRevealState(game){
+    await game.forceToRevealState();
+  }
+
+  static async forceToPayoutState(game){
+    await game.forceToPayoutState();
+  }
+
 
   /* Cool . 
     - ev is the event to watch for from the contract. EX. game.CommitsSubmitted

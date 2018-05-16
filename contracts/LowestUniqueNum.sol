@@ -67,8 +67,8 @@ contract LowestUniqueNum is Game {
         uint gamefee = (address(this).balance/100) * config.GAME_FEE_PERCENT;
         config.FEE_ADDRESS.transfer(gamefee);
 
-        // Give the rest to winner
-        uint prize = address(this).balance;
+        // Give the rest to winner (The warning triggers me :) )
+        //uint prize = address(this).balance;
         performPayout(winner, 1, 5);
 
     } 
