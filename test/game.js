@@ -1,5 +1,6 @@
 var Web3Utils = require('web3-utils');
 import API from '../src/api/Game.js';
+//var API = require('../src/api/Game.js');
 
 // var keccak256 = require('js-sha3').keccak256;
 const FIXED_BET = web3.toWei(1,'ether');
@@ -8,7 +9,7 @@ const HASHNASH_ADDRESS = 0x2540099e9ed04aF369d557a40da2D8f9c2ab928D;
 
 var Game = artifacts.require("./TwoThirdsAverage.sol");
   
-contract("Game", function([owner, donor]){
+contract("2/3 of the Average Game", function([owner, donor]){
 
     var accounts;
 
@@ -21,8 +22,9 @@ contract("Game", function([owner, donor]){
     })
 
     it("init", async () => {
-        const count = await game.getStakeSize();
-        assert.equal(count.toNumber(), web3.toWei(1,'ether'));
+        const count = await API.getStakeSize(game);
+        console.log(count);
+        assert.equal(count, 1);
     });
 
     it("Should commit hashed guess with stake", async () => {
@@ -39,7 +41,7 @@ contract("Game", function([owner, donor]){
     })
 
     it("Should reveal hashed guess", async () => {
-        const bet = await game.getStakeSize();
+        const bet = await API.getStakeSize(game);
         const hash = Web3Utils.soliditySha3({type: 'string', value: "66"}, {type: 'string', value: "3"});
 
         //Commit/Reveal
@@ -61,7 +63,7 @@ contract("Game", function([owner, donor]){
 
     it("Should find winner and distribute prizes", async () => {
         // keccak256 , web3.sha3
-        const bet = await game.getStakeSize();
+        const bet = await API.getStakeSize(game);
 
         const accounts = await new Promise(function(resolve, reject) {
             web3.eth.getAccounts( function (err, accounts) { resolve(accounts) })
@@ -89,7 +91,7 @@ contract("Game", function([owner, donor]){
         
         // MAX IS 10, because max account number is 10
         const num_players = 10;
-        const bet = await game.getStakeSize();
+        const bet = await API.getStakeSize(game);
         
         const accounts = await new Promise(function(resolve, reject) {
             web3.eth.getAccounts( function (err, accounts) { resolve(accounts) })
@@ -103,7 +105,7 @@ contract("Game", function([owner, donor]){
         
         // MAX IS 10, because max account number is 10
         const num_players = 10;
-        const bet = await game.getStakeSize();
+        const bet = await API.getStakeSize(game);
         
         const accounts = await new Promise(function(resolve, reject) {
             web3.eth.getAccounts( function (err, accounts) { resolve(accounts) })
@@ -261,39 +263,34 @@ contract("Game", function([owner, donor]){
         API.watchEvent(game.RevealsSubmitted, function(args){}, ['All reveals submitted']);
     })
 
-    it("Test force state changes", async () => {
+    it("Should be forcable into states by owner", async () => {
         const num_players = 3;
-        const bet = await getStakeSize(game);
+        const bet = await API.getStakeSize(game);
         
         const accounts = await new Promise(function(resolve, reject) {
             web3.eth.getAccounts( function (err, accounts) { resolve(accounts) })
         });
 
-        await setMaxPlayers(game, num_players);
+        await API.setMaxPlayers(game, num_players);
 
-        await commitGuess(game, accounts[2], "45", "3");
-        await commitGuess(game, accounts[6], "30", "3");
+        await API.commitGuess(game, accounts[2], "45", "3");
+        await API.commitGuess(game, accounts[6], "30", "3");
 
         await game.forceToRevealState();
 
-        var commitNumber = await getCurrentCommits(game);
+        var commitNumber = await API.getCurrentCommits(game);
         assert(commitNumber == 2, "Wrong commit number");
 
-        await revealGuess(game, accounts[2], "45", "3");
+        await API.revealGuess(game, accounts[2], "45", "3");
 
         await game.forceToPayoutState();
 
         await game.payout();
 
-        var winners = await getWinners(game);
+        var winners = await API.getWinners(game);
+
         assert(winners.length == 1, winners.length);
         assert(winners[0] == accounts[2], winners[0]);
-
-
-
-        
-
-
     })
 
 

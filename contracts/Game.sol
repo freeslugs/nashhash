@@ -157,7 +157,7 @@ contract Game is Pausable, GameHelper {
     uint public average23 = 0;
 
     // Reset the contract to the initial state
-    function reset() public onlyOwner whenNotPaused {  
+    function resetGame() public onlyOwner whenNotPaused {  
         toCommitState();
         info.lastPrize = 0;
         delete info.lastWinners;
