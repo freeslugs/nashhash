@@ -23,7 +23,7 @@ class PayoutPage extends Component<props> {
     const balance = await web3.eth.getBalance(account);
     console.log('balance : ' + balance)
 
-    const diff = this.props.balance - balance / 1000000000000000000;
+    const diff = (this.props.balance - balance) / 1000000000000000000;
 
     // this.setState({text: `diff: ${diff}`})
 
