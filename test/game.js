@@ -1,4 +1,5 @@
 var Web3Utils = require('web3-utils');
+import API from '../src/api/Game.js'
 
 // var keccak256 = require('js-sha3').keccak256;
 const FIXED_BET = web3.toWei(1,'ether');
@@ -6,10 +7,6 @@ const MAX_PLAYERS = 10;
 const HASHNASH_ADDRESS = 0x2540099e9ed04aF369d557a40da2D8f9c2ab928D;
 
 var Game = artifacts.require("./TwoThirdsAverage.sol");
-
-// function testHandler(args){
-//     console.log(args);
-// }
   
 contract("Game", function([owner, donor]){
 
@@ -20,7 +17,7 @@ contract("Game", function([owner, donor]){
     beforeEach('setup contract for each test', async () => {
         game = await Game.new(10);
 
-        //watchEvent(game.RevealsSubmitted, function(){game.payout();} );
+        // watchEvent(game.RevealsSubmitted, function(){game.payout();} );
     })
 
     it("init", async () => {
@@ -30,9 +27,9 @@ contract("Game", function([owner, donor]){
 
     it("Should commit hashed guess with stake", async () => {
         
-        const hash = hashGuess("66", "3");
+        const hash = API.hashGuess("66", "3");
 
-        await commitGuess(game, donor, "66", "3");
+        await API.commitGuess(game, donor, "66", "3");
 
         const curr_number_bets = await game.getCurrentCommits();
         const guess_commit = await game.commits(donor);
@@ -46,12 +43,12 @@ contract("Game", function([owner, donor]){
         const hash = Web3Utils.soliditySha3({type: 'string', value: "66"}, {type: 'string', value: "3"});
 
         //Commit/Reveal
-        await setMaxPlayers(game, 1);
+        await API.setMaxPlayers(game, 1);
 
-        await commitGuess(game, donor, "66", "3");
+        await API.commitGuess(game, donor, "66", "3");
 
         //await game.commit(hash, { value: bet, from: donor });
-        await revealGuess(game, donor, "66", "3");
+        await API.revealGuess(game, donor, "66", "3");
         
         //await game.reveal("66", "3", {from: donor});
         
@@ -70,13 +67,13 @@ contract("Game", function([owner, donor]){
             web3.eth.getAccounts( function (err, accounts) { resolve(accounts) })
         });
 
-        await setMaxPlayers(game, 2);
+        await API.setMaxPlayers(game, 2);
 
-        await commitGuess(game, accounts[2], "80", "3");
-        await commitGuess(game, accounts[6], "20", "3");
+        await API.commitGuess(game, accounts[2], "80", "3");
+        await API.commitGuess(game, accounts[6], "20", "3");
 
-        await revealGuess(game, accounts[2], "80", "3");   
-        await revealGuess(game, accounts[6], "20", "3");
+        await API.revealGuess(game, accounts[2], "80", "3");   
+        await API.revealGuess(game, accounts[6], "20", "3");
 
         await game.payout();
 
@@ -122,43 +119,43 @@ contract("Game", function([owner, donor]){
     it("Should go back to init", async () => {
         
         // MAX IS 10, because max account number is 10
-        const bet = await getStakeSize(game);
+        const bet = await API.getStakeSize(game);
 
         const accounts = await new Promise(function(resolve, reject) {
             web3.eth.getAccounts( function (err, accounts) { resolve(accounts) })
         });
 
 
-         await setMaxPlayers(game, 3);
+         await API.setMaxPlayers(game, 3);
 
-        await commitGuess(game, accounts[2], "30", "3");
-        await commitGuess(game, accounts[6], "25", "3");
+        await API.commitGuess(game, accounts[2], "30", "3");
+        await API.commitGuess(game, accounts[6], "25", "3");
 
-        var cur_bets = await getCurrentCommits(game);
+        var cur_bets = await API.getCurrentCommits(game);
         assert(cur_bets == 2, "Number of commits does not mathc");
 
-        await game.reset();
+        await game.resetGame();
 
-        cur_bets = await getCurrentCommits(game);
+        cur_bets = await API.getCurrentCommits(game);
         assert(cur_bets == 0, "State was not reset properly");
 
-        await setMaxPlayers(game, 2);
-        await commitGuess(game, accounts[2], "30", "3");
-        await commitGuess(game, accounts[6], "25", "3");
+        await API.setMaxPlayers(game, 2);
+        await API.commitGuess(game, accounts[2], "30", "3");
+        await API.commitGuess(game, accounts[6], "25", "3");
 
-        await revealGuess(game, accounts[2], "30", "3");
+        await API.revealGuess(game, accounts[2], "30", "3");
 
-        cur_bets = await getCurrentCommits(game);
+        cur_bets = await API.getCurrentCommits(game);
         assert(cur_bets == 2, "Number of commits does not match in REVEAL_STATE");
 
-        var cur_reveals = await getCurrentReveals(game);
+        var cur_reveals = await API.getCurrentReveals(game);
         assert(cur_reveals == 1, "Number of reveals does not match in REVEAL_STATE");
 
-        await game.reset();
+        await game.resetGame();
 
-        cur_bets = await getCurrentCommits(game);
+        cur_bets = await API.getCurrentCommits(game);
         assert(cur_bets == 0, "failed to reset: commits");
-        var cur_reveals = await getCurrentReveals(game);
+        var cur_reveals = await API.getCurrentReveals(game);
         assert(cur_reveals == 0, "failed to reset: reveals");
 
     })
@@ -167,7 +164,7 @@ contract("Game", function([owner, donor]){
         
         // MAX IS 10, because max account number is 10
         const num_players = 3;
-        const bet = await getStakeSize(game);
+        const bet = await API.getStakeSize(game);
         
         const accounts = await new Promise(function(resolve, reject) {
             web3.eth.getAccounts( function (err, accounts) { resolve(accounts) })
@@ -176,8 +173,8 @@ contract("Game", function([owner, donor]){
         // Round 1-4
         await runGame(bet, num_players, accounts, game);
 
-        var prize = await getPrizeAmount(game);
-        var fee = await getGameFeeAmount(game);
+        var prize = await API.getPrizeAmount(game);
+        var fee = await API.getGameFeeAmount(game);
       
         var expected_prize = (bet*num_players) - ((bet*num_players) / 100.0) * fee;
         assert(prize == expected_prize);
@@ -187,27 +184,27 @@ contract("Game", function([owner, donor]){
         
         // MAX IS 10, because max account number is 10
         const num_players = 2;
-        const bet = await getStakeSize(game);
+        const bet = await API.getStakeSize(game);
         
         const accounts = await new Promise(function(resolve, reject) {
             web3.eth.getAccounts( function (err, accounts) { resolve(accounts) })
         });
 
 
-        await setMaxPlayers(game, num_players);
+        await API.setMaxPlayers(game, num_players);
 
-        await commitGuess(game, accounts[2], "30", "3");
-        await commitGuess(game, accounts[6], "30", "3");
+        await API.commitGuess(game, accounts[2], "30", "3");
+        await API.commitGuess(game, accounts[6], "30", "3");
 
 
 
-        await revealGuess(game, accounts[2], "30", "3");
-        await revealGuess(game, accounts[6], "30", "3");
+        await API.revealGuess(game, accounts[2], "30", "3");
+        await API.revealGuess(game, accounts[6], "30", "3");
 
-        var payout1 = await getPayout(game, accounts[2]);
+        var payout1 = await API.getPayout(game, accounts[2]);
 
-        var payout2 = await getPayout(game, accounts[6]);
-        var prize = await getPrizeAmount(game);
+        var payout2 = await API.getPayout(game, accounts[6]);
+        var prize = await API.getPrizeAmount(game);
 
         assert(payout1 == prize, "Wrong prize amount");
         assert(payout2 == prize, "Wrong prize amount");
@@ -215,31 +212,31 @@ contract("Game", function([owner, donor]){
     
     it("Should not be pausable and unpausable", async () => {
         const num_players = 2;
-        const bet = await getStakeSize(game);
+        const bet = await API.getStakeSize(game);
         
         const accounts = await new Promise(function(resolve, reject) {
             web3.eth.getAccounts( function (err, accounts) { resolve(accounts) })
         });
         
-        await setMaxPlayers(game, 1);
+        await API.setMaxPlayers(game, 1);
 
-        await pauseGame(game);
+        await API.pauseGame(game);
 
         var error = false;
         try {
-            await commitGuess(game, accounts[2], "30", "3");
+            await API.commitGuess(game, accounts[2], "30", "3");
             error = true;
         } catch (e) {
         }
 
         assert(error == false, "The commit executed in paused state");
 
-        await unpauseGame(game);
-        await commitGuess(game, accounts[2], "30", "3");
-        await pauseGame(game);
+        await API.unpauseGame(game);
+        await API.commitGuess(game, accounts[2], "30", "3");
+        await API.pauseGame(game);
 
         try {
-             await revealGuess(game, accounts[2], "30", "3");
+             await API.revealGuess(game, accounts[2], "30", "3");
              error = true;
         } catch (e) {
         }
@@ -251,179 +248,19 @@ contract("Game", function([owner, donor]){
         
         // MAX IS 10, because max account number is 10
         const num_players = 2;
-        const bet = await getStakeSize(game);
+        const bet = await API.getStakeSize(game);
         
         const accounts = await new Promise(function(resolve, reject) {
             web3.eth.getAccounts( function (err, accounts) { resolve(accounts) })
         });
 
-        watchEvent(game.CommitsSubmitted, function(args){}, ["All commits submitted"]);
-        watchEvent(game.RevealsSubmitted, function(args){}, ['All reveals submitted']);
-
-
+        // todo: 
+        // API.watchEvent(game.CommitsSubmitted).then(() => console.log("All commits submitted"))
+        // API.watchEvent(game.RevealsSubmitted).then(() => console.log("All reveals submitted"))
+        API.watchEvent(game.CommitsSubmitted, function(args){}, ['All commits submitted']);
+        API.watchEvent(game.RevealsSubmitted, function(args){}, ['All reveals submitted']);
     })
-
-
-
 });
-
-
-
-
-
-////////////////////// GILADS API ///////////////////////
-async function isInCommitState(game){
-    var state = await game.getGameState();
-    if(state.toNumber() == 0){
-        return true;
-    }else{
-        return false;
-    }
-}
-
-async function isInRevealState(game){
-    var state = await game.getGameState();
-    if(state.toNumber() == 1){
-        return true;
-    }else{
-        return false;
-    }
-}
-
-async function isInPayoutState(game){
-    var state =  await game.getGameState();
-    if(state.toNumber() == 2){
-        return true;
-    }else{
-        return false;
-    }
-    
-}
-
-async function getCurrentCommits(game){
-    const currNumberCommits = await game.getCurrentCommits();
-    return currNumberCommits.toNumber();
-}
-
-async function getCurrentReveals(game){
-    var curNumberReveals = await game.getCurrentReveals();
-    return curNumberReveals.toNumber();
-}
-
-async function resetGame(game){
-    game.reset();
-}
-
-async function commitGuess(game, usr_addr, guess, random){
-    const bet = await getStakeSize(game);
-    const hash = hashGuess(guess, random);
-    await game.commit(hash, { value: web3.toWei(bet,'ether'), from: usr_addr });
-}
-
-async function revealGuess(game, usr_addr, guess, random){
-    await game.reveal(guess, random, {from: usr_addr});
-}
-
-function hashGuess(guess, random){
-    return hash = Web3Utils.soliditySha3({type: 'string', value: guess}, {type: 'string', value: random});
-}
-
-async function getStakeSize(game){
-    var bet = await game.getStakeSize();
-    return web3.fromWei(bet.toNumber(), 'ether');
-}
-
-async function getWinners(game){
-
-    var winners = new Array();
-
-    var nw = await game.getNumberOfWinners();
-    var number_of_winners = nw.toNumber();
-    var i;
-    for (i = 0; i < number_of_winners; i++){
-        //var winner = await game.last_winners(i);
-        var winner = await game.getLastWinners(i);
-        winners.push(winner);
-    }
-
-    return winners;
-}
-
-async function getPayout(game, usr_addr){
-
-    var winners = await getWinners(game);
-    var prize = await game.getLastPrize();
-    var i;
-    for (i = 0; i < winners.length; i++){
-        if(winners[i] == usr_addr){
-            return web3.fromWei(prize.toNumber(), 'ether');
-        }
-    }
-    return 0;
-}
-
-async function getPrizeAmount(game){
-     var prize = await game.getLastPrize();
-     return web3.fromWei(prize.toNumber(), 'ether');
-}
-
-async function getGameFeeAmount(game){
-    var fee = await game.getGameFee();
-    return fee.toNumber();
-}
-
-async function pauseGame(game){
-    await game.pause();
-}
-
-async function unpauseGame(game){
-    await game.unpause();
-}
-
-async function setMaxPlayers(game, num){
-    await game.setMaxPlayers(num);
-}
-
-async function getMaxPlayers(game){
-    var num = await game.getMaxPlayers();
-    return num.toNumber();
-}
-
-/* Cool function. 
-    - ev is the event to watch for from the contract. EX. game.CommitsSubmitted
-    - handler is the function that is to be called when that event is emited by the contract
-    - handler_args_list is a list of argumetns to the handler
-
-*/
-function watchEvent(ev, handler, handler_args_list){
-    
-    var event = ev({}, {fromBlock: 0, toBlock: 'latest'});
-    event.watch(function(error, result){
-        if(!error){
-            handler.apply(this, handler_args_list);
-        }else{
-            console.log(error);
-            assert(true == false, "event handler failed to be installed");
-        }
-    });
-}
-
-function watchEvent(ev, handler){
-    
-    var event = ev({}, {fromBlock: 0, toBlock: 'latest'});
-    event.watch(function(error, result){
-        if(!error){
-            handler();
-        }else{
-            console.log(error);
-            assert(true == false, "event handler failed to be installed");
-        }
-    });
-
-}
-
-
-
 
 /////////////////////// HELPERS /////////////////////////
 
@@ -431,22 +268,22 @@ async function runGame(bet, num_players, accounts, game) {
 
     var guesses = createRandomGuesses(num_players, accounts);
 
-    await setMaxPlayers(game, num_players);
+    await API.setMaxPlayers(game, num_players);
 
     var i;
     for(i = 0; i < num_players; i++){
         //const hash = Web3Utils.soliditySha3({type: 'string', value: guesses[1][i].toString()}, {type: 'string', value: "3"});
-        await commitGuess(game, accounts[i], guesses[1][i].toString(), "3");
+        await API.commitGuess(game, accounts[i], guesses[1][i].toString(), "3");
     }
 
-    var state = await isInRevealState(game);
+    var state = await API.isInRevealState(game);
     
     assert(state == true, "Bad state transition, should be in REVEAL_STATE");
     for(i = 0; i < num_players; i++){
-        await revealGuess(game, accounts[i], guesses[1][i].toString(), "3");
+        await API.revealGuess(game, accounts[i], guesses[1][i].toString(), "3");
     }
 
-    state = await isInPayoutState(game);
+    state = await API.isInPayoutState(game);
     assert(state == true, "Bad state transition, should be in PAYOUT_STATE");
 
     // Lets check the balances
@@ -472,7 +309,7 @@ async function runGame(bet, num_players, accounts, game) {
 
     // Grab all the winners
 
-    var winners = await getWinners(game);
+    var winners = await API.getWinners(game);
 
 
     var number_of_winners = winners.length;
@@ -485,7 +322,7 @@ async function runGame(bet, num_players, accounts, game) {
         assert(winner == loc_winners[i], "Wrong winner");
     }
 
-    state = await isInCommitState(game);
+    state = await API.isInCommitState(game);
     assert(state == true, "Bad state transition, should be in COMMIT_STATE");
 
 
@@ -506,8 +343,8 @@ function findWinner(player_addrs, guesses, avrg){
     var min_diff = MAX_GUESS;
     var cur_diff;
 
-    var winner = [];
-    for(i = 0; i < player_addrs.length; i++) {
+    let winners = [];
+    for(let i = 0; i < player_addrs.length; i++) {
         
         var cur_guess = guesses[i];
 

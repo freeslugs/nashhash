@@ -12,6 +12,14 @@ Game theory games on the blockchain
 
 1. `yarn install`
 
+1. IMPORTANT: you're going to want to set your metamask mneumonic in an `.env` file . used for deployments too.
+
+    1. Create a file in root dir called `.env`
+
+    1. first line set `WORDS='my words here'`
+
+    1. nice all done
+
 ## Build
 
 
