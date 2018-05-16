@@ -115,7 +115,7 @@ contract("Game", function([owner, donor]){
         // Round 1-4
         await runGame(bet, num_players, accounts, game);
         await runGame(bet, num_players, accounts, game);
-        await runGame(bet, num_players, accounts, game);
+        // await runGame(bet, num_players, accounts, game);
         //await runGame(bet, num_players, accounts, game);
     })
 
@@ -259,6 +259,41 @@ contract("Game", function([owner, donor]){
 
         watchEvent(game.CommitsSubmitted, function(args){}, ["All commits submitted"]);
         watchEvent(game.RevealsSubmitted, function(args){}, ['All reveals submitted']);
+
+
+    })
+
+    it("Test force state changes", async () => {
+        const num_players = 3;
+        const bet = await getStakeSize(game);
+        
+        const accounts = await new Promise(function(resolve, reject) {
+            web3.eth.getAccounts( function (err, accounts) { resolve(accounts) })
+        });
+
+        await setMaxPlayers(game, num_players);
+
+        await commitGuess(game, accounts[2], "45", "3");
+        await commitGuess(game, accounts[6], "30", "3");
+
+        await game.forceToRevealState();
+
+        var commitNumber = await getCurrentCommits(game);
+        assert(commitNumber == 2, "Wrong commit number");
+
+        await revealGuess(game, accounts[2], "45", "3");
+
+        await game.forceToPayoutState();
+
+        await game.payout();
+
+        var winners = await getWinners(game);
+        assert(winners.length == 1, winners.length);
+        assert(winners[0] == accounts[2], winners[0]);
+
+
+
+        
 
 
     })
@@ -490,6 +525,10 @@ async function runGame(bet, num_players, accounts, game) {
 
 
     //console.log("Done.");
+}
+
+function sleep(ms) {
+    return new Promise(resolve => setTimeout(resolve, ms));
 }
 
 

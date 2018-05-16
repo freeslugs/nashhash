@@ -61,16 +61,19 @@ contract Game is Pausable, GameHelper {
         uint currNumberCommits;
         uint currNumberReveals;
         uint finalCommitBlock;
-        uint round;
+        uint startOfRoundBlock;
+        uint round; // not implemented
     }
 
     struct Config {
-        uint REVEAL_PERIOD;
+        uint GAME_STAGE_LENGTH;
         uint MAX_PLAYERS;
 
         address FEE_ADDRESS;
         uint GAME_FEE_PERCENT;
         uint STAKE_SIZE;
+
+        uint originBlock;
     }
 
     struct GameInfo {
@@ -85,16 +88,18 @@ contract Game is Pausable, GameHelper {
     constructor(uint maxp) public {
         owner = msg.sender;
 
-        config.REVEAL_PERIOD = 5;
+        config.GAME_STAGE_LENGTH = 6;
         config.GAME_FEE_PERCENT = 5;
         config.MAX_PLAYERS = maxp;
         config.STAKE_SIZE = 1 ether;
         config.FEE_ADDRESS = 0x2540099e9ed04aF369d557a40da2D8f9c2ab928D;
+        config.originBlock = block.number;
 
         state.gameState = GameState.COMMIT_STATE;
         state.currNumberCommits = 0;
         state.currNumberReveals = 0;
         state.finalCommitBlock = 0;
+        state.startOfRoundBlock = block.number;
 
         info.lastPrize = 0;
     }
@@ -145,8 +150,6 @@ contract Game is Pausable, GameHelper {
     // Commit/Reveal Protocol vars
     mapping (address => bytes32) public commits;
     address[] internal commitsKeys;
-
-
     mapping (address => string) public gameData;
     address[] internal gameDataKeys;
 
@@ -154,15 +157,25 @@ contract Game is Pausable, GameHelper {
     uint public average23 = 0;
 
     // Reset the contract to the initial state
-    function reset() public onlyOwner {  
+    function reset() public onlyOwner whenNotPaused {  
         toCommitState();
         info.lastPrize = 0;
         delete info.lastWinners;
     }
 
-    event CommitsSubmitted(
-        uint round
-    );
+    function forceToRevealState() public onlyOwner whenNotPaused {
+        require(state.startOfRoundBlock + config.GAME_STAGE_LENGTH > block.number);
+        toRevealState();
+        emit CommitsSubmitted();
+    }
+
+    function forceToPayoutState() public onlyOwner whenNotPaused {
+        require(state.startOfRoundBlock + config.GAME_STAGE_LENGTH + config.GAME_STAGE_LENGTH > block.number);
+        toPayoutState();
+        emit RevealsSubmitted();
+    }
+
+    event CommitsSubmitted();
 
     function commit(bytes32 hashedCommit) public payable whenNotPaused {
         
@@ -178,7 +191,7 @@ contract Game is Pausable, GameHelper {
         // us to change state.
         if (state.currNumberCommits == config.MAX_PLAYERS) {
             toRevealState();
-            emit CommitsSubmitted(1);
+            emit CommitsSubmitted();
         }
     }
 
@@ -254,6 +267,8 @@ contract Game is Pausable, GameHelper {
         state.currNumberCommits = 0;
         state.currNumberReveals = 0;
 
+        state.startOfRoundBlock = block.number;
+
     }
 
     // Call this function to get to REVEAL_STATE
@@ -263,6 +278,11 @@ contract Game is Pausable, GameHelper {
         state.gameStateDebug = 1;
         state.finalCommitBlock = block.number;
 
+    }
+
+    function toPayoutState() internal {
+        state.gameState = GameState.PAYOUT_STATE;
+        state.gameStateDebug = 2;
     }
 
 
