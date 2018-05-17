@@ -85,7 +85,22 @@ contract Game is Pausable, GameHelper {
     State internal state;
     GameInfo internal info;
 
+
+    // Commit/Reveal Protocol vars
+    mapping (address => bytes32) public commits;
+    address[] internal commitsKeys;
+
+    mapping (address => string) public gameData;
+    address[] internal gameDataKeys;
+
+    ////// DEBUG vars and debug functions
+    // Why is this declared in Game and not in TwoThirdsAverage?
+    uint public average23 = 0;
+
+
     constructor(uint maxp) public {
+
+
         owner = msg.sender;
 
         config.GAME_STAGE_LENGTH = 6;
@@ -102,6 +117,13 @@ contract Game is Pausable, GameHelper {
         state.startOfRoundBlock = block.number;
 
         info.lastPrize = 0;
+
+        commitsKeys = new address[](maxp);
+        //gameDataKeys = new address[](maxp);
+
+
+
+
     }
 
     // Contrcact public API
@@ -145,18 +167,6 @@ contract Game is Pausable, GameHelper {
         config.MAX_PLAYERS = new_max;
     }
     
-
-
-    // Commit/Reveal Protocol vars
-    mapping (address => bytes32) public commits;
-    address[] internal commitsKeys;
-    mapping (address => string) public gameData;
-    address[] internal gameDataKeys;
-
-    ////// DEBUG vars and debug functions
-    // Why is this declared in Game and not in TwoThirdsAverage?
-    uint public average23 = 0;
-
     // Reset the contract to the initial state
     function resetGame() public onlyOwner whenNotPaused {  
         toCommitState();
@@ -185,7 +195,8 @@ contract Game is Pausable, GameHelper {
         require(msg.value == config.STAKE_SIZE);
 
         commits[msg.sender] = hashedCommit;
-        commitsKeys.push(msg.sender);
+        //commitsKeys.push(msg.sender);
+        commitsKeys[state.currNumberCommits] = msg.sender;
         state.currNumberCommits++;
 
         // If we received the MAX_PLAYER number of commits, it is time for
@@ -258,10 +269,10 @@ contract Game is Pausable, GameHelper {
         state.gameStateDebug = 0;
 
         uint i;
-        for(i = 0; i < commitsKeys.length; i++){
+        for(i = 0; i < state.currNumberCommits; i++){
             delete commits[commitsKeys[i]];
         }
-        delete commitsKeys;
+        //delete commitsKeys;
 
         delete gameDataKeys;
         
