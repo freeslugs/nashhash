@@ -2,6 +2,8 @@ var Web3Utils = require('web3-utils');
 
 var Game = artifacts.require("./LowestUniqueNum.sol");
 
+import API from '../src/api/Game.js'
+
 contract("Game", function([owner, donor]){
 
 	var accounts;
@@ -28,15 +30,15 @@ contract("Game", function([owner, donor]){
             web3.eth.getAccounts( function (err, accounts) { resolve(accounts) })
         });
 
-        await setMaxPlayers(game, 2);
+        await API.setMaxPlayers(game, 3);
 
-        await commitGuess(game, accounts[2], "3", "6534");
-        await commitGuess(game, accounts[3], "5", "1004");
-        //await commitGuess(game, accounts[8], "5", "7728");
+        await API.commitGuess(game, accounts[2], "3", "6534");
+        await API.commitGuess(game, accounts[3], "3", "1004");
+        await API.commitGuess(game, accounts[8], "5", "7728");
 
-        await revealGuess(game, accounts[2], "3", "6534");  
-        await revealGuess(game, accounts[3], "5", "1004"); 
-        //await revealGuess(game, accounts[8], "5", "7728");
+        await API.revealGuess(game, accounts[2], "3", "6534");  
+        await API.revealGuess(game, accounts[3], "3", "1004"); 
+        await API.revealGuess(game, accounts[8], "5", "7728");
 
         // console.log("HELLO");
 
@@ -47,159 +49,126 @@ contract("Game", function([owner, donor]){
         const winner = await game.getLastWinners(0);
         console.log(winner);
         
-        assert.equal(winner, accounts[2], "Winner isn't correctly selected");
+        assert.equal(winner, accounts[8], "Winner isn't correctly selected");
+    })
+
+    it("Should play a full game with random input correctly", async () => {
+        
+        // MAX IS 10, because max account number is 10
+        const num_players = 10;
+        const bet = await game.getStakeSize();
+        
+        const accounts = await new Promise(function(resolve, reject) {
+            web3.eth.getAccounts( function (err, accounts) { resolve(accounts) })
+        });
+
+        // Round 1
+        await runGame(bet, num_players, accounts, game);
     })
 
 });
 
 
-////////////////////// GILADS API ///////////////////////
-async function isInCommitState(game){
-    var state = await game.getGameState();
-    if(state.toNumber() == 0){
-        return true;
-    }else{
-        return false;
-    }
-}
 
-async function isInRevealState(game){
-    var state = await game.getGameState();
-    if(state.toNumber() == 1){
-        return true;
-    }else{
-        return false;
-    }
-}
 
-async function isInPayoutState(game){
-    var state =  await game.getGameState();
-    if(state.toNumber() == 2){
-        return true;
-    }else{
-        return false;
-    }
-    
-}
+/////////////////////// HELPERS /////////////////////////
 
-async function getCurrentCommits(game){
-    const currNumberCommits = await game.getCurrentCommits();
-    return currNumberCommits.toNumber();
-}
+async function runGame(bet, num_players, accounts, game) {
 
-async function getCurrentReveals(game){
-    var curNumberReveals = await game.getCurrentReveals();
-    return curNumberReveals.toNumber();
-}
+    var guesses = createRandomGuesses(num_players, accounts);
 
-async function resetGame(game){
-    game.reset();
-}
+    await API.setMaxPlayers(game, num_players);
 
-async function commitGuess(game, usr_addr, guess, random){
-    const bet = await getStakeSize(game);
-    const hash = hashGuess(guess, random);
-    await game.commit(hash, { value: web3.toWei(bet,'ether'), from: usr_addr });
-}
-
-async function revealGuess(game, usr_addr, guess, random){
-    await game.reveal(guess, random, {from: usr_addr});
-}
-
-function hashGuess(guess, random){
-    return hash = Web3Utils.soliditySha3({type: 'string', value: guess}, {type: 'string', value: random});
-}
-
-async function getStakeSize(game){
-    var bet = await game.getStakeSize();
-    return web3.fromWei(bet.toNumber(), 'ether');
-}
-
-async function getWinners(game){
-
-    var winners = new Array();
-
-    var nw = await game.getNumberOfWinners();
-    var number_of_winners = nw.toNumber();
-    var i;
-    for (i = 0; i < number_of_winners; i++){
-        //var winner = await game.last_winners(i);
-        var winner = await game.getLastWinners(i);
-        winners.push(winner);
+    for(var i = 0; i < num_players; i++){
+        //const hash = Web3Utils.soliditySha3({type: 'string', value: guesses[1][i].toString()}, {type: 'string', value: "3"});
+        await API.commitGuess(game, accounts[i], guesses[i].toString(), "3");
     }
 
-    return winners;
+    var state = await API.isInRevealState(game);
+    assert(state == true, "Bad state transition, should be in REVEAL_STATE");
+    for(i = 0; i < num_players; i++){
+        await API.revealGuess(game, accounts[i], guesses[i].toString(), "3");
+    }
+
+    state = await API.isInPayoutState(game);
+    assert(state == true, "Bad state transition, should be in PAYOUT_STATE");
+
+    // Lets check the balances
+    for(i = 0; i < num_players; i++){
+        var balance = web3.fromWei(web3.eth.getBalance(accounts[i]),'ether').toString()
+    }
+
+    await game.payout();
+
+    var gamelowest = findLowestUniqueNum(guesses);
+
+    var realLowest = await game.testLowest();
+
+    var loc_winner = findWinner(accounts, guesses, realLowest);
+
+    // Grab all the winners
+
+    var winner = await API.getWinners(game);
+
+    assert(winner.length == 1, "More than one winner");
+
+    assert(winner[0] == loc_winner, "Winner is incorrectly chosen")
+
+    state = await API.isInCommitState(game);
+    assert(state == true, "Bad state transition, should be in COMMIT_STATE");
 }
 
-async function getPayout(game, usr_addr){
+function findWinner(player_addrs, guesses, lwst){
 
-    var winners = await getWinners(game);
-    var prize = await game.getLastPrize();
-    var i;
-    for (i = 0; i < winners.length; i++){
-        if(winners[i] == usr_addr){
-            return web3.fromWei(prize.toNumber(), 'ether');
+    var winner; 
+    for(let i = 0; i < player_addrs.length; i++) {
+        
+        var cur_guess = guesses[i];
+
+        //If current guess is lowest unique number, set winner to guesser address
+        if(cur_guess == lwst){
+        	winner = player_addrs[i];
         }
     }
-    return 0;
+
+    return winner;
 }
 
-async function getPrizeAmount(game){
-     var prize = await game.getLastPrize();
-     return web3.fromWei(prize.toNumber(), 'ether');
+function createRandomGuesses(max_players, accounts){
+
+    var guesses = new Array(max_players);
+    for(var i = 0; i < max_players; i++){
+        guesses[i] = Math.floor(Math.random() * 1000);
+
+    }
+
+    return guesses;
 }
 
-async function getGameFeeAmount(game){
-    var fee = await game.getGameFee();
-    return fee.toNumber();
+function findLowestUniqueNum(guesses){
+	//Initialize empty sets
+	var unique = new Set([]);
+	var notUnique = new Set([]);
+
+
+	for(var i = 0; i < guesses.length; i++){
+		if(unique.has(guesses[i])){
+			unique.delete(guesses[i]);
+			notUnique.add(guesses[i]);
+		} else if(!notUnique.has(guesses[i])){
+			unique.add(guesses[i]);
+		}
+	}
+
+	var lowest;
+    for(let num of unique.values()){
+    	if(num < lowest){
+    		lowest = num;
+    	}
+    }  
+
+    return lowest;
 }
 
-async function pauseGame(game){
-    await game.pause();
-}
 
-async function unpauseGame(game){
-    await game.unpause();
-}
 
-async function setMaxPlayers(game, num){
-    await game.setMaxPlayers(num);
-}
-
-async function getMaxPlayers(game){
-    var num = await game.getMaxPlayers();
-    return num.toNumber();
-}
-
-/* Cool function. 
-    - ev is the event to watch for from the contract. EX. game.CommitsSubmitted
-    - handler is the function that is to be called when that event is emited by the contract
-    - handler_args_list is a list of argumetns to the handler
-
-*/
-function watchEvent(ev, handler, handler_args_list){
-    
-    var event = ev({}, {fromBlock: 0, toBlock: 'latest'});
-    event.watch(function(error, result){
-        if(!error){
-            handler.apply(this, handler_args_list);
-        }else{
-            console.log(error);
-            assert(true == false, "event handler failed to be installed");
-        }
-    });
-}
-
-function watchEvent(ev, handler){
-    
-    var event = ev({}, {fromBlock: 0, toBlock: 'latest'});
-    event.watch(function(error, result){
-        if(!error){
-            handler();
-        }else{
-            console.log(error);
-            assert(true == false, "event handler failed to be installed");
-        }
-    });
-
-}

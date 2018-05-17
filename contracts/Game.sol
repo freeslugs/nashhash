@@ -151,6 +151,7 @@ contract Game is Pausable, GameHelper {
     address[] internal gameDataKeys;
 
     ////// DEBUG vars and debug functions
+    // Why is this declared in Game and not in TwoThirdsAverage?
     uint public average23 = 0;
 
     // Reset the contract to the initial state

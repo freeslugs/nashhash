@@ -12,6 +12,8 @@ contract LowestUniqueNum is Game {
     mapping (uint => address) private guessAddrs;
     uint[] private guesses;
 
+    // Test variable (COMMENT OUT WHEN DEPLOYING TO NETWORK)
+    uint public testLowest;
 
     struct Rules {
         uint MIN_GUESS;
@@ -63,13 +65,15 @@ contract LowestUniqueNum is Game {
             }
         }
 
+        testLowest = lowest_unique_guess;
+
         // Lets pay ourselves some money
         uint gamefee = (address(this).balance/100) * config.GAME_FEE_PERCENT;
         config.FEE_ADDRESS.transfer(gamefee);
 
         // Give the rest to winner
         uint prize = address(this).balance;
-        performPayout(winner, 1, 5);
+        performPayout(winner, 1, prize);
 
     } 
 }

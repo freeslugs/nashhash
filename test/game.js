@@ -270,17 +270,16 @@ async function runGame(bet, num_players, accounts, game) {
 
     await API.setMaxPlayers(game, num_players);
 
-    var i;
-    for(i = 0; i < num_players; i++){
+    for(var i = 0; i < num_players; i++){
         //const hash = Web3Utils.soliditySha3({type: 'string', value: guesses[1][i].toString()}, {type: 'string', value: "3"});
-        await API.commitGuess(game, accounts[i], guesses[1][i].toString(), "3");
+        await API.commitGuess(game, accounts[i], guesses[i].toString(), "3");
     }
 
     var state = await API.isInRevealState(game);
     
     assert(state == true, "Bad state transition, should be in REVEAL_STATE");
     for(i = 0; i < num_players; i++){
-        await API.revealGuess(game, accounts[i], guesses[1][i].toString(), "3");
+        await API.revealGuess(game, accounts[i], guesses[i].toString(), "3");
     }
 
     state = await API.isInPayoutState(game);
@@ -294,7 +293,7 @@ async function runGame(bet, num_players, accounts, game) {
 
     await game.payout();
 
-    var average = computeTwoThirdsAverage(guesses[1]);
+    var average = computeTwoThirdsAverage(guesses);
     //console.log(average);
 
     var average23 = await game.average23();
@@ -303,7 +302,7 @@ async function runGame(bet, num_players, accounts, game) {
     assert(Math.floor(average) == average23.toNumber(), "Average23 miscalculated...");
 
 
-    var loc_winners = findWinner(accounts, guesses[1], average23);
+    var loc_winners = findWinner(accounts, guesses, average23);
 
     //console.log(loc_winners);
 
@@ -338,22 +337,20 @@ const MAX_GUESS = 100;
 
 function findWinner(player_addrs, guesses, avrg){
     
-    var twothirdsavg = computeTwoThirdsAverage(guesses);
-
     var min_diff = MAX_GUESS;
     var cur_diff;
 
     let winners = [];
-    for(let i = 0; i < player_addrs.length; i++) {
+    for(var i = 0; i < player_addrs.length; i++) {
         
         var cur_guess = guesses[i];
 
         // Find the difference between the guess and the average
-        if(twothirdsavg > cur_guess){
-            cur_diff = twothirdsavg - cur_guess;
+        if(avrg > cur_guess){
+            cur_diff = avrg - cur_guess;
         }
         else{
-            cur_diff = cur_guess - twothirdsavg;
+            cur_diff = cur_guess - avrg;
         }
         
         // If the difference is less than the smallest difference,
@@ -374,17 +371,12 @@ function findWinner(player_addrs, guesses, avrg){
 
 function createRandomGuesses(max_players, accounts){
 
-    var guesses = new Array(2);
-    guesses[0] = new Array(max_players);
-    guesses[1] = new Array(max_players);
-    
-    var i;
-    for(i = 0; i < max_players; i++){
-        guesses[0][i] = accounts[i];
-        guesses[1][i] = Math.floor(Math.random() * 101);
+    var guesses = new Array(max_players);
+    for(var i = 0; i < max_players; i++){
+        guesses[i] = Math.floor(Math.random() * 101);
+
     }
 
-    //console.log(guesses);
     return guesses;
 }
 
