@@ -1,8 +1,14 @@
 var Web3Utils = require('web3-utils');
 
 class API {
-  static async isInCommitState(game) {
-    const state = await game.getGameState();
+  constructor(web3, assert, game) {
+    this.web3 = web3
+    this.assert = assert
+    this.game = game
+  }
+
+  async isInCommitState() {
+    const state = await this.game.getGameState();
     if (state.toNumber() == 0) {
       return true;
     } else {
@@ -10,8 +16,8 @@ class API {
     }
   }
 
-  static async isInRevealState(game) {
-    const state = await game.getGameState();
+  async isInRevealState() {
+    const state = await this.game.getGameState();
     if (state.toNumber() == 1) {
       return true;
     } else {
@@ -19,8 +25,8 @@ class API {
     }
   }
 
-  static async isInPayoutState(game) {
-    const state = await game.getGameState();
+  async isInPayoutState() {
+    const state = await this.game.getGameState();
     if (state.toNumber() == 2) {
       return true;
     } else {
@@ -28,108 +34,103 @@ class API {
     }
   }
 
-  static async getGameState() {
-    const state = await game.getGameState();
-    return state.toNumber();
-  }
-
-  static async getCurrentCommits(game) {
-    const currNumberCommits = await game.getCurrentCommits();
+  async getCurrentCommits() {
+    const currNumberCommits = await this.game.getCurrentCommits();
     return currNumberCommits.toNumber();
   }
 
-  static async getCurrentReveals(game) {
-    const curNumberReveals = await game.getCurrentReveals();
+  async getCurrentReveals() {
+    const curNumberReveals = await this.game.getCurrentReveals();
     return curNumberReveals.toNumber();
   }
 
-  static async resetGame(game) {
-    await game.resetGame();
+  async resetGame() {
+    await this.game.resetGame();
   }
 
-  static async commitGuess(game, usr_addr, guess, random) {
-    const bet = await this.getStakeSize(game);
+  async commitGuess(usr_addr, guess, random) {
+    const bet = await this.getStakeSize();
     const hash = this.hashGuess(guess, random);
-    await game.commit(hash, { value: web3.toWei(bet,'ether'), from: usr_addr });
+    await this.game.commit(hash, { value: this.web3.toWei(bet,'ether'), from: usr_addr });
   }
 
-  static async revealGuess(game, usr_addr, guess, random) {
-    await game.reveal(guess, random, { from: usr_addr });
+  async revealGuess(usr_addr, guess, random) {
+    await this.game.reveal(guess, random, { from: usr_addr });
   }
 
-  static hashGuess(guess, random) {
+  hashGuess(guess, random) {
     const hash = Web3Utils.soliditySha3({ type: 'string', value: guess }, { type: 'string', value: random });
     return hash;
   }
 
-  static async getStakeSize(game) {
-    const bet = await game.getStakeSize();
-    return web3.fromWei(bet.toNumber(), 'ether');
+  async getStakeSize() {
+    const bet = await this.game.getStakeSize();
+    return this.web3.fromWei(bet.toNumber(), 'ether');
   }
 
-  static async getWinners(game) {
+  async getWinners() {
     let winners = [];
 
-    const nw = await game.getNumberOfWinners();
+    const nw = await this.game.getNumberOfWinners();
     const number_of_winners = nw.toNumber();
 
     for (let i = 0; i < number_of_winners; i++) {
-      const winner = await game.getLastWinners(i);
+      const winner = await this.game.getLastWinners(i);
       winners.push(winner);
     }
 
     return winners;
   }
 
-  static async getPayout(game, usr_addr) {
-    const winners = await this.getWinners(game);
-    const prize = await game.getLastPrize();
+  async getPayout(usr_addr) {
+    const winners = await this.getWinners();
+    const prize = await this.game.getLastPrize();
     
     for (let i = 0; i < winners.length; i++) {
       if (winners[i] == usr_addr) {
-        return web3.fromWei(prize.toNumber(), 'ether');
+        return this.web3.fromWei(prize.toNumber(), 'ether');
       }
     }
     return 0;
   }
 
-  static async getPrizeAmount(game) {
-    const prize = await game.getLastPrize();
-    return web3.fromWei(prize.toNumber(), 'ether');
+  async getPrizeAmount() {
+    const prize = await this.game.getLastPrize();
+    return this.web3.fromWei(prize.toNumber(), 'ether');
   }
 
-  static async getGameFeeAmount(game) {
-    const fee = await game.getGameFee();
+  async getGameFeeAmount() {
+    const fee = await this.game.getGameFee();
     return fee.toNumber();
   }
 
-  static async pauseGame(game) {
-    await game.pause();
+  async pauseGame() {
+    await this.game.pause();
   }
 
-  static async unpauseGame(game) {
-    await game.unpause();
+  async unpauseGame() {
+    await this.game.unpause();
   }
 
-  static async setMaxPlayers(game, num) {
-    await game.setMaxPlayers(num);
+  async setMaxPlayers(num) {
+    await this.game.setMaxPlayers(num);
   }
 
-  static async getMaxPlayers(game) {
-    const num = await game.getMaxPlayers();
+  async getMaxPlayers() {
+    const num = await this.game.getMaxPlayers();
     return num.toNumber();
   }
 
-  static async payout(game){
-    await game.payout();
+  async payout(){
+    await this.game.payout();
   }
 
-  static async forceToRevealState(game){
-    await game.forceToRevealState();
+  async forceToRevealState(){
+    await this.game.forceToRevealState();
   }
 
-  static async forceToPayoutState(game){
-    await game.forceToPayoutState();
+  async forceToPayoutState(){
+    await this.game.forceToPayoutState();
   }
 
 
@@ -139,7 +140,7 @@ class API {
     - handler_args_list is a list of argumetns to the handler
   */
   // todo: 
-  /*static watchEvent(e) {    
+  /*watchEvent(e) {    
     return new Promise((resolve, reject) => {
       const event = e({}, { fromBlock: 0, toBlock: 'latest' });
       event.watch((error, result) => {
@@ -155,7 +156,7 @@ class API {
     })
   }*/
 
-  static watchEvent(ev, handler, handler_args_list) {    
+  watchEvent(ev, handler, handler_args_list) {    
     const event = ev({}, { fromBlock: 0, toBlock: 'latest' });
     event.watch((error, result) => {
       if (!error) {
@@ -163,12 +164,12 @@ class API {
         handler.apply(this, handler_args_list);
       } else {
         console.log(error);
-        assert(true == false, "event handler failed to be installed");
+        this.assert(true == false, "event handler failed to be installed");
       }
     });
   }
 
-  /*static watchEvent(ev, handler) {
+  /*watchEvent(ev, handler) {
     var event = ev({}, { fromBlock: 0, toBlock: 'latest' });
     event.watch((error, result) => {
       if (!error) {
