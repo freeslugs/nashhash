@@ -1,8 +1,6 @@
 var Web3Utils = require('web3-utils');
 import API from '../src/api/Game.js';
-//var api = require('../src/api/Game.js');
 
-// var keccak256 = require('js-sha3').keccak256;
 const FIXED_BET = web3.toWei(1,'ether');
 const MAX_PLAYERS = 10;
 const HASHNASH_ADDRESS = 0x2540099e9ed04aF369d557a40da2D8f9c2ab928D;
