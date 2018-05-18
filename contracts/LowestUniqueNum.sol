@@ -52,8 +52,6 @@ contract LowestUniqueNum is Game {
         uint lowest_unique_guess = rules.MAX_GUESS + 1;
         //Declared as array for interface purposes
         address[] memory winner = new address[](1);
-        // We also flush the last list of winners
-        //delete info.lastWinners;
 
         for(uint j = 0; j < guesses.length; j++){
             uint cur_guess = guesses[j];

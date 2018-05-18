@@ -28,6 +28,11 @@ class API {
     }
   }
 
+  static async getGameState() {
+    const state = await game.getGameState();
+    return state.toNumber();
+  }
+
   static async getCurrentCommits(game) {
     const currNumberCommits = await game.getCurrentCommits();
     return currNumberCommits.toNumber();

@@ -46,9 +46,6 @@ contract TwoThirdsAverage is Game {
 
         address[] memory winners = new address[](config.MAX_PLAYERS);
         uint winIndex = 0;
-        // We also flush the last list of winner
-        //delete info.lastWinners;
-
 
         // Find the guessers who are the closest to the 2/3 average
         uint min_diff = ~uint256(0);
