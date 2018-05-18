@@ -53,7 +53,7 @@ contract LowestUniqueNum is Game {
         //Declared as array for interface purposes
         address[] memory winner = new address[](1);
         // We also flush the last list of winners
-        delete info.lastWinners;
+        //delete info.lastWinners;
 
         for(uint j = 0; j < guesses.length; j++){
             uint cur_guess = guesses[j];

@@ -78,6 +78,7 @@ contract Game is Pausable, GameHelper {
 
     struct GameInfo {
         address[] lastWinners;
+        uint lastWinnersLength;
         uint lastPrize;
     }
 
@@ -121,6 +122,8 @@ contract Game is Pausable, GameHelper {
         commitsKeys = new address[](_maxp);
         gameDataKeys = new address[](_maxp);
 
+        info.lastWinners = new address[](_maxp);
+        info.lastWinnersLength = 0;
 
 
 
@@ -148,10 +151,11 @@ contract Game is Pausable, GameHelper {
     }
 
     function getNumberOfWinners() public view returns(uint) {
-        return info.lastWinners.length;
+        return info.lastWinnersLength;
     }
 
     function getLastWinners(uint i) public view returns(address){
+        require(i < info.lastWinnersLength);
         return info.lastWinners[i];
     }
 
@@ -176,7 +180,13 @@ contract Game is Pausable, GameHelper {
         toCommitState();
 
         info.lastPrize = 0;
-        delete info.lastWinners;
+        
+        uint i;
+        for (i = 0; i < info.lastWinnersLength; i++){
+            delete info.lastWinners[i];
+        }
+        info.lastWinnersLength = 0;
+        
     }
 
     function forceToRevealState() public onlyOwner whenNotPaused {
@@ -200,7 +210,6 @@ contract Game is Pausable, GameHelper {
         require(msg.value == config.STAKE_SIZE);
 
         commits[msg.sender] = hashedCommit;
-        //commitsKeys.push(msg.sender);
         commitsKeys[state.currNumberCommits] = msg.sender;
         state.currNumberCommits++;
 
@@ -252,9 +261,11 @@ contract Game is Pausable, GameHelper {
 
     function performPayout(address[] winners, uint numWinners, uint prize) internal {
         uint i = 0;
+
+        info.lastWinnersLength = numWinners;
         for(i = 0; i < numWinners; i++){
             winners[i].transfer(prize); 
-            info.lastWinners.push(winners[i]);
+            info.lastWinners[i] = winners[i];
         }
         info.lastPrize = prize;
     } 

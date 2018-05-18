@@ -47,7 +47,7 @@ contract TwoThirdsAverage is Game {
         address[] memory winners = new address[](config.MAX_PLAYERS);
         uint winIndex = 0;
         // We also flush the last list of winner
-        delete info.lastWinners;
+        //delete info.lastWinners;
 
 
         // Find the guessers who are the closest to the 2/3 average
@@ -71,7 +71,6 @@ contract TwoThirdsAverage is Game {
                 
                 // NOT A BUG!
                 //delete winners; // WTF you might ask? There is no necessity to delete elements.
-                
                 winIndex = 0;
                 winners[winIndex] = gameDataKeys[i];
                 winIndex++;
