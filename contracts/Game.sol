@@ -106,7 +106,7 @@ contract Game is Pausable, GameHelper {
         config.GAME_STAGE_LENGTH = 6;
         config.GAME_FEE_PERCENT = 5;
         config.MAX_PLAYERS = maxp;
-        config.STAKE_SIZE = 1 ether;
+        config.STAKE_SIZE = 1000000000000000000 wei;
         config.FEE_ADDRESS = 0x2540099e9ed04aF369d557a40da2D8f9c2ab928D;
         config.originBlock = block.number;
 
@@ -143,6 +143,10 @@ contract Game is Pausable, GameHelper {
         return config.STAKE_SIZE;
     }
 
+    function setStakeSize(uint new_stake) public onlyOwner {
+        config.STAKE_SIZE = new_stake;
+    }
+
     function getNumberOfWinners() public view returns(uint) {
         return info.lastWinners.length;
     }
@@ -170,6 +174,7 @@ contract Game is Pausable, GameHelper {
     // Reset the contract to the initial state
     function resetGame() public onlyOwner whenNotPaused {  
         toCommitState();
+
         info.lastPrize = 0;
         delete info.lastWinners;
     }
