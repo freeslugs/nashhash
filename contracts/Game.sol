@@ -119,7 +119,7 @@ contract Game is Pausable, GameHelper {
         info.lastPrize = 0;
 
         commitsKeys = new address[](maxp);
-        //gameDataKeys = new address[](maxp);
+        gameDataKeys = new address[](maxp);
 
 
 
@@ -227,7 +227,7 @@ contract Game is Pausable, GameHelper {
 
         // When they do, we add the revealed guess to game data
         gameData[msg.sender] = guess;
-        gameDataKeys.push(msg.sender);
+        gameDataKeys[state.currNumberReveals] = msg.sender;
         state.currNumberReveals++;
 
         if(state.currNumberReveals == config.MAX_PLAYERS){
@@ -274,7 +274,7 @@ contract Game is Pausable, GameHelper {
         }
         //delete commitsKeys;
 
-        delete gameDataKeys;
+        //delete gameDataKeys;
         
         state.currNumberCommits = 0;
         state.currNumberReveals = 0;

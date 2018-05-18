@@ -24,17 +24,17 @@ contract TwoThirdsAverage is Game {
 
     function findWinners() private {
 
-        emit DebugWinner(1, gameDataKeys.length);
+        //emit DebugWinner(1, gameDataKeys.length);
         
         // Calculate the 2/3 average
         uint guess_sum = 0;
-        for(uint i = 0; i < gameDataKeys.length; i++){
+        for(uint i = 0; i < state.currNumberReveals; i++){
             uint tmp = stringToUint(gameData[gameDataKeys[i]]);
             guess_sum += tmp;
         }
 
         guess_sum = guess_sum * 10000;
-        uint average = div(guess_sum, gameDataKeys.length);
+        uint average = div(guess_sum, state.currNumberReveals);
         uint twothirdsavg = div(mul(average, 2), 3);
         twothirdsavg = twothirdsavg / 10000;
 
@@ -50,7 +50,7 @@ contract TwoThirdsAverage is Game {
         // Find the guessers who are the closest to the 2/3 average
         uint min_diff = ~uint256(0);
         uint cur_diff;
-        for(i = 0; i < gameDataKeys.length; i++) {
+        for(i = 0; i < state.currNumberReveals; i++) {
             
             uint cur_guess = stringToUint(gameData[gameDataKeys[i]]);
 
@@ -82,7 +82,7 @@ contract TwoThirdsAverage is Game {
             }
         }
 
-        emit DebugWinner(2, gameDataKeys.length);
+        //emit DebugWinner(2, gameDataKeys.length);
 
         // winrIndex here has the number of winner in our array
         require(winIndex > 0);

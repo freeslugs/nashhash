@@ -34,7 +34,7 @@ contract LowestUniqueNum is Game {
 
     function findWinners() private {
 
-       for(uint i = 0; i < gameDataKeys.length; i++){
+       for(uint i = 0; i < state.currNumberReveals; i++){
             uint tmp = stringToUint(gameData[gameDataKeys[i]]);
 
             //If guess is unique input guesser address to mapping
