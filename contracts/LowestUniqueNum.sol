@@ -19,6 +19,9 @@ contract LowestUniqueNum is Game {
 
     Rules public rules;
 
+    // Debug
+    uint public testLowest = 0;
+
     constructor(uint maxp) public Game(maxp) {
         rules.MIN_GUESS = 0;
         rules.MAX_GUESS = ~uint256(0) - 1;

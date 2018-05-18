@@ -12,6 +12,9 @@ contract TwoThirdsAverage is Game {
 
     Rules public rules;
 
+    //DEBUG
+    uint public average23 = 0;
+
     constructor(uint maxp) public Game(maxp) {
         rules.MIN_GUESS = 0;
         rules.MAX_GUESS = 100;
