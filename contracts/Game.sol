@@ -98,15 +98,15 @@ contract Game is Pausable, GameHelper {
     uint public average23 = 0;
 
 
-    constructor(uint maxp) public {
+    constructor(uint _maxp) public {
 
 
         owner = msg.sender;
 
         config.GAME_STAGE_LENGTH = 6;
         config.GAME_FEE_PERCENT = 5;
-        config.MAX_PLAYERS = maxp;
-        config.STAKE_SIZE = 1000000000000000000 wei;
+        config.MAX_PLAYERS = _maxp;
+        config.STAKE_SIZE = 1 ether;
         config.FEE_ADDRESS = 0x2540099e9ed04aF369d557a40da2D8f9c2ab928D;
         config.originBlock = block.number;
 
@@ -118,8 +118,8 @@ contract Game is Pausable, GameHelper {
 
         info.lastPrize = 0;
 
-        commitsKeys = new address[](maxp);
-        gameDataKeys = new address[](maxp);
+        commitsKeys = new address[](_maxp);
+        gameDataKeys = new address[](_maxp);
 
 
 
