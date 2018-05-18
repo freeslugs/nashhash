@@ -44,7 +44,6 @@ contract("Lowest Unique Game", function([owner, donor]){
         // //console.log(hash)
 
         const winner = await API.getWinners(game, 0);
-        console.log(winner);
         
         assert.equal(winner, accounts[8], "Winner isn't correctly selected");
     })
@@ -62,6 +61,25 @@ contract("Lowest Unique Game", function([owner, donor]){
         // Round 1
         await runGame(bet, num_players, accounts, game);
     })
+
+    it("Should reset correctly", async () => {
+        
+        // MAX IS 10, because max account number is 10
+        const num_players = 10;
+        const bet = await API.getStakeSize(game);
+        
+        const accounts = await new Promise(function(resolve, reject) {
+            web3.eth.getAccounts( function (err, accounts) { resolve(accounts) })
+        });
+
+        // Round 1-4
+        await runGame(bet, num_players, accounts, game);
+        await runGame(bet, num_players, accounts, game);
+        await runGame(bet, num_players, accounts, game);
+        await runGame(bet, num_players, accounts, game);
+    })
+
+
 
 });
 
@@ -90,10 +108,11 @@ async function runGame(bet, num_players, accounts, game) {
     state = await API.isInPayoutState(game);
     assert(state == true, "Bad state transition, should be in PAYOUT_STATE");
 
-    // Lets check the balances
-    for(i = 0; i < num_players; i++){
+    // Uncomment to check the balances
+/*    for(i = 0; i < num_players; i++){
         var balance = web3.fromWei(web3.eth.getBalance(accounts[i]),'ether').toString()
-    }
+        console.log(balance);
+    }*/
 
     await game.payout();
 
@@ -102,7 +121,6 @@ async function runGame(bet, num_players, accounts, game) {
     var realLowest = await game.testLowest();
 
     var loc_winner = findWinner(accounts, guesses, realLowest);
-
     // Grab all the winners
 
     var winner = await API.getWinners(game);
@@ -118,6 +136,7 @@ async function runGame(bet, num_players, accounts, game) {
 function findWinner(player_addrs, guesses, lwst){
 
     var winner; 
+
     for(let i = 0; i < player_addrs.length; i++) {
         
         var cur_guess = guesses[i];

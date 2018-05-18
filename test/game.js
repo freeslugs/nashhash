@@ -128,7 +128,7 @@ contract("2/3 of the Average Game", function([owner, donor]){
         });
 
 
-         await API.setMaxPlayers(game, 3);
+        await API.setMaxPlayers(game, 3);
 
         await API.commitGuess(game, accounts[2], "30", "3");
         await API.commitGuess(game, accounts[6], "25", "3");
@@ -191,7 +191,6 @@ contract("2/3 of the Average Game", function([owner, donor]){
         const accounts = await new Promise(function(resolve, reject) {
             web3.eth.getAccounts( function (err, accounts) { resolve(accounts) })
         });
-
 
         await API.setMaxPlayers(game, num_players);
 
@@ -320,7 +319,7 @@ async function runGame(bet, num_players, accounts, game) {
     state = await API.isInPayoutState(game);
     assert(state == true, "Bad state transition, should be in PAYOUT_STATE");
 
-    // Lets check the balances
+    // Uncomment to check the balances
     for(i = 0; i < num_players; i++){
         var balance = web3.fromWei(web3.eth.getBalance(accounts[i]),'ether').toString()
         //console.log(balance);
@@ -428,3 +427,5 @@ function computeTwoThirdsAverage(guesses){
 
     return  average23;    
 }
+
+

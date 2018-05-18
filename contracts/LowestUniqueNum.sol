@@ -12,9 +12,6 @@ contract LowestUniqueNum is Game {
     mapping (uint => address) private guessAddrs;
     uint[] private guesses;
 
-    // Test variable (COMMENT OUT WHEN DEPLOYING TO NETWORK)
-    uint public testLowest;
-
     struct Rules {
         uint MIN_GUESS;
         uint MAX_GUESS;
@@ -52,6 +49,9 @@ contract LowestUniqueNum is Game {
         uint lowest_unique_guess = rules.MAX_GUESS + 1;
         //Declared as array for interface purposes
         address[] memory winner = new address[](1);
+        // We also flush the last list of winners
+        delete info.lastWinners;
+
         for(uint j = 0; j < guesses.length; j++){
             uint cur_guess = guesses[j];
 
@@ -60,12 +60,16 @@ contract LowestUniqueNum is Game {
                 //If guess is lower than current min
                 if(guesses[j] < lowest_unique_guess){
                     lowest_unique_guess = guesses[j];
+                    testLowest = guesses[j];
                     winner[0] = guessAddrs[cur_guess];
                 }
             }
+            //Clear mapping for next round
+            delete guessAddrs[cur_guess];
         }
 
-        testLowest = lowest_unique_guess;
+        //Clear array for next round
+        delete guesses;
 
         // Lets pay ourselves some money
         uint gamefee = (address(this).balance/100) * config.GAME_FEE_PERCENT;
