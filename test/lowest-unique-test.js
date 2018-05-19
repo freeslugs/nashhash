@@ -23,7 +23,7 @@ contract("Lowest Unique Game", function([owner, donor]){
     });
 
 
-    it("Should find winner and distribute prizes", async () => {
+    it("Three players, two pick a common low number", async () => {
         // keccak256 , web3.sha3
         const bet = await api.getStakeSize(game);
 
@@ -41,11 +41,8 @@ contract("Lowest Unique Game", function([owner, donor]){
         await api.revealGuess( accounts[3], "3", "1004"); 
         await api.revealGuess( accounts[8], "5", "7728");
 
-        // console.log("HELLO");
 
         await game.payout();
-
-        // //console.log(hash)
 
         const winner = await api.getWinners( 0);
         

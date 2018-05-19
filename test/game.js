@@ -6,12 +6,14 @@ const MAX_PLAYERS = 10;
 const HASHNASH_ADDRESS = 0x2540099e9ed04aF369d557a40da2D8f9c2ab928D;
 
 var Game = artifacts.require("./TwoThirdsAverage.sol");
-  
+
+
+
 let api
 
 contract("2/3 of the Average Game", function([owner, donor]){
 
-    var accounts;
+    let accounts
 
     let game
 
@@ -20,57 +22,48 @@ contract("2/3 of the Average Game", function([owner, donor]){
         // init api
         api = new API(web3, assert, game);
 
-        // watchEvent(game.RevealsSubmitted, function(){game.payout();} );
+        accounts = await new Promise(function(resolve, reject) {
+            web3.eth.getAccounts( function (err, accounts) { resolve(accounts) })
+        });
+
     })
 
     it("init", async () => {
         const count = await api.getStakeSize();
-        // console.log(count);
         assert.equal(count, 1);
     });
 
-    it("Should commit hashed guess with stake", async () => {
+    it("Single commit", async () => {
         
         const hash = api.hashGuess("66", "3");
 
         await api.commitGuess(donor, "66", "3");
 
-        const curr_number_bets = await game.getCurrentCommits();
+        const curr_number_bets = await api.getCurrentCommits();
         const guess_commit = await game.commits(donor);
 
         assert.equal(curr_number_bets, 1, "Number of bets did not increment");
         assert.equal(guess_commit, hash, "Hashes do not match");
     })
 
-    it("Should reveal hashed guess", async () => {
-        const bet = await api.getStakeSize();
-        const hash = Web3Utils.soliditySha3({type: 'string', value: "66"}, {type: 'string', value: "3"});
-
+    it("Single commit and single reveal", async () => {
+       
         //Commit/Reveal
         await api.setMaxPlayers(1);
 
         await api.commitGuess(donor, "66", "3");
 
-        //await game.commit(hash, { value: bet, from: donor });
         await api.revealGuess(donor, "66", "3");
         
-        //await game.reveal("66", "3", {from: donor});
-        
         const guess = await game.gameData(donor);
-        //console.log(guess);
+
 
         assert.equal(guess, '66', "Revealed guesses do not match");
-        //console.log(guess);
+
     })
 
-    it("Should find winner and distribute prizes", async () => {
-        // keccak256 , web3.sha3
-        const bet = await api.getStakeSize();
-
-        const accounts = await new Promise(function(resolve, reject) {
-            web3.eth.getAccounts( function (err, accounts) { resolve(accounts) })
-        });
-
+    it("Winner is found correclty, prizes distributed correctly. Two players, different guesses", async () => {
+        
         await api.setMaxPlayers(2);
 
         await api.commitGuess(accounts[2], "80", "3");
@@ -81,29 +74,22 @@ contract("2/3 of the Average Game", function([owner, donor]){
 
         await api.payout();
 
-        // //console.log(hash)
-
         const winners = await api.getWinners();
-        //console.log(winner);
         
         assert.equal(winners[0], accounts[6], "Winner isn't correctly selected");
     })
 
-    it("Should play a full game with random input correctly", async () => {
+    it("Plays the full game, 10 players, random guesses", async () => {
         
         // MAX IS 10, because max account number is 10
         const num_players = 10;
         const bet = await api.getStakeSize();
-        
-        const accounts = await new Promise(function(resolve, reject) {
-            web3.eth.getAccounts( function (err, accounts) { resolve(accounts) })
-        });
 
         // Round 1
         await runGame(bet, num_players, accounts, game);
     })
 
-    it("Should reset correctly", async () => {
+    it("Multiple rounds of the game are played correclty", async () => {
         
         // MAX IS 10, because max account number is 10
         const num_players = 10;
@@ -116,19 +102,11 @@ contract("2/3 of the Average Game", function([owner, donor]){
         // Round 1-4
         await runGame(bet, num_players, accounts, game);
         await runGame(bet, num_players, accounts, game);
-        // await runGame(bet, num_players, accounts, game);
-        //await runGame(bet, num_players, accounts, game);
+
     })
 
-    it("Should go back to init", async () => {
+    it("resetGame() works correcly", async () => {
         
-        // MAX IS 10, because max account number is 10
-        const bet = await api.getStakeSize();
-
-        const accounts = await new Promise(function(resolve, reject) {
-            web3.eth.getAccounts( function (err, accounts) { resolve(accounts) })
-        });
-
 
         await api.setMaxPlayers(3);
 
@@ -164,15 +142,11 @@ contract("2/3 of the Average Game", function([owner, donor]){
 
     })
 
-    it("Should make a correct payout", async () => {
+    it("Makes a correct payout", async () => {
         
         // MAX IS 10, because max account number is 10
         const num_players = 3;
         const bet = await api.getStakeSize();
-        
-        const accounts = await new Promise(function(resolve, reject) {
-            web3.eth.getAccounts( function (err, accounts) { resolve(accounts) })
-        });
 
         // Round 1-4
         await runGame(bet, num_players, accounts, game);
@@ -187,18 +161,11 @@ contract("2/3 of the Average Game", function([owner, donor]){
     it("2 players bet, one wins, one loses", async () => {
         // MAX IS 10, because max account number is 10
         const num_players = 2;
-        const bet = await api.getStakeSize();
         
-        const accounts = await new Promise(function(resolve, reject) {
-            web3.eth.getAccounts( function (err, accounts) { resolve(accounts) })
-        });
-
         await api.setMaxPlayers(num_players);
 
         await api.commitGuess(accounts[2], "100", "3");
         await api.commitGuess(accounts[6], "2", "3");
-
-
 
         await api.revealGuess(accounts[2], "100", "3");
         await api.revealGuess(accounts[6], "2", "3");
@@ -212,22 +179,15 @@ contract("2/3 of the Average Game", function([owner, donor]){
         assert(payout2 == prize, "Wrong prize amount");
     })
 
-    it("Everyone betting the same number", async () => {
+    it("2 players betting the same number", async () => {
         
         // MAX IS 10, because max account number is 10
         const num_players = 2;
-        const bet = await api.getStakeSize();
         
-        const accounts = await new Promise(function(resolve, reject) {
-            web3.eth.getAccounts( function (err, accounts) { resolve(accounts) })
-        });
-
         await api.setMaxPlayers(num_players);
 
         await api.commitGuess(accounts[2], "30", "3");
         await api.commitGuess(accounts[6], "30", "3");
-
-
 
         await api.revealGuess(accounts[2], "30", "3");
         await api.revealGuess(accounts[6], "30", "3");
@@ -241,13 +201,9 @@ contract("2/3 of the Average Game", function([owner, donor]){
         assert(payout2 == prize, "Wrong prize amount");
     })
     
-    it("Should not be pausable and unpausable", async () => {
+    it("Can be paused an unpaused", async () => {
         const num_players = 2;
         const bet = await api.getStakeSize();
-        
-        const accounts = await new Promise(function(resolve, reject) {
-            web3.eth.getAccounts( function (err, accounts) { resolve(accounts) })
-        });
         
         await api.setMaxPlayers(1);
 
@@ -275,30 +231,33 @@ contract("2/3 of the Average Game", function([owner, donor]){
         assert(error == false, "The reveal executed in paused state");
     })
 
-    it("Should emmit events and api should watch for them", async () => {
+    it("TODO: Emit event", async () => {
         
         // MAX IS 10, because max account number is 10
-        const num_players = 2;
-        const bet = await api.getStakeSize();
+        // const num_players = 2;
+        // const bet = await api.getStakeSize();
         
-        const accounts = await new Promise(function(resolve, reject) {
-            web3.eth.getAccounts( function (err, accounts) { resolve(accounts) })
-        });
+        // var error = 1;
 
-        // todo: 
-        // api.watchEvent(game.CommitsSubmitted).then(() => console.log("All commits submitted"))
-        // api.watchEvent(game.RevealsSubmitted).then(() => console.log("All reveals submitted"))
-        api.watchEvent(game.CommitsSubmitted, function(args){}, ['All commits submitted']);
-        api.watchEvent(game.RevealsSubmitted, function(args){}, ['All reveals submitted']);
+        // api.watchEvent(api.game.CommitsSubmitted, function(args){error = 0; console.log("Commits received");}, ['All commits submitted']);
+        // api.watchEvent(api.game.RevealsSubmitted, function(args){error = 0; console.log("hi");}, ['All reveals submitted']);
+
+        // await api.commitGuess(accounts[2], "30", "3");
+        // await api.commitGuess(accounts[6], "30", "3");
+
+        // await sleep(30000);
+
+        // assert(error = 0, "CommitsSubmitted event not emmited");
+
+        // error = 1;
+
+        
+
+        // assert(error = 0, "RevealsSubmitted event not emmited");
     })
 
     it("Should be forcable into states by owner", async () => {
         const num_players = 3;
-        const bet = await api.getStakeSize();
-        
-        const accounts = await new Promise(function(resolve, reject) {
-            web3.eth.getAccounts( function (err, accounts) { resolve(accounts) })
-        });
 
         await api.setMaxPlayers(num_players);
 
@@ -335,7 +294,6 @@ async function runGame(bet, num_players, accounts) {
     await api.setMaxPlayers(num_players);
 
     for(var i = 0; i < num_players; i++){
-        //const hash = Web3Utils.soliditySha3({type: 'string', value: guesses[1][i].toString()}, {type: 'string', value: "3"});
         await api.commitGuess(accounts[i], guesses[i].toString(), "3");
     }
 
@@ -352,13 +310,11 @@ async function runGame(bet, num_players, accounts) {
     // Uncomment to check the balances
     for(i = 0; i < num_players; i++){
         var balance = web3.fromWei(web3.eth.getBalance(accounts[i]),'ether').toString()
-        //console.log(balance);
     }
 
     await api.payout();
 
     var average = computeTwoThirdsAverage(guesses);
-    //console.log(average);
 
     var average23 = await api.game.average23();
     
@@ -368,7 +324,6 @@ async function runGame(bet, num_players, accounts) {
 
     var loc_winners = findWinner(accounts, guesses, average23);
 
-    //console.log(loc_winners);
 
     // Grab all the winners
 
@@ -389,7 +344,6 @@ async function runGame(bet, num_players, accounts) {
     assert(state == true, "Bad state transition, should be in COMMIT_STATE");
 
 
-    //console.log("Done.");
 }
 
 function sleep(ms) {
@@ -456,6 +410,15 @@ function computeTwoThirdsAverage(guesses){
     average23 = Math.floor(average23/10000)
 
     return  average23;    
+}
+
+function spin(i){
+    var j;
+    var sum;
+    for(j = 0; j < i; j++ ){
+        sum = j + i;
+    }
+    return sum;
 }
 
 

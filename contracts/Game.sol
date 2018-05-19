@@ -94,10 +94,6 @@ contract Game is Pausable, GameHelper {
     mapping (address => string) public gameData;
     address[] internal gameDataKeys;
 
-    ////// DEBUG vars and debug functions
-    // Why is this declared in Game and not in TwoThirdsAverage?
-    uint public average23 = 0;
-
 
     constructor(uint _maxp) public {
 
@@ -288,9 +284,6 @@ contract Game is Pausable, GameHelper {
         for(i = 0; i < state.currNumberCommits; i++){
             delete commits[commitsKeys[i]];
         }
-        //delete commitsKeys;
-
-        //delete gameDataKeys;
         
         state.currNumberCommits = 0;
         state.currNumberReveals = 0;
