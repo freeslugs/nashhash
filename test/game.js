@@ -153,8 +153,13 @@ contract("2/3 of the Average Game", function([owner, donor]){
 
         var prize = await api.getPrizeAmount();
         var fee = await api.getGameFeeAmount();
+
+        var numWinners = await api.getNumberOfWinners();
       
-        var expected_prize = (bet*num_players) - ((bet*num_players) / 100.0) * fee;
+        var expectedTotalPrize = (bet*num_players) - ((bet*num_players) / 100.0) * fee;
+        var expectedPrize = expectedTotalPrize / numWinners;
+
+
         assert(prize == expected_prize);
     })
 
