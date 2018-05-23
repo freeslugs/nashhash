@@ -51,6 +51,10 @@ func (g *Game) CurrCommits() uint {
 	return g.currCommits
 }
 
+func (g *Game) CurrReveals() uint {
+	return g.currReveals
+}
+
 // Play emulates the Game.sol changing of state. Random increment of commits/reveals
 // and appropriate state transitions are used to achive this goal.
 func (g *Game) Play() {
@@ -112,6 +116,32 @@ func (g *Game) SendCommit() error {
 func (g *Game) SendCommitSafe() error {
 	g.gameLock.Lock()
 	e := g.SendCommit()
+	g.gameLock.Unlock()
+	return e
+}
+
+// SendCommit imitates sending of a commit to the game.
+// WARNING: Assumes that the game lock is held
+func (g *Game) SendReveal() error {
+	if g.state != REVEAL_STATE {
+		return errors.New("Bad state: cannot commit state")
+	}
+
+	if g.currReveals < g.maxPlayers {
+		g.currReveals++
+		if g.currReveals == g.maxPlayers {
+			g.state = PAYOUT_STATE
+		}
+		return nil
+	}
+	return errors.New("WRONG BEHAVIOUR: Inconsistent State")
+}
+
+// SendCommitSafe sends a commit but also lock the gamelock
+// WARNING: Assumes the gamelock is not held
+func (g *Game) SendRevealSafe() error {
+	g.gameLock.Lock()
+	e := g.SendReveal()
 	g.gameLock.Unlock()
 	return e
 }
