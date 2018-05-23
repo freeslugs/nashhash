@@ -71,19 +71,9 @@ func (g *Game) Play() {
 
 		switch g.state {
 		case COMMIT_STATE:
-			if g.currCommits < g.maxPlayers {
-				g.currCommits++
-				if g.currCommits == g.maxPlayers {
-					g.state = REVEAL_STATE
-				}
-			}
+			g.SendCommit()
 		case REVEAL_STATE:
-			if g.currReveals < g.maxPlayers {
-				g.currReveals++
-				if g.currReveals == g.maxPlayers {
-					g.state = PAYOUT_STATE
-				}
-			}
+			g.SendReveal()
 		case PAYOUT_STATE:
 
 		default:
@@ -98,7 +88,7 @@ func (g *Game) Play() {
 // WARNING: Assumes that the game lock is held
 func (g *Game) SendCommit() error {
 	if g.state != COMMIT_STATE {
-		return errors.New("Bad state: cannot commit state")
+		return errors.New("Bad state: cannot commit in this state")
 	}
 
 	if g.currCommits < g.maxPlayers {
@@ -124,7 +114,7 @@ func (g *Game) SendCommitSafe() error {
 // WARNING: Assumes that the game lock is held
 func (g *Game) SendReveal() error {
 	if g.state != REVEAL_STATE {
-		return errors.New("Bad state: cannot commit state")
+		return errors.New("Bad state: cannot reveal in this state")
 	}
 
 	if g.currReveals < g.maxPlayers {
@@ -137,11 +127,32 @@ func (g *Game) SendReveal() error {
 	return errors.New("WRONG BEHAVIOUR: Inconsistent State")
 }
 
-// SendCommitSafe sends a commit but also lock the gamelock
+// SendCommitSafe sends a commit but also locks the gamelock
 // WARNING: Assumes the gamelock is not held
 func (g *Game) SendRevealSafe() error {
 	g.gameLock.Lock()
 	e := g.SendReveal()
+	g.gameLock.Unlock()
+	return e
+}
+
+// Payout triggers the payout routine in the contract. In emulation, it resets the state to COMMIT_STATE
+// WARNING: Assumes that the game lock is held
+func (g *Game) Payout() error {
+	if g.state != PAYOUT_STATE {
+		return errors.New("Bad state: cannot payout in this state")
+	}
+	g.state = COMMIT_STATE
+	g.currCommits = 0
+	g.currReveals = 0
+	return nil
+}
+
+// PayoutSafe like payout but also locks the gamelock
+// WARNING: Assume the lock is NOT held
+func (g *Game) PayoutSafe() error {
+	g.gameLock.Lock()
+	e := g.Payout()
 	g.gameLock.Unlock()
 	return e
 }

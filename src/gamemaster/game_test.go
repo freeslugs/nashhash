@@ -62,15 +62,38 @@ func TestSendReveal(t *testing.T) {
 	// Send reveal
 	e := g.SendRevealSafe()
 	assertEqual(t, e, nil, "")
-	assertEqual(t, g.State(), PAYOUT_STATE, "Bad state")
+	assertEqual(t, g.State(), PAYOUT_STATE, "Bad state transition")
 	assertEqual(t, g.CurrReveals(), uint(1), "")
 
 	e = g.SendRevealSafe()
 	assertNotEqual(t, e, nil, "SendReveal at wrong state has to return error")
-	assertEqual(t, g.State(), PAYOUT_STATE, "Bad state")
+	assertEqual(t, g.State(), PAYOUT_STATE, "Bad state transition")
 	assertEqual(t, g.CurrReveals(), uint(1), "")
+}
 
+func TestPayout(t *testing.T){
+	var g Game
+	g.Init("0x1", 2)
 
+	// Send 2 commits and 
+	g.SendCommitSafe()
+	g.SendCommitSafe()
+
+	// Send 2 reveals
+	g.SendRevealSafe()
+	g.SendRevealSafe()
+
+	// Assert correct state
+	assertEqual(t, g.CurrReveals(), uint(2), "")
+	assertEqual(t, g.CurrCommits(), uint(2), "")
+	assertEqual(t, g.State(), PAYOUT_STATE, "Bad state transition")
+
+	// Call payout
+	e := g.Payout()
+	assertEqual(t, e, nil, "")
+	assertEqual(t, g.State(), COMMIT_STATE, "Bad state transition")
+	assertEqual(t, g.CurrReveals(), uint(0), "Wrong number of reveals")
+	assertEqual(t, g.CurrCommits(), uint(0), "Wrong number of commits")
 
 
 }
