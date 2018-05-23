@@ -8,7 +8,7 @@ import (
 	"time"
 )
 
-const MAX_TIME_PERIOD = 5
+const MAX_TIME_PERIOD = 100
 const COMMIT_STATE = uint(0)
 const REVEAL_STATE = uint(1)
 const PAYOUT_STATE = uint(2)
@@ -53,29 +53,32 @@ func (g *Game) MaxPlayers() uint {
 	return g.maxPlayers
 }
 
+// CurrCommits returns the current number of commits
 func (g *Game) CurrCommits() uint {
 	g.gameLock.Lock()
 	defer g.gameLock.Unlock()
 	return g.currCommits
 }
 
+// CurrReveals returns the current number of reveals
 func (g *Game) CurrReveals() uint {
 	g.gameLock.Lock()
 	defer g.gameLock.Unlock()
 	return g.currReveals
 }
 
-// Play emulates the Game.sol changing of state. Random increment of commits/reveals
+// PlayBasic emulates the Game.sol changing of state. Random increment of commits/reveals
 // and appropriate state transitions are used to achive this goal.
-func (g *Game) Play() {
+func (g *Game) PlayBasic(fromHandler <-chan bool) {
 
 	rand.Seed(time.Now().UnixNano())
 
+	i := 0
 	for {
 
 		// Sleep a random number of seconds
 		sleepTime := rand.Intn(MAX_TIME_PERIOD)
-		time.Sleep(time.Duration(sleepTime) * time.Second)
+		time.Sleep(time.Duration(sleepTime) * time.Millisecond)
 
 		g.gameLock.Lock()
 
@@ -85,10 +88,21 @@ func (g *Game) Play() {
 		case REVEAL_STATE:
 			g.SendReveal()
 		case PAYOUT_STATE:
+			g.gameLock.Unlock()
+			stayAlive := <-fromHandler
+			if !stayAlive {
+				return
+			}
+			continue
 
+			// Do nothing, wait for payout to be called
 		default:
 			fmt.Println("Error: Bad game state")
+			g.gameLock.Unlock()
+			return
 		}
+
+		i++
 
 		g.gameLock.Unlock()
 	}
@@ -120,7 +134,7 @@ func (g *Game) SendCommitSafe() error {
 	return e
 }
 
-// SendCommit imitates sending of a commit to the game.
+// SendReveal imitates sending of a reveal to the game.
 // WARNING: Assumes that the game lock is held
 func (g *Game) SendReveal() error {
 	if g.state != REVEAL_STATE {
@@ -137,7 +151,7 @@ func (g *Game) SendReveal() error {
 	return errors.New("WRONG BEHAVIOUR: Inconsistent State")
 }
 
-// SendCommitSafe sends a commit but also locks the gamelock
+// SendRevealSafe sends a reveal but also locks the gamelock
 // WARNING: Assumes the gamelock is not held
 func (g *Game) SendRevealSafe() error {
 	g.gameLock.Lock()

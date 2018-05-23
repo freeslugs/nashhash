@@ -96,8 +96,28 @@ func TestPayout(t *testing.T) {
 	assertEqual(t, g.CurrCommits(), uint(0), "Wrong number of commits")
 }
 
-func TestPlay(t *testing.T) {
-	var g Game
-	g.Init("0x1", 10)
+func TestPlayBasic(t *testing.T) {
 
+	nump := uint(10)
+
+	var g Game
+	g.Init("0x1", nump)
+	toGame := make(chan bool, 1)
+
+	// Start the game
+	go g.PlayBasic(toGame)
+
+	// We want to play 5 full rounds
+	for i := 0; i < 5; i++ {
+
+		// Wait for the game to reach the payout state
+		for g.State() != PAYOUT_STATE {
+		}
+
+		assertEqual(t, g.CurrReveals(), uint(nump), "Wrong number of reveals")
+		assertEqual(t, g.CurrCommits(), uint(nump), "Wrong number of reveals")
+		assertEqual(t, g.State(), PAYOUT_STATE, "Bad state transition")
+		toGame <- true
+	}
+	toGame <- false
 }
