@@ -34,24 +34,34 @@ func (g *Game) Init(addr string, maxp uint) {
 
 // Address returns the game address
 func (g *Game) Address() string {
+	g.gameLock.Lock()
+	defer g.gameLock.Unlock()
 	return g.address
 }
 
 // State returns the state of the game
 func (g *Game) State() uint {
+	g.gameLock.Lock()
+	defer g.gameLock.Unlock()
 	return g.state
 }
 
 // MaxPlayers returns the max players of the game
 func (g *Game) MaxPlayers() uint {
+	g.gameLock.Lock()
+	defer g.gameLock.Unlock()
 	return g.maxPlayers
 }
 
 func (g *Game) CurrCommits() uint {
+	g.gameLock.Lock()
+	defer g.gameLock.Unlock()
 	return g.currCommits
 }
 
 func (g *Game) CurrReveals() uint {
+	g.gameLock.Lock()
+	defer g.gameLock.Unlock()
 	return g.currReveals
 }
 

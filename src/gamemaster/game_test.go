@@ -58,7 +58,7 @@ func TestSendReveal(t *testing.T) {
 
 	// Send the fist commit
 	g.SendCommitSafe()
-	
+
 	// Send reveal
 	e := g.SendRevealSafe()
 	assertEqual(t, e, nil, "")
@@ -71,11 +71,11 @@ func TestSendReveal(t *testing.T) {
 	assertEqual(t, g.CurrReveals(), uint(1), "")
 }
 
-func TestPayout(t *testing.T){
+func TestPayout(t *testing.T) {
 	var g Game
 	g.Init("0x1", 2)
 
-	// Send 2 commits and 
+	// Send 2 commits and
 	g.SendCommitSafe()
 	g.SendCommitSafe()
 
@@ -94,8 +94,6 @@ func TestPayout(t *testing.T){
 	assertEqual(t, g.State(), COMMIT_STATE, "Bad state transition")
 	assertEqual(t, g.CurrReveals(), uint(0), "Wrong number of reveals")
 	assertEqual(t, g.CurrCommits(), uint(0), "Wrong number of commits")
-
-
 }
 
 func TestPlay(t *testing.T) {
