@@ -1,5 +1,10 @@
 package gm
 
+/*
+This file is needed to emulate the behaviour of a blockchain game. Main purpose
+of such emulation is to be able to quickly develop the rest of the game master.
+*/
+
 import (
 	"errors"
 	"fmt"
@@ -72,8 +77,6 @@ func (g *Game) CurrReveals() uint {
 func (g *Game) PlayBasic(fromHandler <-chan bool) {
 
 	rand.Seed(time.Now().UnixNano())
-
-	i := 0
 	for {
 
 		// Sleep a random number of seconds
@@ -91,6 +94,7 @@ func (g *Game) PlayBasic(fromHandler <-chan bool) {
 			g.gameLock.Unlock()
 			stayAlive := <-fromHandler
 			if !stayAlive {
+				fmt.Println("die")
 				return
 			}
 			continue
@@ -101,8 +105,6 @@ func (g *Game) PlayBasic(fromHandler <-chan bool) {
 			g.gameLock.Unlock()
 			return
 		}
-
-		i++
 
 		g.gameLock.Unlock()
 	}
@@ -177,6 +179,25 @@ func (g *Game) Payout() error {
 func (g *Game) PayoutSafe() error {
 	g.gameLock.Lock()
 	e := g.Payout()
+	g.gameLock.Unlock()
+	return e
+}
+
+// ForceToRevealState forces the game into reveal state
+// WARNING: Assumes the game lock is held
+func (g *Game) ForceToRevealState() error {
+	if g.state != COMMIT_STATE {
+		return errors.New("Bad state: cannot force to reveal in this state")
+	}
+	g.state = REVEAL_STATE
+	return nil
+}
+
+// ForceToRevealStateSafe same but holds the lock
+// WARNING: Assumes the game lock is held
+func (g *Game) ForceToRevealStateSafe() error {
+	g.gameLock.Lock()
+	e := g.ForceToRevealState()
 	g.gameLock.Unlock()
 	return e
 }

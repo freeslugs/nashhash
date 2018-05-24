@@ -25,6 +25,24 @@ func assertNotEqual(t *testing.T, a interface{}, b interface{}, message string) 
 	t.Fatal(message)
 }
 
+func assertState(t *testing.T, g *Game, state uint, commits uint, reveals uint) {
+	assertEqual(t, g.State(), state, "Bad state transition")
+	assertEqual(t, g.CurrReveals(), reveals, "Wrong number of reveals")
+	assertEqual(t, g.CurrCommits(), commits, "Wrong number of commits")
+}
+
+func sendCommits(g *Game, num uint) {
+	for i := 0; uint(i) < num; i++ {
+		g.SendCommitSafe()
+	}
+}
+
+func sendReveals(g *Game, num uint) {
+	for i := 0; uint(i) < num; i++ {
+		g.SendRevealSafe()
+	}
+}
+
 func TestInit(t *testing.T) {
 
 	var g Game
@@ -62,13 +80,11 @@ func TestSendReveal(t *testing.T) {
 	// Send reveal
 	e := g.SendRevealSafe()
 	assertEqual(t, e, nil, "")
-	assertEqual(t, g.State(), PAYOUT_STATE, "Bad state transition")
-	assertEqual(t, g.CurrReveals(), uint(1), "")
+	assertState(t, &g, PAYOUT_STATE, 1, 1)
 
 	e = g.SendRevealSafe()
 	assertNotEqual(t, e, nil, "SendReveal at wrong state has to return error")
-	assertEqual(t, g.State(), PAYOUT_STATE, "Bad state transition")
-	assertEqual(t, g.CurrReveals(), uint(1), "")
+	assertState(t, &g, PAYOUT_STATE, 1, 1)
 }
 
 func TestPayout(t *testing.T) {
@@ -84,16 +100,29 @@ func TestPayout(t *testing.T) {
 	g.SendRevealSafe()
 
 	// Assert correct state
-	assertEqual(t, g.CurrReveals(), uint(2), "")
-	assertEqual(t, g.CurrCommits(), uint(2), "")
-	assertEqual(t, g.State(), PAYOUT_STATE, "Bad state transition")
+	assertState(t, &g, PAYOUT_STATE, 2, 2)
 
 	// Call payout
 	e := g.Payout()
 	assertEqual(t, e, nil, "")
-	assertEqual(t, g.State(), COMMIT_STATE, "Bad state transition")
-	assertEqual(t, g.CurrReveals(), uint(0), "Wrong number of reveals")
-	assertEqual(t, g.CurrCommits(), uint(0), "Wrong number of commits")
+	assertState(t, &g, COMMIT_STATE, 0, 0)
+}
+
+func TestForceToRevealState(t *testing.T) {
+	nump := uint(10)
+	var g Game
+	g.Init("0x1", nump)
+
+	// Send the commits
+	sendCommits(&g, 7)
+	assertState(t, &g, COMMIT_STATE, 7, 0)
+
+	g.ForceToRevealStateSafe()
+	assertState(t, &g, REVEAL_STATE, 7, 0)
+
+	sendCommits(&g, 7)
+	assertState(t, &g, REVEAL_STATE, 7, 0)
+
 }
 
 func TestPlayBasic(t *testing.T) {
@@ -114,9 +143,15 @@ func TestPlayBasic(t *testing.T) {
 		for g.State() != PAYOUT_STATE {
 		}
 
-		assertEqual(t, g.CurrReveals(), uint(nump), "Wrong number of reveals")
-		assertEqual(t, g.CurrCommits(), uint(nump), "Wrong number of reveals")
-		assertEqual(t, g.State(), PAYOUT_STATE, "Bad state transition")
+		// Check that we are ready for payout
+		assertState(t, &g, PAYOUT_STATE, nump, nump)
+
+		// Call payout
+		g.PayoutSafe()
+
+		// Check if payout has reset us correctly
+		assertState(t, &g, COMMIT_STATE, 0, 0)
+
 		toGame <- true
 	}
 	toGame <- false
