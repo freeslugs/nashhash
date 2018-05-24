@@ -110,6 +110,59 @@ func (g *Game) PlayBasic(fromHandler <-chan bool) {
 	}
 }
 
+// PlayHard emulates the state transition of a game
+func (g *Game) PlayHard(fromHandler <-chan bool, chanceIgnore int) {
+	rand.Seed(time.Now().UnixNano())
+
+	// Total possible commits
+	totalCommits := g.maxPlayers
+	totalReveals := g.maxPlayers
+
+	for {
+
+		// Sleep a random number of seconds
+		sleepTime := rand.Intn(MAX_TIME_PERIOD)
+		ignore := (rand.Intn(100) > chanceIgnore)
+		time.Sleep(time.Duration(sleepTime) * time.Millisecond)
+
+		switch g.State() {
+		case COMMIT_STATE:
+			if totalCommits == 0 {
+				//fmt.Println("stuck")
+				continue
+			}
+
+			totalCommits--
+			if !ignore {
+				g.SendCommitSafe()
+				//fmt.Printf("%v commits left\n", totalCommits)
+
+			}
+
+		case REVEAL_STATE:
+			if totalReveals == 0 {
+				//fmt.Println("stuck on reveal")
+				continue
+			}
+
+			totalReveals--
+			if !ignore {
+				g.SendRevealSafe()
+				//fmt.Printf("%v reveals left\n", totalReveals)
+			}
+
+		case PAYOUT_STATE:
+			return
+
+			// Do nothing, wait for payout to be called
+		default:
+			fmt.Println("Error: Bad game state")
+			return
+		}
+	}
+
+}
+
 // SendCommit imitates sending of a commit to the game.
 // WARNING: Assumes that the game lock is held
 func (g *Game) SendCommit() error {
@@ -143,7 +196,7 @@ func (g *Game) SendReveal() error {
 		return errors.New("Bad state: cannot reveal in this state")
 	}
 
-	if g.currReveals < g.maxPlayers {
+	if g.currReveals < g.currCommits {
 		g.currReveals++
 		if g.currReveals == g.maxPlayers {
 			g.state = PAYOUT_STATE

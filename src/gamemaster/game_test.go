@@ -3,6 +3,7 @@ package gm
 import (
 	"fmt"
 	"testing"
+	"time"
 )
 
 func assertEqual(t *testing.T, a interface{}, b interface{}, message string) {
@@ -175,4 +176,42 @@ func TestPlayBasic(t *testing.T) {
 		toGame <- true
 	}
 	toGame <- false
+}
+
+func TestPlayHard(t *testing.T) {
+
+	nump := uint(10)
+	sleepTime := 3000
+
+	var g Game
+	g.Init("0x1", nump)
+	toGame := make(chan bool, 1)
+
+	// Start the game
+	go g.PlayHard(toGame, 70)
+
+	for {
+		state := g.State()
+		switch state {
+		case COMMIT_STATE:
+			time.Sleep(time.Duration(sleepTime) * time.Millisecond)
+			if g.State() == COMMIT_STATE {
+				g.ForceToRevealStateSafe()
+			}
+		case REVEAL_STATE:
+			time.Sleep(time.Duration(sleepTime) * time.Millisecond)
+			if g.State() == REVEAL_STATE {
+				g.ForceToPayoutStateSafe()
+			}
+		case PAYOUT_STATE:
+
+			assertEqual(t, g.State(), PAYOUT_STATE, "")
+			e := g.PayoutSafe()
+			assertEqual(t, e, nil, "")
+			return
+
+		}
+
+	}
+
 }
