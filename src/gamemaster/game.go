@@ -194,10 +194,29 @@ func (g *Game) ForceToRevealState() error {
 }
 
 // ForceToRevealStateSafe same but holds the lock
-// WARNING: Assumes the game lock is held
+// WARNING: Assumes the game lock is NOT held
 func (g *Game) ForceToRevealStateSafe() error {
 	g.gameLock.Lock()
 	e := g.ForceToRevealState()
+	g.gameLock.Unlock()
+	return e
+}
+
+// ForceToPayoutState forces the game into PAYOUT_STATE
+// WARNING: Assumes the game lock is held
+func (g *Game) ForceToPayoutState() error {
+	if g.state != REVEAL_STATE {
+		return errors.New("Bad state: cannot force to reveal in this state")
+	}
+	g.state = PAYOUT_STATE
+	return nil
+}
+
+// ForceToPayoutStateSafe same but holds the lock
+// WARNING: Assumes the game lock is NOT held
+func (g *Game) ForceToPayoutStateSafe() error {
+	g.gameLock.Lock()
+	e := g.ForceToPayoutState()
 	g.gameLock.Unlock()
 	return e
 }

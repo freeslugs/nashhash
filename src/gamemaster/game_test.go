@@ -123,6 +123,26 @@ func TestForceToRevealState(t *testing.T) {
 	sendCommits(&g, 7)
 	assertState(t, &g, REVEAL_STATE, 7, 0)
 
+	e := g.ForceToRevealStateSafe()
+	assertNotEqual(t, e, nil, "Bad state")
+}
+
+func TestForceToPayoutState(t *testing.T) {
+	nump := uint(10)
+	var g Game
+	g.Init("0x1", nump)
+
+	sendCommits(&g, 7)
+	assertState(t, &g, COMMIT_STATE, 7, 0)
+	g.ForceToRevealStateSafe()
+	assertState(t, &g, REVEAL_STATE, 7, 0)
+
+	sendReveals(&g, 5)
+	assertState(t, &g, REVEAL_STATE, 7, 5)
+
+	g.ForceToPayoutStateSafe()
+	assertState(t, &g, PAYOUT_STATE, 7, 5)
+
 }
 
 func TestPlayBasic(t *testing.T) {
