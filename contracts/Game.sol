@@ -4,11 +4,7 @@ pragma solidity ^0.4.23;
 
 /*
 !!!!!!!!!!! KNOWN BUGS !!!!!!!!!!!!!!!
-1) 2/3 average consistent with the js results. BUT. The way we calculate it
-in solidity seems to be rounded down at the taking of the average step, and then
-again rounded down after division by 3. It is better to fix this because this skews
-the average ever so slightly south. 
-2) Protect against repeated reveal call. (SOLVED, needs testing)
+1) Repeated reveal still a problem!!! 
 
 
 !!!!!!!!!!!! POTENTIAL BUGS !!!!!!!!!!!!!!!!
@@ -21,16 +17,9 @@ Check that this is not the case.
 They can then use this receit to look up info about their game.
 
 !!!!!!!!!! PERFORMANCE INMPROVEMENTS !!!!!!!!!!!!!!!!
-1) Change the body of findWinners to use an in memory array to find the winners. 
-Then copy those winners to info.lastWinners
 
 !!!!!!!!!! REFACTORING GOALS !!!!!!!!!!!!!!!!!
 1) Get a goddamn constructor in here with a reasonable amount of arguments
-2) Maybe put all the state related variable into a State struct? Work around that object. 
-I started the idea....
-3) Give normal names to everything. Also, change to cammelcase. 
-Apparently, the lower_case_underscore is not that popular in Solidity...
-
 
 */
 
