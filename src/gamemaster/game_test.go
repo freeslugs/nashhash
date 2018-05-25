@@ -150,10 +150,10 @@ func TestBlockTicker(t *testing.T) {
 	nump := uint(10)
 
 	var g Game
-	g.Init("0x1", nump)
 	quit := make(chan bool, 1)
-
 	go g.BlockTicker(uint(10), quit)
+
+	g.Init("0x1", nump)
 
 	time.Sleep(1 * time.Second)
 
@@ -162,7 +162,7 @@ func TestBlockTicker(t *testing.T) {
 	fmt.Printf("block number %d\n", blockNum)
 	good := g.CurrBlockNumber() > uint(50)
 
-	assertEqual(t, true, good, "")
+	assertEqual(t, true, good, "Something wrong with the BlockTicker incrementation")
 
 	quit <- true
 }
@@ -225,12 +225,68 @@ func TestPlayHard(t *testing.T) {
 				g.ForceToPayoutStateSafe()
 			}
 		case PAYOUT_STATE:
-
 			assertEqual(t, g.State(), PAYOUT_STATE, "")
 			e := g.PayoutSafe()
 			assertEqual(t, e, nil, "")
 			return
+		}
 
+	}
+}
+
+func TestBlockNumberTimer(t *testing.T) {
+
+	// Test configs
+	nump := uint(10)
+	tickTimeMillis := uint(100)
+
+	// Inits
+	var g Game
+	quit := make(chan bool, 1)
+	toGame := make(chan bool, 1)
+
+	// Start the blockchain
+	go g.BlockTicker(tickTimeMillis, quit)
+
+	// We want to make sure our round starts at > 0
+	time.Sleep(500 * time.Millisecond)
+	g.Init("0x1", nump)
+
+	// Start the game
+	go g.PlayHard(toGame, 70)
+
+	// Check that the start block is good
+	startBlock := g.StartOfRoundBlock()
+	good := startBlock > uint(0)
+	assertEqual(t, true, good, "Start of the round is wrong")
+
+	for {
+		state := g.State()
+		switch state {
+		case COMMIT_STATE:
+			//fmt.Printf("curr: %d timeout:%d + %d\n", g.CurrBlockNumber(), startBlock, g.RevealPeriod())
+			if g.State() == COMMIT_STATE && (startBlock+g.RevealPeriod()) < g.CurrBlockNumber() {
+				g.ForceToRevealStateSafe()
+			}
+		case REVEAL_STATE:
+			if g.State() == REVEAL_STATE && (startBlock+2*g.RevealPeriod()) < g.CurrBlockNumber() {
+				g.ForceToPayoutStateSafe()
+			}
+		case PAYOUT_STATE:
+			assertEqual(t, g.State(), PAYOUT_STATE, "")
+			e := g.PayoutSafe()
+			newRoundStartBlock := g.StartOfRoundBlock()
+			good := newRoundStartBlock > startBlock
+			//fmt.Printf("%d vs %d\n", newRoundStartBlock, startBlock)
+			assertEqual(t, good, true, "The new start of round is incorrect")
+			assertEqual(t, e, nil, "")
+
+			toGame <- true
+			time.Sleep(500 * time.Millisecond)
+			state = g.State()
+			assertEqual(t, state, COMMIT_STATE, "Should go stuck in commit state")
+
+			return
 		}
 
 	}

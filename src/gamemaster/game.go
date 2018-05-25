@@ -13,7 +13,7 @@ import (
 	"time"
 )
 
-const MAX_TIME_PERIOD = 100
+const MAX_TIME_PERIOD = 30
 const COMMIT_STATE = uint(0)
 const REVEAL_STATE = uint(1)
 const PAYOUT_STATE = uint(2)
@@ -31,10 +31,11 @@ type Game struct {
 	gameLock sync.Mutex
 
 	// For now the block number is part of the game.
-	currBlockNumber uint
-	commitPeriod    uint
-	revealPeriod    uint
-	blockLock       sync.Mutex
+	currBlockNumber   uint
+	commitPeriod      uint
+	revealPeriod      uint
+	startOfRoundBlock uint
+	blockLock         sync.Mutex
 }
 
 // BlockTicker is run in a separate goroutine. Pass value of true into the quit channel
@@ -47,6 +48,7 @@ func (g *Game) BlockTicker(millisPerBlock uint, quit <-chan bool) {
 		default:
 			time.Sleep(time.Duration(millisPerBlock) * time.Millisecond)
 			g.IncrementBlockNumber()
+			fmt.Printf("current block: %d\n", g.CurrBlockNumber())
 		}
 	}
 
@@ -66,12 +68,26 @@ func (g *Game) IncrementBlockNumber() {
 	g.currBlockNumber++
 }
 
+// RevealPeriod returns the reveal period timer in terms of blocks
+func (g *Game) RevealPeriod() uint {
+	return g.revealPeriod
+}
+
+// StartOfRoundBlock returns the start of round block number
+func (g *Game) StartOfRoundBlock() uint {
+	g.gameLock.Lock()
+	defer g.gameLock.Unlock()
+	return g.startOfRoundBlock
+
+}
+
 // Init initializes the game to a contract address and the max players
 func (g *Game) Init(addr string, maxp uint) {
 	g.address = addr
 	g.maxPlayers = maxp
-	g.revealPeriod = 6
-	g.commitPeriod = 6
+	g.revealPeriod = 10
+	g.commitPeriod = 10
+	g.startOfRoundBlock = g.CurrBlockNumber()
 }
 
 // Address returns the game address
@@ -185,7 +201,7 @@ func (g *Game) PlayHard(fromHandler <-chan bool, chanceIgnore int) {
 			}
 
 		case PAYOUT_STATE:
-			return
+			<-fromHandler
 
 			// Do nothing, wait for payout to be called
 		default:
@@ -257,6 +273,7 @@ func (g *Game) Payout() error {
 	g.state = COMMIT_STATE
 	g.currCommits = 0
 	g.currReveals = 0
+	g.startOfRoundBlock = g.CurrBlockNumber()
 	return nil
 }
 
