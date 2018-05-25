@@ -160,7 +160,7 @@ contract("2/3 of the Average Game", function([owner, donor]){
         var expectedPrize = expectedTotalPrize / numWinners;
 
 
-        assert(prize == expected_prize);
+        assert(prize == expectedPrize);
     })
 
     it("2 players bet, one wins, one loses", async () => {
