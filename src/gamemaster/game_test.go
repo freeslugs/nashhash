@@ -146,6 +146,27 @@ func TestForceToPayoutState(t *testing.T) {
 
 }
 
+func TestBlockTicker(t *testing.T) {
+	nump := uint(10)
+
+	var g Game
+	g.Init("0x1", nump)
+	quit := make(chan bool, 1)
+
+	go g.BlockTicker(uint(10), quit)
+
+	time.Sleep(1 * time.Second)
+
+	// Check that the block number is higher than 80
+	blockNum := g.CurrBlockNumber()
+	fmt.Printf("block number %d\n", blockNum)
+	good := g.CurrBlockNumber() > uint(50)
+
+	assertEqual(t, true, good, "")
+
+	quit <- true
+}
+
 func TestPlayBasic(t *testing.T) {
 
 	nump := uint(10)

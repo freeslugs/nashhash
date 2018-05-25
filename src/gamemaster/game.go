@@ -29,12 +29,49 @@ type Game struct {
 	maxPlayers  uint
 
 	gameLock sync.Mutex
+
+	// For now the block number is part of the game.
+	currBlockNumber uint
+	commitPeriod    uint
+	revealPeriod    uint
+	blockLock       sync.Mutex
+}
+
+// BlockTicker is run in a separate goroutine. Pass value of true into the quit channel
+// to stop the ticker. Funtion increments the length of the blockchain by one ever millisPerBlock
+func (g *Game) BlockTicker(millisPerBlock uint, quit <-chan bool) {
+	for {
+		select {
+		case <-quit:
+			return
+		default:
+			time.Sleep(time.Duration(millisPerBlock) * time.Millisecond)
+			g.IncrementBlockNumber()
+		}
+	}
+
+}
+
+// CurrBlockNumber returns the current number of the head of the blockchain
+func (g *Game) CurrBlockNumber() uint {
+	g.blockLock.Lock()
+	defer g.blockLock.Unlock()
+	return g.currBlockNumber
+}
+
+// IncrementBlockNumber increments the block number. Does so safely by holding the blockLock mutex
+func (g *Game) IncrementBlockNumber() {
+	g.blockLock.Lock()
+	defer g.blockLock.Unlock()
+	g.currBlockNumber++
 }
 
 // Init initializes the game to a contract address and the max players
 func (g *Game) Init(addr string, maxp uint) {
 	g.address = addr
 	g.maxPlayers = maxp
+	g.revealPeriod = 6
+	g.commitPeriod = 6
 }
 
 // Address returns the game address
@@ -128,27 +165,23 @@ func (g *Game) PlayHard(fromHandler <-chan bool, chanceIgnore int) {
 		switch g.State() {
 		case COMMIT_STATE:
 			if totalCommits == 0 {
-				//fmt.Println("stuck")
 				continue
 			}
 
 			totalCommits--
 			if !ignore {
 				g.SendCommitSafe()
-				//fmt.Printf("%v commits left\n", totalCommits)
 
 			}
 
 		case REVEAL_STATE:
 			if totalReveals == 0 {
-				//fmt.Println("stuck on reveal")
 				continue
 			}
 
 			totalReveals--
 			if !ignore {
 				g.SendRevealSafe()
-				//fmt.Printf("%v reveals left\n", totalReveals)
 			}
 
 		case PAYOUT_STATE:
