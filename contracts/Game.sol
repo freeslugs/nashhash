@@ -197,23 +197,23 @@ contract Game is Pausable, GameHelper {
 
         uint x = 1;
         
-        //require(state.gameState == GameState.COMMIT_STATE);
+        require(state.gameState == GameState.COMMIT_STATE);
 
-        //require(msg.value == config.STAKE_SIZE);
+        require(msg.value == config.STAKE_SIZE);
 
         //Make sure this is first and only commit. 
-        //require(commits[msg.sender] == bytes32(0x0));
+        require(commits[msg.sender] == bytes32(0x0));
 
-        //commits[msg.sender] = hashedCommit;
-        //commitsKeys[state.currNumberCommits] = msg.sender;
-        //state.currNumberCommits++;
+        commits[msg.sender] = hashedCommit;
+        commitsKeys[state.currNumberCommits] = msg.sender;
+        state.currNumberCommits++;
 
         // If we received the MAX_PLAYER number of commits, it is time for
         // us to change state.
-        //if (state.currNumberCommits == config.MAX_PLAYERS) {
-        //    toRevealState();
-        //    emit CommitsSubmitted();
-        //}
+        if (state.currNumberCommits == config.MAX_PLAYERS) {
+            toRevealState();
+            emit CommitsSubmitted();
+        }
     }
 
     event RevealsSubmitted();
