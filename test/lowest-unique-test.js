@@ -31,7 +31,7 @@ contract("Lowest Unique Game", function([owner, donor]){
             web3.eth.getAccounts( function (err, accounts) { resolve(accounts) })
         });
 
-        await api.setMaxPlayers( 3);
+        await api.setMaxPlayers(3);
 
         await api.commitGuess( accounts[2], "3", "6534");
         await api.commitGuess( accounts[3], "3", "1004");
@@ -44,7 +44,7 @@ contract("Lowest Unique Game", function([owner, donor]){
 
         await game.payout();
 
-        const winner = await api.getWinners( 0);
+        const winner = await api.getWinners(0);
         
         assert.equal(winner, accounts[8], "Winner isn't correctly selected");
     })
@@ -79,8 +79,6 @@ contract("Lowest Unique Game", function([owner, donor]){
         await runGame(bet, num_players, accounts, game);
         await runGame(bet, num_players, accounts, game);
     })
-
-
 
 });
 

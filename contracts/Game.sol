@@ -186,24 +186,34 @@ contract Game is Pausable, GameHelper {
         emit RevealsSubmitted();
     }
 
+    function throwReq() pure public {
+        require(1 == 1);
+        uint tmp = 1;
+    }
+
     event CommitsSubmitted();
 
     function commit(bytes32 hashedCommit) public payable whenNotPaused {
+
+        uint x = 1;
         
-        require(state.gameState == GameState.COMMIT_STATE);
+        //require(state.gameState == GameState.COMMIT_STATE);
 
-        require(msg.value == config.STAKE_SIZE);
+        //require(msg.value == config.STAKE_SIZE);
 
-        commits[msg.sender] = hashedCommit;
-        commitsKeys[state.currNumberCommits] = msg.sender;
-        state.currNumberCommits++;
+        //Make sure this is first and only commit. 
+        //require(commits[msg.sender] == bytes32(0x0));
+
+        //commits[msg.sender] = hashedCommit;
+        //commitsKeys[state.currNumberCommits] = msg.sender;
+        //state.currNumberCommits++;
 
         // If we received the MAX_PLAYER number of commits, it is time for
         // us to change state.
-        if (state.currNumberCommits == config.MAX_PLAYERS) {
-            toRevealState();
-            emit CommitsSubmitted();
-        }
+        //if (state.currNumberCommits == config.MAX_PLAYERS) {
+        //    toRevealState();
+        //    emit CommitsSubmitted();
+        //}
     }
 
     event RevealsSubmitted();
@@ -223,6 +233,9 @@ contract Game is Pausable, GameHelper {
 
         // Check that the hashes match
         require(commits[msg.sender] == keccak256(guess, random));
+
+        //Prevents user from revealing twice because above require will fail.
+        delete commits[msg.sender];
 
         // When they do, we add the revealed guess to game data
         gameData[msg.sender] = guess;
