@@ -186,16 +186,9 @@ contract Game is Pausable, GameHelper {
         emit RevealsSubmitted();
     }
 
-    function throwReq() pure public {
-        require(1 == 1);
-        uint tmp = 1;
-    }
-
     event CommitsSubmitted();
 
     function commit(bytes32 hashedCommit) public payable whenNotPaused {
-
-        uint x = 1;
         
         require(state.gameState == GameState.COMMIT_STATE);
 
