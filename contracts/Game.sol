@@ -194,6 +194,9 @@ contract Game is Pausable, GameHelper {
 
         require(msg.value == config.STAKE_SIZE);
 
+        //Make sure this is first and only commit. 
+        require(commits[msg.sender] == bytes32(0x0));
+
         commits[msg.sender] = hashedCommit;
         commitsKeys[state.currNumberCommits] = msg.sender;
         state.currNumberCommits++;
@@ -223,6 +226,9 @@ contract Game is Pausable, GameHelper {
 
         // Check that the hashes match
         require(commits[msg.sender] == keccak256(guess, random));
+
+        //Prevents user from revealing twice because above require will fail.
+        delete commits[msg.sender];
 
         // When they do, we add the revealed guess to game data
         gameData[msg.sender] = guess;
