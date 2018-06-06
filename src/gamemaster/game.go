@@ -7,7 +7,6 @@ of such emulation is to be able to quickly develop the rest of the game master.
 
 import (
 	"errors"
-	"fmt"
 	"math/rand"
 	"sync"
 	"time"
@@ -48,7 +47,7 @@ func (g *Game) BlockTicker(millisPerBlock uint, quit <-chan bool) {
 		default:
 			time.Sleep(time.Duration(millisPerBlock) * time.Millisecond)
 			g.IncrementBlockNumber()
-			fmt.Printf("current block: %d\n", g.CurrBlockNumber())
+			//fmt.Printf("current block: %d\n", g.CurrBlockNumber())
 		}
 	}
 
@@ -147,14 +146,14 @@ func (g *Game) PlayBasic(fromHandler <-chan bool) {
 			g.gameLock.Unlock()
 			stayAlive := <-fromHandler
 			if !stayAlive {
-				fmt.Println("die")
+				//fmt.Println("die")
 				return
 			}
 			continue
 
 			// Do nothing, wait for payout to be called
 		default:
-			fmt.Println("Error: Bad game state")
+			//fmt.Println("Error: Bad game state")
 			g.gameLock.Unlock()
 			return
 		}
@@ -205,7 +204,7 @@ func (g *Game) PlayHard(fromHandler <-chan bool, chanceIgnore int) {
 
 			// Do nothing, wait for payout to be called
 		default:
-			fmt.Println("Error: Bad game state")
+			///fmt.Println("Error: Bad game state")
 			return
 		}
 	}
