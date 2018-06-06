@@ -62,6 +62,7 @@ func connectGame(gmAddr string, gameAddr string) error {
 	return nil
 }
 
+// disconnectGame, asks gm at gmAddre to disconnect the game at gameAddr
 func disconnectGame(gmAddr string, gameAddr string) error {
 	args := DisconnectCallArgs{ContractAddress: gameAddr}
 	reply := &DisconnectCallReply{}

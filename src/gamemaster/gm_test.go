@@ -225,3 +225,46 @@ func TestBasicThreaded(t *testing.T) {
 	assertEqual(t, len(gm.operatedGames), 0, "gm mapping has wrong size")
 
 }
+
+func TestClerkThreaded(t *testing.T) {
+	var gm GM
+	gm.Init("", 11112)
+	defer gm.Kill()
+	gmAddr := ":" + strconv.Itoa(11112)
+	const numThreads = 10
+
+	var clerks [numThreads]*Clerk
+	for i := 0; i < numThreads; i++ {
+		clerks[i] = &Clerk{GMAddr: gmAddr}
+	}
+
+	var wg sync.WaitGroup
+	wg.Add(numThreads)
+
+	// Connect bunch of games, each connection goes in its own thread
+	for i := 0; i < numThreads; i++ {
+		go func(i int) {
+			e := clerks[i].ConnectGame("0x" + strconv.Itoa(i))
+			assertEqual(t, e, nil, "connect game failed")
+			wg.Done()
+		}(i)
+	}
+
+	wg.Wait()
+	//time.Sleep(2 * time.Second)
+	assertEqual(t, len(gm.operatedGames), numThreads, "gm mapping has wrong size")
+
+	// Disconnect all these games in async
+	wg.Add(numThreads)
+	for i := 0; i < numThreads; i++ {
+		go func(i int) {
+			e := clerks[i].DisconnectGame("0x" + strconv.Itoa(i))
+			assertEqual(t, e, nil, "connect game failed")
+			wg.Done()
+		}(i)
+	}
+
+	wg.Wait()
+	assertEqual(t, len(gm.operatedGames), 0, "gm mapping has wrong size")
+
+}
