@@ -40,7 +40,7 @@ func (gop *GameOperator) Init(addr string) {
 // Play the game at the contract address
 func (gop *GameOperator) Play() error {
 	if gop.playing == true {
-		return errors.New("")
+		return errors.New("GameOperator: game operated")
 	}
 	go gop.playGame()
 	gop.playing = true

@@ -13,8 +13,8 @@ import (
 // The GameMaster object. Runs on the server. Manages GameOperators, connects
 // new games, resets games and etc etc etc. Important mister.
 type GameMaster struct {
-	handlers      []GameOperator
-	operatedGames map[string]bool
+	// handlers      []GameOperator
+	operatedGames map[string]*GameOperator
 	gmLock        sync.Mutex
 
 	// RPC stuff
@@ -27,7 +27,7 @@ type GameMaster struct {
 // game master for RPC.
 func (gm *GameMaster) Init(ipAddr string, port int) error {
 
-	gm.operatedGames = make(map[string]bool)
+	gm.operatedGames = make(map[string]*GameOperator)
 
 	// RPC RELATED STUFF BELOW
 	// Register our baby with net/rpc
@@ -58,7 +58,7 @@ func (gm *GameMaster) Init(ipAddr string, port int) error {
 			}
 		}
 	}()
-	fmt.Println("gm is waiting...")
+	fmt.Println("gm initialization succesful...")
 
 	return nil
 }
@@ -78,6 +78,26 @@ func (gm *GameMaster) Connect(args ConnectCallArgs, res *ConnectCallReply) error
 	gm.gmLock.Lock()
 	defer gm.gmLock.Unlock()
 
+	// First we check if the game already has an operator on it
+	addr := args.ContractAddress
+	if gm.isOperated(addr) {
+		return errors.New("GameMaster: game already operated")
+	}
+
+	// Create a game operator
+	gop := &GameOperator{}
+	gop.Init(addr)
+
+	// Add this GameOperator to the mapping
+	gm.operatedGames[addr] = gop
+
+	// TODO: Give an option to not immediately start operating the game
+	e := gm.operatedGames[addr].Play()
+	if e != nil {
+		panic("Error: inconsistent state in GM.Connect()")
+		//		return e
+	}
+
 	return nil
 }
 
@@ -85,6 +105,22 @@ func (gm *GameMaster) Connect(args ConnectCallArgs, res *ConnectCallReply) error
 func (gm *GameMaster) Disconnect(args DisconnectCallArgs, res *DisconnectCallReply) error {
 	gm.gmLock.Lock()
 	defer gm.gmLock.Unlock()
+
+	// First we check if the game already has an operator on it
+	addr := args.ContractAddress
+	if !gm.isOperated(addr) {
+		return errors.New("GameMaster: game at " + addr + " not operated")
+	}
+
+	// Stop the handler
+	e := gm.operatedGames[addr].Stop()
+	if e != nil {
+		panic("Error: inconsistent state in GM.Connect()")
+		//		return e
+	}
+
+	// Remove the gameOperator from the map
+	delete(gm.operatedGames, addr)
 
 	return nil
 }
