@@ -125,3 +125,64 @@ func TestRepeatedDisconnectGame(t *testing.T) {
 
 	//time.Sleep(2 * time.Second)
 }
+
+func TestBasic(t *testing.T) {
+	// Init on localhost and port
+	var gm GameMaster
+	gm.Init("", 11112)
+	defer gm.Kill()
+	gmAddr := ":" + strconv.Itoa(11112)
+
+	e := connectGame(gmAddr, "0x1")
+	assertEqual(t, e, nil, "connect game failed")
+	e = connectGame(gmAddr, "0x2")
+	assertEqual(t, e, nil, "connect game failed")
+	e = connectGame(gmAddr, "0x3")
+	assertEqual(t, e, nil, "connect game failed")
+
+	assertEqual(t, len(gm.operatedGames), 3, "gm mapping has wrong size")
+
+	// Disconnect 0x1
+	e = disconnectGame(gmAddr, "0x1")
+	assertEqual(t, e, nil, "disconnect game failed")
+	assertEqual(t, len(gm.operatedGames), 2, "gm mapping has wrong size")
+
+	// Reconnect
+	e = connectGame(gmAddr, "0x1")
+	assertEqual(t, e, nil, "connect game failed")
+	e = connectGame(gmAddr, "0x1")
+	assertNotEqual(t, e, nil, "connect game failed")
+
+	assertEqual(t, len(gm.operatedGames), 3, "gm mapping has wrong size")
+
+	// Disconnect all
+	e = disconnectGame(gmAddr, "0x1")
+	assertEqual(t, e, nil, "connect game failed")
+	e = disconnectGame(gmAddr, "0x2")
+	assertEqual(t, e, nil, "connect game failed")
+	e = disconnectGame(gmAddr, "0x3")
+	assertEqual(t, e, nil, "connect game failed")
+
+	assertEqual(t, len(gm.operatedGames), 0, "gm mapping has wrong size")
+
+	// Connect 3 more
+	e = connectGame(gmAddr, "0x4")
+	assertEqual(t, e, nil, "connect game failed")
+	e = connectGame(gmAddr, "0x5")
+	assertEqual(t, e, nil, "connect game failed")
+	e = connectGame(gmAddr, "0x6")
+	assertEqual(t, e, nil, "connect game failed")
+
+	assertEqual(t, len(gm.operatedGames), 3, "gm mapping has wrong size")
+
+	// Disconnect all
+	e = disconnectGame(gmAddr, "0x4")
+	assertEqual(t, e, nil, "connect game failed")
+	e = disconnectGame(gmAddr, "0x5")
+	assertEqual(t, e, nil, "connect game failed")
+	e = disconnectGame(gmAddr, "0x6")
+	assertEqual(t, e, nil, "connect game failed")
+
+	assertEqual(t, len(gm.operatedGames), 0, "gm mapping has wrong size")
+
+}
