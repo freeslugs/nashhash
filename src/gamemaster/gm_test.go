@@ -10,7 +10,8 @@ import (
 func TestGameMasterRPC(t *testing.T) {
 	var gm GameMaster
 
-	gm.Init()
+	// Init on localhost and port
+	gm.Init("", 11112)
 	defer gm.Kill()
 
 	var (
@@ -26,9 +27,6 @@ func TestGameMasterRPC(t *testing.T) {
 
 	fmt.Println("client succesfull dialed the number...")
 
-	// Perform a procedure call (core.HandlerName == Handler.Execute)
-	// with the Request as specified and a pointer to a response
-	// to have our response back.
 	_ = c.Call("GameMaster.Execute", request, response)
 	fmt.Println(response.Response)
 

@@ -15,19 +15,22 @@ type GameMaster struct {
 	//handlers []GameOperator
 	dead bool
 	l    net.Listener
+	port int
 }
 
 // Init initializes the game master. In particular, it should register the
 // game master for RPC.
-func (gm *GameMaster) Init() error {
+func (gm *GameMaster) Init(ipAddr string, port int) error {
 
 	// RPC RELATED STUFF BELOW
 	// Register our baby with net/rpc
+	gm.port = port
+
 	rpcs := rpc.NewServer()
 	rpcs.Register(gm)
 
 	// Create a TCP listener that will listen on `Port`
-	l, e := net.Listen("tcp", ":"+strconv.Itoa(11112))
+	l, e := net.Listen("tcp", ipAddr+":"+strconv.Itoa(gm.port))
 	if e != nil {
 		log.Fatal("listen error: ", e)
 	}
