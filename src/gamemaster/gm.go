@@ -10,9 +10,9 @@ import (
 	"sync"
 )
 
-// The GameMaster object. Runs on the server. Manages GameOperators, connects
+// The GM object. Runs on the server. Manages GameOperators, connects
 // new games, resets games and etc etc etc. Important mister.
-type GameMaster struct {
+type GM struct {
 	// handlers      []GameOperator
 	operatedGames map[string]*GameOperator
 	gmLock        sync.Mutex
@@ -25,7 +25,7 @@ type GameMaster struct {
 
 // Init initializes the game master. In particular, it should register the
 // game master for RPC.
-func (gm *GameMaster) Init(ipAddr string, port int) error {
+func (gm *GM) Init(ipAddr string, port int) error {
 
 	gm.operatedGames = make(map[string]*GameOperator)
 
@@ -53,7 +53,7 @@ func (gm *GameMaster) Init(ipAddr string, port int) error {
 				conn.Close()
 			}
 			if err != nil && gm.dead == false {
-				fmt.Printf("GameMaster accept: %v\n", err.Error())
+				fmt.Printf("GM accept: %v\n", err.Error())
 				gm.Kill()
 			}
 		}
@@ -64,7 +64,7 @@ func (gm *GameMaster) Init(ipAddr string, port int) error {
 }
 
 // Execute is a test
-func (gm *GameMaster) Execute(req ExecuteCallArgs, res *ExecuteCallReply) error {
+func (gm *GM) Execute(req ExecuteCallArgs, res *ExecuteCallReply) error {
 	if req.Message == "" {
 		return errors.New("You must give me a message")
 	}
@@ -74,14 +74,14 @@ func (gm *GameMaster) Execute(req ExecuteCallArgs, res *ExecuteCallReply) error 
 }
 
 // Connect call connects a GameOperator to a game at ConnectCallArgs.ContractAddress
-func (gm *GameMaster) Connect(args ConnectCallArgs, res *ConnectCallReply) error {
+func (gm *GM) Connect(args ConnectCallArgs, res *ConnectCallReply) error {
 	gm.gmLock.Lock()
 	defer gm.gmLock.Unlock()
 
 	// First we check if the game already has an operator on it
 	addr := args.ContractAddress
 	if gm.isOperated(addr) {
-		return errors.New("GameMaster: game already operated")
+		return errors.New("GM: game already operated")
 	}
 
 	// Create a game operator
@@ -102,14 +102,14 @@ func (gm *GameMaster) Connect(args ConnectCallArgs, res *ConnectCallReply) error
 }
 
 // Disconnect call disconnects a GameOperator from a game at ConnectCallArgs.ContractAddress
-func (gm *GameMaster) Disconnect(args DisconnectCallArgs, res *DisconnectCallReply) error {
+func (gm *GM) Disconnect(args DisconnectCallArgs, res *DisconnectCallReply) error {
 	gm.gmLock.Lock()
 	defer gm.gmLock.Unlock()
 
 	// First we check if the game already has an operator on it
 	addr := args.ContractAddress
 	if !gm.isOperated(addr) {
-		return errors.New("GameMaster: game at " + addr + " not operated")
+		return errors.New("GM: game at " + addr + " not operated")
 	}
 
 	// Stop the handler
@@ -126,15 +126,15 @@ func (gm *GameMaster) Disconnect(args DisconnectCallArgs, res *DisconnectCallRep
 }
 
 // Helper, checks if a game is already operated
-func (gm *GameMaster) isOperated(addr string) bool {
+func (gm *GM) isOperated(addr string) bool {
 	if _, ok := gm.operatedGames[addr]; ok {
 		return true
 	}
 	return false
 }
 
-// Kill the gamemaster is something is wrong.
-func (gm *GameMaster) Kill() {
+// Kill the GM is something is wrong.
+func (gm *GM) Kill() {
 	gm.dead = true
 	gm.l.Close()
 }

@@ -13,22 +13,22 @@ type ExecuteCallReply struct {
 	Response string
 }
 
-// ConnectCallArgs is a struct of arguments to the GameMaster.Connect RPC
+// ConnectCallArgs is a struct of arguments to the GM.Connect RPC
 type ConnectCallArgs struct {
 	ContractAddress string
 }
 
-// ConnectCallReply is the reply from GameMaster.Connect RPC
+// ConnectCallReply is the reply from GM.Connect RPC
 type ConnectCallReply struct {
 	Reply string
 }
 
-// DisconnectCallArgs is a struct of arguments to the GameMaster.Connect RPC
+// DisconnectCallArgs is a struct of arguments to the GM.Connect RPC
 type DisconnectCallArgs struct {
 	ContractAddress string
 }
 
-// DisconnectCallReply is the reply from GameMaster.Disconnect RPC
+// DisconnectCallReply is the reply from GM.Disconnect RPC
 type DisconnectCallReply struct {
 	Reply string
 }
@@ -55,7 +55,7 @@ func connectGame(gmAddr string, gameAddr string) error {
 	args := ConnectCallArgs{ContractAddress: gameAddr}
 	reply := &ConnectCallReply{}
 
-	e := call(gmAddr, "GameMaster.Connect", args, reply)
+	e := call(gmAddr, "GM.Connect", args, reply)
 	if e != nil {
 		return e
 	}
@@ -66,7 +66,7 @@ func disconnectGame(gmAddr string, gameAddr string) error {
 	args := DisconnectCallArgs{ContractAddress: gameAddr}
 	reply := &DisconnectCallReply{}
 
-	e := call(gmAddr, "GameMaster.Disconnect", args, reply)
+	e := call(gmAddr, "GM.Disconnect", args, reply)
 	if e != nil {
 		return e
 	}

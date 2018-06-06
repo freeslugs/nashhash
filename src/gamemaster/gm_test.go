@@ -8,8 +8,8 @@ import (
 	"time"
 )
 
-func TestGameMasterRPC(t *testing.T) {
-	var gm GameMaster
+func TestGMRPC(t *testing.T) {
+	var gm GM
 
 	// Init on localhost and port
 	gm.Init("", 11112)
@@ -21,7 +21,7 @@ func TestGameMasterRPC(t *testing.T) {
 		response = &ExecuteCallReply{}
 	)
 
-	e := call(addr, "GameMaster.Execute", request, response)
+	e := call(addr, "GM.Execute", request, response)
 	if e != nil {
 		panic("rpc failed")
 	}
@@ -30,7 +30,7 @@ func TestGameMasterRPC(t *testing.T) {
 }
 
 func TestConnectGame(t *testing.T) {
-	var gm GameMaster
+	var gm GM
 
 	// Init on localhost and port
 	gm.Init("", 11112)
@@ -45,7 +45,7 @@ func TestConnectGame(t *testing.T) {
 }
 
 func TestRepeatedConnectGame(t *testing.T) {
-	var gm GameMaster
+	var gm GM
 
 	// Init on localhost and port
 	gm.Init("", 11112)
@@ -63,7 +63,7 @@ func TestRepeatedConnectGame(t *testing.T) {
 }
 
 func TestMultipleConnects(t *testing.T) {
-	var gm GameMaster
+	var gm GM
 
 	// Init on localhost and port
 	gm.Init("", 11112)
@@ -85,7 +85,7 @@ func TestMultipleConnects(t *testing.T) {
 
 func TestDisconnect(t *testing.T) {
 	// Init on localhost and port
-	var gm GameMaster
+	var gm GM
 	gm.Init("", 11112)
 	defer gm.Kill()
 	gmAddr := ":" + strconv.Itoa(11112)
@@ -104,7 +104,7 @@ func TestDisconnect(t *testing.T) {
 }
 
 func TestRepeatedDisconnectGame(t *testing.T) {
-	var gm GameMaster
+	var gm GM
 
 	// Init on localhost and port
 	gm.Init("", 11112)
@@ -129,7 +129,7 @@ func TestRepeatedDisconnectGame(t *testing.T) {
 
 func TestBasic(t *testing.T) {
 	// Init on localhost and port
-	var gm GameMaster
+	var gm GM
 	gm.Init("", 11112)
 	defer gm.Kill()
 	gmAddr := ":" + strconv.Itoa(11112)
@@ -189,7 +189,7 @@ func TestBasic(t *testing.T) {
 }
 
 func TestBasicThreaded(t *testing.T) {
-	var gm GameMaster
+	var gm GM
 	gm.Init("", 11112)
 	defer gm.Kill()
 	gmAddr := ":" + strconv.Itoa(11112)
