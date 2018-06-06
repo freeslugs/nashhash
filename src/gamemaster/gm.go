@@ -7,12 +7,17 @@ import (
 	"net"
 	"net/rpc"
 	"strconv"
+	"sync"
 )
 
 // The GameMaster object. Runs on the server. Manages GameOperators, connects
 // new games, resets games and etc etc etc. Important mister.
 type GameMaster struct {
-	//handlers []GameOperator
+	handlers      []GameOperator
+	operatedGames map[string]bool
+	gmLock        sync.Mutex
+
+	// RPC stuff
 	dead bool
 	l    net.Listener
 	port int
@@ -21,6 +26,8 @@ type GameMaster struct {
 // Init initializes the game master. In particular, it should register the
 // game master for RPC.
 func (gm *GameMaster) Init(ipAddr string, port int) error {
+
+	gm.operatedGames = make(map[string]bool)
 
 	// RPC RELATED STUFF BELOW
 	// Register our baby with net/rpc
@@ -57,14 +64,37 @@ func (gm *GameMaster) Init(ipAddr string, port int) error {
 }
 
 // Execute is a test
-func (gm *GameMaster) Execute(req ExecuteCallArgs, res *ExecuteCallReply) (err error) {
+func (gm *GameMaster) Execute(req ExecuteCallArgs, res *ExecuteCallReply) error {
 	if req.Message == "" {
-		err = errors.New("You must give me a message")
-		return
+		return errors.New("You must give me a message")
 	}
 
 	res.Response = "This is your message: " + req.Message
-	return
+	return nil
+}
+
+// Connect call connects a GameOperator to a game at ConnectCallArgs.ContractAddress
+func (gm *GameMaster) Connect(args ConnectCallArgs, res *ConnectCallReply) error {
+	gm.gmLock.Lock()
+	defer gm.gmLock.Unlock()
+
+	return nil
+}
+
+// Disconnect call disconnects a GameOperator from a game at ConnectCallArgs.ContractAddress
+func (gm *GameMaster) Disconnect(args DisconnectCallArgs, res *DisconnectCallReply) error {
+	gm.gmLock.Lock()
+	defer gm.gmLock.Unlock()
+
+	return nil
+}
+
+// Helper, checks if a game is already operated
+func (gm *GameMaster) isOperated(addr string) bool {
+	if _, ok := gm.operatedGames[addr]; ok {
+		return true
+	}
+	return false
 }
 
 // Kill the gamemaster is something is wrong.

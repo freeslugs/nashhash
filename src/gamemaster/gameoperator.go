@@ -7,8 +7,8 @@ import (
 )
 
 const (
-	// StopGame command to stop a game
-	StopGame = 0
+	// DisconnectOperator command to stop a game
+	DisconnectOperator = 0
 )
 
 // GameOperator operates a game contract
@@ -60,7 +60,7 @@ func (gop *GameOperator) playGame() {
 			// For example, we can ask the handler to reset the state
 			// or log the current state of the game
 			switch cmd {
-			case StopGame:
+			case DisconnectOperator:
 				fmt.Printf("operator quitting the game at address %s\n", gop.contractAddress)
 				return
 			default:
@@ -89,7 +89,7 @@ func (gop *GameOperator) Stop() error {
 	if gop.playing == false {
 		return errors.New("game already stopped")
 	}
-	gop.controlChannel <- StopGame
+	gop.controlChannel <- DisconnectOperator
 	gop.playing = false
 	return nil
 }
