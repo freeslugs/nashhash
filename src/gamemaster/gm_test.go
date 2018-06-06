@@ -3,6 +3,7 @@ package gm
 import (
 	"fmt"
 	"strconv"
+	"sync"
 	"testing"
 	"time"
 )
@@ -183,6 +184,44 @@ func TestBasic(t *testing.T) {
 	e = disconnectGame(gmAddr, "0x6")
 	assertEqual(t, e, nil, "connect game failed")
 
+	assertEqual(t, len(gm.operatedGames), 0, "gm mapping has wrong size")
+
+}
+
+func TestBasicThreaded(t *testing.T) {
+	var gm GameMaster
+	gm.Init("", 11112)
+	defer gm.Kill()
+	gmAddr := ":" + strconv.Itoa(11112)
+	numThreads := 10
+
+	var wg sync.WaitGroup
+	wg.Add(numThreads)
+
+	// Connect bunch of games, each connection goes in its own thread
+	for i := 0; i < numThreads; i++ {
+		go func(i int) {
+			e := connectGame(gmAddr, "0x"+strconv.Itoa(i))
+			assertEqual(t, e, nil, "connect game failed")
+			wg.Done()
+		}(i)
+	}
+
+	wg.Wait()
+	//time.Sleep(2 * time.Second)
+	assertEqual(t, len(gm.operatedGames), numThreads, "gm mapping has wrong size")
+
+	// Disconnect all these games in async
+	wg.Add(numThreads)
+	for i := 0; i < numThreads; i++ {
+		go func(i int) {
+			e := disconnectGame(gmAddr, "0x"+strconv.Itoa(i))
+			assertEqual(t, e, nil, "connect game failed")
+			wg.Done()
+		}(i)
+	}
+
+	wg.Wait()
 	assertEqual(t, len(gm.operatedGames), 0, "gm mapping has wrong size")
 
 }
