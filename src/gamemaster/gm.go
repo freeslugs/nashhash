@@ -2,7 +2,11 @@ package gm
 
 import (
 	"errors"
+	"fmt"
+	"log"
 	"net"
+	"net/rpc"
+	"strconv"
 )
 
 // The GameMaster object. Runs on the server. Manages GameOperators, connects
@@ -16,6 +20,36 @@ type GameMaster struct {
 // Init initializes the game master. In particular, it should register the
 // game master for RPC.
 func (gm *GameMaster) Init() error {
+
+	// RPC RELATED STUFF BELOW
+	// Register our baby with net/rpc
+	rpcs := rpc.NewServer()
+	rpcs.Register(gm)
+
+	// Create a TCP listener that will listen on `Port`
+	l, e := net.Listen("tcp", ":"+strconv.Itoa(11112))
+	if e != nil {
+		log.Fatal("listen error: ", e)
+	}
+	gm.l = l
+
+	// Go routine that accepts and serves new procedure calls
+	go func() {
+		for gm.dead == false {
+			conn, err := gm.l.Accept()
+			if err == nil && gm.dead == false {
+				go rpcs.ServeConn(conn)
+			} else if err == nil {
+				conn.Close()
+			}
+			if err != nil && gm.dead == false {
+				fmt.Printf("GameMaster accept: %v\n", err.Error())
+				gm.Kill()
+			}
+		}
+	}()
+	fmt.Println("gm is waiting...")
+
 	return nil
 }
 
