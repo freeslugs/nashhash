@@ -161,6 +161,16 @@ class API {
     await this.game.forceToPayoutState();
   }
 
+  async getCommitStageStartBlock(){
+    const csb = await this.game.getCommitStageStartBlock()
+    return csb
+  }
+
+  async getRevealStageStartBlock(){
+    const rsb = await this.game.getRevealStageStartBlock()
+    return rsb
+  }
+
 
   /* Cool . 
     - ev is the event to watch for from the contract. EX. game.CommitsSubmitted
