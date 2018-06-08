@@ -5,6 +5,7 @@ require('babel-polyfill')
 
 var HDWalletProvider = require("truffle-hdwallet-provider");
 var words = process.env.WORDS;
+
 if(words == undefined) {
   console.log(`
 ⚠️  Important ⚠️  : You are missing WORDS in the .env file. Check readme on howto. 
@@ -33,8 +34,10 @@ module.exports = {
     rinkeby: {
       network_id: 4,
       provider: function() {
-        return new HDWalletProvider(words, 'https://rinkeby.infura.io/gWHhRsgzNoiJr110I1AB')
-      }
+        return new HDWalletProvider(words, 'https://rinkeby.infura.io/SpARW7NJTyVseQE3d8Bs')
+      },
+      "gas": 4000000,
+      "gasPrice": 4000000000
     }
   }
 };
