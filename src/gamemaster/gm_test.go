@@ -8,6 +8,26 @@ import (
 	"time"
 )
 
+func assertEqual(t *testing.T, a interface{}, b interface{}, message string) {
+	if a == b {
+		return
+	}
+	if len(message) == 0 {
+		message = fmt.Sprintf("%v != %v", a, b)
+	}
+	t.Fatal(message)
+}
+
+func assertNotEqual(t *testing.T, a interface{}, b interface{}, message string) {
+	if a != b {
+		return
+	}
+	if len(message) == 0 {
+		message = fmt.Sprintf("%v != %v", a, b)
+	}
+	t.Fatal(message)
+}
+
 func TestGMRPC(t *testing.T) {
 	var gm GM
 
@@ -266,5 +286,19 @@ func TestClerkThreaded(t *testing.T) {
 
 	wg.Wait()
 	assertEqual(t, len(gm.operatedGames), 0, "gm mapping has wrong size")
+
+}
+
+func TestEthereum(t *testing.T) {
+	var gm GM
+	gm.Init("", 11112)
+	defer gm.Kill()
+	gmAddr := ":" + strconv.Itoa(11112)
+	const numThreads = 10
+
+	clerk := &Clerk{GMAddr: gmAddr}
+	clerk.ConnectGame("0x1")
+
+	time.Sleep(20 * time.Second)
 
 }

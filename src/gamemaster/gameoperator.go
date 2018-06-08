@@ -3,7 +3,11 @@ package gm
 import (
 	"errors"
 	"fmt"
+	"log"
 	"time"
+
+	"github.com/ethereum/go-ethereum/common"
+	"github.com/ethereum/go-ethereum/ethclient"
 )
 
 const (
@@ -80,6 +84,23 @@ func (gop *GameOperator) playGame() {
 // 1) Figure out in which state the game is
 // 2) Force a state transition or payout
 func (gop *GameOperator) operate() {
+
+	// Create an IPC based RPC connection to a remote node
+	conn, err := ethclient.Dial("/Users/me/Library/Ethereum/rinkeby/geth.ipc")
+	if err != nil {
+		log.Fatalf("Failed to connect to the Ethereum client: %v", err)
+	}
+	// Instantiate the contract and display its name
+	game, err := NewGame(common.HexToAddress("0xA1bC5593374C51E5Becfc7b03ae369B994C5e27E"), conn)
+	if err != nil {
+		log.Fatalf("Failed to instantiate a Token contract: %v", err)
+	}
+	n, err := game.GetMaxPlayers(nil)
+	if err != nil {
+		log.Fatalf("Failed to retrieve token name: %v", err)
+	}
+	fmt.Println("Max players:", n)
+
 	fmt.Printf("wow look at me I am operating hard %s\n", gop.contractAddress)
 }
 
