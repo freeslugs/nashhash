@@ -20,6 +20,9 @@ type GameOperator struct {
 	contractAddress string
 	controlChannel  chan int
 	playing         bool
+
+	// GM controlling us
+	gm *GM
 }
 
 // ContractAddress returns the address of the game contract
@@ -35,10 +38,11 @@ func (gop *GameOperator) Playing() bool {
 }
 
 // Init the handler
-func (gop *GameOperator) Init(addr string) {
+func (gop *GameOperator) Init(addr string, gm *GM) {
 	gop.contractAddress = addr
 	gop.controlChannel = make(chan int)
 	gop.playing = false
+	gop.gm = gm
 }
 
 // Play the game at the contract address
@@ -74,7 +78,11 @@ func (gop *GameOperator) playGame() {
 		// The default behaviour is to continue operating the game
 		default:
 			// Proceed with the normal game logic
-			gop.operate()
+			if gop.gm.debug == true {
+				fmt.Printf("wow look at me I am operating hard %s\n", gop.contractAddress)
+			} else {
+				gop.operate()
+			}
 		}
 		time.Sleep(1 * time.Second)
 	}

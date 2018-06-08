@@ -32,7 +32,7 @@ func TestGMRPC(t *testing.T) {
 	var gm GM
 
 	// Init on localhost and port
-	gm.Init("", 11112)
+	gm.Init("", 11112, true)
 	defer gm.Kill()
 
 	var (
@@ -53,7 +53,7 @@ func TestConnectGame(t *testing.T) {
 	var gm GM
 
 	// Init on localhost and port
-	gm.Init("", 11112)
+	gm.Init("", 11112, true)
 	defer gm.Kill()
 	gmAddr := ":" + strconv.Itoa(11112)
 
@@ -68,7 +68,7 @@ func TestRepeatedConnectGame(t *testing.T) {
 	var gm GM
 
 	// Init on localhost and port
-	gm.Init("", 11112)
+	gm.Init("", 11112, true)
 	defer gm.Kill()
 	gmAddr := ":" + strconv.Itoa(11112)
 
@@ -86,7 +86,7 @@ func TestMultipleConnects(t *testing.T) {
 	var gm GM
 
 	// Init on localhost and port
-	gm.Init("", 11112)
+	gm.Init("", 11112, true)
 	defer gm.Kill()
 	gmAddr := ":" + strconv.Itoa(11112)
 
@@ -106,7 +106,7 @@ func TestMultipleConnects(t *testing.T) {
 func TestDisconnect(t *testing.T) {
 	// Init on localhost and port
 	var gm GM
-	gm.Init("", 11112)
+	gm.Init("", 11112, true)
 	defer gm.Kill()
 	gmAddr := ":" + strconv.Itoa(11112)
 
@@ -127,7 +127,7 @@ func TestRepeatedDisconnectGame(t *testing.T) {
 	var gm GM
 
 	// Init on localhost and port
-	gm.Init("", 11112)
+	gm.Init("", 11112, true)
 	defer gm.Kill()
 	gmAddr := ":" + strconv.Itoa(11112)
 
@@ -150,7 +150,7 @@ func TestRepeatedDisconnectGame(t *testing.T) {
 func TestBasic(t *testing.T) {
 	// Init on localhost and port
 	var gm GM
-	gm.Init("", 11112)
+	gm.Init("", 11112, true)
 	defer gm.Kill()
 	gmAddr := ":" + strconv.Itoa(11112)
 
@@ -210,7 +210,7 @@ func TestBasic(t *testing.T) {
 
 func TestBasicThreaded(t *testing.T) {
 	var gm GM
-	gm.Init("", 11112)
+	gm.Init("", 11112, true)
 	defer gm.Kill()
 	gmAddr := ":" + strconv.Itoa(11112)
 	numThreads := 10
@@ -248,7 +248,7 @@ func TestBasicThreaded(t *testing.T) {
 
 func TestClerkThreaded(t *testing.T) {
 	var gm GM
-	gm.Init("", 11112)
+	gm.Init("", 11112, true)
 	defer gm.Kill()
 	gmAddr := ":" + strconv.Itoa(11112)
 	const numThreads = 10
@@ -291,7 +291,7 @@ func TestClerkThreaded(t *testing.T) {
 
 func TestEthereum(t *testing.T) {
 	var gm GM
-	gm.Init("", 11112)
+	gm.Init("", 11112, false)
 	defer gm.Kill()
 	gmAddr := ":" + strconv.Itoa(11112)
 	const numThreads = 10

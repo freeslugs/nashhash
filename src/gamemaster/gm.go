@@ -17,6 +17,9 @@ type GM struct {
 	operatedGames map[string]*GameOperator
 	gmLock        sync.Mutex
 
+	// debug mode
+	debug bool
+
 	// RPC stuff
 	dead bool
 	l    net.Listener
@@ -25,7 +28,9 @@ type GM struct {
 
 // Init initializes the game master. In particular, it should register the
 // game master for RPC.
-func (gm *GM) Init(ipAddr string, port int) error {
+func (gm *GM) Init(ipAddr string, port int, debug bool) error {
+
+	gm.debug = debug
 
 	gm.operatedGames = make(map[string]*GameOperator)
 
@@ -86,7 +91,7 @@ func (gm *GM) Connect(args ConnectCallArgs, res *ConnectCallReply) error {
 
 	// Create a game operator
 	gop := &GameOperator{}
-	gop.Init(addr)
+	gop.Init(addr, gm)
 
 	// Add this GameOperator to the mapping
 	gm.operatedGames[addr] = gop
