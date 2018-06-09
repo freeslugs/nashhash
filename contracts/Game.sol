@@ -42,14 +42,14 @@ contract Game is Pausable, GameHelper {
     }
 
     struct Config {
-        uint GAME_STAGE_LENGTH;
-        uint MAX_PLAYERS;
 
         address FEE_ADDRESS;
         uint GAME_FEE_PERCENT;
         uint STAKE_SIZE;
 
-        uint originBlock;
+        uint GAME_STAGE_LENGTH;
+        uint MAX_PLAYERS;
+
     }
 
     struct GameInfo {
@@ -71,17 +71,21 @@ contract Game is Pausable, GameHelper {
     address[] internal gameDataKeys;
 
 
-    constructor(uint _maxp) public {
+    constructor(
+        address _feeAddress,
+        uint _gameFeePercent,
+        uint _stakeSize,
+        uint _maxp, 
+        uint _gameStageLength) public {
 
 
         owner = msg.sender;
 
-        config.GAME_STAGE_LENGTH = 0;
-        config.GAME_FEE_PERCENT = 5;
+        config.GAME_STAGE_LENGTH = _gameStageLength;
+        config.GAME_FEE_PERCENT = _gameFeePercent;
         config.MAX_PLAYERS = _maxp;
-        config.STAKE_SIZE = 1 ether;
-        config.FEE_ADDRESS = 0x2540099e9ed04aF369d557a40da2D8f9c2ab928D;
-        config.originBlock = block.number;
+        config.STAKE_SIZE = _stakeSize;//1 ether;
+        config.FEE_ADDRESS = _feeAddress;
 
         state.gameState = GameState.COMMIT_STATE;
         state.currNumberCommits = 0;

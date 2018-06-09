@@ -4,6 +4,8 @@ import API from '../src/api/Game.js';
 const FIXED_BET = web3.toWei(1,'ether');
 const MAX_PLAYERS = 10;
 const HASHNASH_ADDRESS = 0x2540099e9ed04aF369d557a40da2D8f9c2ab928D;
+const GAME_STAGE_LENGTH = 0;
+const GAME_FEE_PERCENT = 5;
 
 var Game = artifacts.require("./TwoThirdsAverage.sol");
 
@@ -18,7 +20,11 @@ contract("2/3 of the Average Game", function([owner, donor]){
     let game
 
     beforeEach('setup contract for each test', async () => {
-        game = await Game.new(10);
+        game = await Game.new(HASHNASH_ADDRESS,
+            GAME_FEE_PERCENT,
+            FIXED_BET,
+            MAX_PLAYERS,
+            GAME_STAGE_LENGTH);
         // init api
         api = new API(web3, assert, game);
 
