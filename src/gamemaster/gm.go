@@ -63,7 +63,7 @@ func (gm *GM) Init(ipAddr string, port int, debug bool) error {
 			}
 		}
 	}()
-	fmt.Println("gm initialization succesful...")
+	fmt.Printf("GM: Initialization succesful.\n")
 
 	return nil
 }
@@ -86,6 +86,7 @@ func (gm *GM) Connect(args ConnectCallArgs, res *ConnectCallReply) error {
 	// First we check if the game already has an operator on it
 	addr := args.ContractAddress
 	if gm.isOperated(addr) {
+		log.Printf("WARNING GM: %s already operated\n", addr)
 		return errors.New("GM: game already operated")
 	}
 
@@ -99,9 +100,12 @@ func (gm *GM) Connect(args ConnectCallArgs, res *ConnectCallReply) error {
 	// TODO: Give an option to not immediately start operating the game
 	e := gm.operatedGames[addr].Play()
 	if e != nil {
+		log.Fatalf("ERROR GM: inconsistent state")
 		panic("Error: inconsistent state in GM.Connect()")
 		//		return e
 	}
+
+	log.Printf("INFO GM: %s connected succesfully\n", addr)
 
 	return nil
 }
@@ -127,6 +131,8 @@ func (gm *GM) Disconnect(args DisconnectCallArgs, res *DisconnectCallReply) erro
 	// Remove the gameOperator from the map
 	delete(gm.operatedGames, addr)
 
+	log.Printf("INFO GM: %s disconnected succesfully\n", addr)
+
 	return nil
 }
 
@@ -140,6 +146,18 @@ func (gm *GM) isOperated(addr string) bool {
 
 // Kill the GM is something is wrong.
 func (gm *GM) Kill() {
+
+	gm.gmLock.Lock()
+	defer gm.gmLock.Unlock()
+
+	for _, v := range gm.operatedGames {
+		v.Stop()
+	}
+
+	log.Printf("INFO GM: all game operators stopped\n")
+
 	gm.dead = true
 	gm.l.Close()
+
+	log.Printf("INFO GM: dead\n")
 }

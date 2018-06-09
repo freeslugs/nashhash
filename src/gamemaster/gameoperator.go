@@ -48,6 +48,7 @@ func (gop *GameOperator) Init(addr string, gm *GM) {
 // Play the game at the contract address
 func (gop *GameOperator) Play() error {
 	if gop.playing == true {
+		log.Printf("WARNING GameOperator: game %s already operated\n", gop.contractAddress)
 		return errors.New("GameOperator: game operated")
 	}
 	go gop.playGame()
@@ -57,7 +58,7 @@ func (gop *GameOperator) Play() error {
 
 // Game control logic goes into this function
 func (gop *GameOperator) playGame() {
-	fmt.Printf("playing the game on address %s\n", gop.contractAddress)
+	log.Printf("INFO GameOperator %s: playing the game\n", gop.contractAddress)
 	for {
 
 		// We use select here for non-blocking read on the socket
@@ -69,17 +70,19 @@ func (gop *GameOperator) playGame() {
 			// or log the current state of the game
 			switch cmd {
 			case DisconnectOperator:
-				fmt.Printf("operator quitting the game at address %s\n", gop.contractAddress)
+				log.Printf("INFO GameOperator %s: quitting the game\n", gop.contractAddress)
+				//fmt.Printf("operator quitting the game at address %s\n", gop.contractAddress)
 				return
 			default:
-				fmt.Printf("Unknown command")
+				log.Printf("WARNING GameOperator %s: unknown command\n", gop.contractAddress)
+				//fmt.Printf("Unknown command")
 			}
 
 		// The default behaviour is to continue operating the game
 		default:
 			// Proceed with the normal game logic
 			if gop.gm.debug == true {
-				fmt.Printf("wow look at me I am operating hard %s\n", gop.contractAddress)
+				log.Printf("INFO GameOperator %s: operate succesful\n", gop.contractAddress)
 			} else {
 				gop.operate()
 			}
@@ -96,26 +99,28 @@ func (gop *GameOperator) operate() {
 	// Create an IPC based RPC connection to a remote node
 	conn, err := ethclient.Dial("/Users/me/Library/Ethereum/rinkeby/geth.ipc")
 	if err != nil {
-		log.Fatalf("Failed to connect to the Ethereum client: %v", err)
+		log.Printf("Failed to connect to the Ethereum client: %v", err)
 	}
 	// Instantiate the contract and display its name
 	game, err := NewGame(common.HexToAddress("0xA1bC5593374C51E5Becfc7b03ae369B994C5e27E"), conn)
 	if err != nil {
-		log.Fatalf("Failed to instantiate a Token contract: %v", err)
+		log.Printf("Failed to instantiate a Token contract: %v", err)
 	}
 	n, err := game.GetMaxPlayers(nil)
 	if err != nil {
-		log.Fatalf("Failed to retrieve token name: %v", err)
+		log.Printf("Failed to retrieve token name: %v", err)
 	}
 	fmt.Println("Max players:", n)
 
-	fmt.Printf("wow look at me I am operating hard %s\n", gop.contractAddress)
+	//fmt.Printf("wow look at me I am operating hard %s\n", gop.contractAddress)
+	log.Printf("INFO GameOperator %s: operate succesful\n", gop.contractAddress)
 }
 
 // Stop stops the operator from operating the game. The game ideally should also
 // be paused.
 func (gop *GameOperator) Stop() error {
 	if gop.playing == false {
+		log.Printf("WARNING GameOperator %s: game already stop", gop.contractAddress)
 		return errors.New("game already stopped")
 	}
 	gop.controlChannel <- DisconnectOperator
