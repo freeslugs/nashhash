@@ -11,9 +11,10 @@ class API {
     return this.web3
   }
 
+  // Get the state of the game
   async isInCommitState() {
-    const state = await this.game.getGameState();
-    if (state.toNumber() == 0) {
+    const state = await this.getGameState();
+    if (state == 0) {
       return true;
     } else {
       return false;
@@ -21,8 +22,8 @@ class API {
   }
 
   async isInRevealState() {
-    const state = await this.game.getGameState();
-    if (state.toNumber() == 1) {
+    const state = await this.getGameState();
+    if (state == 1) {
       return true;
     } else {
       return false;
@@ -30,14 +31,22 @@ class API {
   }
 
   async isInPayoutState() {
-    const state = await this.game.getGameState();
-    if (state.toNumber() == 2) {
+    const state = await this.getGameState();
+    if (state == 2) {
       return true;
     } else {
       return false;
     }
   }
 
+  async getGameState() {
+    const state = await this.game.getGameState();
+    return state.toNumber();
+  }
+  ////
+
+
+  // Get number of commits and number of reveales in the current round
   async getCurrentCommits() {
     const currNumberCommits = await this.game.getCurrentCommits();
     return currNumberCommits.toNumber();
@@ -48,14 +57,18 @@ class API {
     return curNumberReveals.toNumber();
   }
 
+
+  // Reset the game to the initial state
   async resetGame() {
     await this.game.resetGame();
   }
 
+
+  // Commit and reveal functions
   async commitGuess(usr_addr, guess, random) {
     const bet = await this.getStakeSize();
     const hash = this.hashGuess(guess, random);
-    await this.game.commit(hash, { value: this.web3.toWei(bet,'ether'), from: usr_addr });
+    await this.game.commit(hash, { value: this.getWeb3().toWei(bet,'ether'), from: usr_addr });
   }
 
   async revealGuess(usr_addr, guess, random) {
@@ -67,23 +80,30 @@ class API {
     return hash;
   }
 
+
+  // Get the size of the stake for the game
   async getStakeSize() {
     const bet = await this.game.getStakeSize();
-    return this.web3.fromWei(bet.toNumber().toString(), 'ether');
+    return this.getWeb3().fromWei(bet.toNumber().toString(), 'ether');
   }
 
+
+  // Functiuons help getting information about the prize
   async getWinners() {
     let winners = [];
 
-    const nw = await this.game.getNumberOfWinners();
-    const number_of_winners = nw.toNumber();
+    const nw = await this.getNumberOfWinners();
 
-    for (let i = 0; i < number_of_winners; i++) {
+    for (let i = 0; i < nw; i++) {
       const winner = await this.game.getLastWinners(i);
       winners.push(winner);
     }
-
     return winners;
+  }
+
+  async getNumberOfWinners() {
+    const nw = await this.game.getNumberOfWinners();
+    return nw.toNumber();
   }
 
   async getPayout(usr_addr) {
@@ -92,7 +112,7 @@ class API {
     
     for (let i = 0; i < winners.length; i++) {
       if (winners[i] == usr_addr) {
-        return this.web3.fromWei(prize.toNumber(), 'ether');
+        return this.getWeb3().fromWei(prize.toNumber(), 'ether');
       }
     }
     return 0;
@@ -100,14 +120,17 @@ class API {
 
   async getPrizeAmount() {
     const prize = await this.game.getLastPrize();
-    return this.web3.fromWei(prize.toNumber(), 'ether');
+    return this.getWeb3().fromWei(prize.toNumber(), 'ether');
   }
 
   async getGameFeeAmount() {
+    //console.log("10100101010101010010101");
     const fee = await this.game.getGameFee();
     return fee.toNumber();
   }
 
+
+  // Control functions that can be used by the owner
   async pauseGame() {
     await this.game.pause();
   }
@@ -117,7 +140,7 @@ class API {
   }
 
   async setMaxPlayers(num, usr_addr) {
-    await this.game.setMaxPlayers(num, {from: usr_addr});
+    await this.game.setMaxPlayers(num, {from: usr_addr});  
   }
 
   async getMaxPlayers() {
@@ -125,6 +148,8 @@ class API {
     return num.toNumber();
   }
 
+
+  // These functions are used by the Game Master to control the flow of the game
   async payout(){
     await this.game.payout();
   }
@@ -135,6 +160,16 @@ class API {
 
   async forceToPayoutState(){
     await this.game.forceToPayoutState();
+  }
+
+  async getCommitStageStartBlock(){
+    const csb = await this.game.getCommitStageStartBlock()
+    return csb
+  }
+
+  async getRevealStageStartBlock(){
+    const rsb = await this.game.getRevealStageStartBlock()
+    return rsb
   }
 
 
