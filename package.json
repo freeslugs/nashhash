@@ -24,7 +24,7 @@
     "babel-register": "^6.26.0",
     "flow-bin": "^0.72.0",
     "lite-server": "^2.3.0",
-    "truffle-hdwallet-provider": "^0.0.5"
+    "truffle-hdwallet-provider": "0.0.5"
   },
   "dependencies": {
     "dotenv": "^5.0.1",
@@ -38,6 +38,7 @@
     "react-toastify": "^4.0.1",
     "secure-random-string": "^1.1.0",
     "semantic-ui-react": "^0.80.0",
+    "solc": "^0.4.24",
     "styled-components": "^3.2.6",
     "truffle-contract": "^3.0.5",
     "web3": "^1.0.0-beta.34",
