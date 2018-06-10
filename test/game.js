@@ -181,7 +181,7 @@ contract("2/3 of the Average Game", function([owner, donor]){
         var fee = await api.getGameFeeAmount();
       
         var expected_prize = (bet*num_players) - ((bet*num_players) / 100.0) * fee;
-        assert(prize == expected_prize);
+        assert(prize == expected_prize, `prizes are not equal, prize: ${prize} fee: ${fee}, bet: ${bet}`);
     })
 
     it("2 players bet, one wins, one loses", async () => {

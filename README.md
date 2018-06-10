@@ -31,6 +31,20 @@ Game theory games on the blockchain
 
 1. `yarn start`  
 
+## Deploy
+
+1. Purge assets `rm -r build; rm -r src/contracts`
+2. Compile `truffle compile`
+3. Deploy: `truffle migrate --reset --network rinkeby`
+
+1. Copy assets to local `cp -r build/contracts src/contracts`
+
+## Common errors
+
+### `INVALID ADDRESS`
+
+make sure you include account in function call. ie. `instance.function(params, { from: user_address })`
+
 
 ## API i need to connect to 
 

@@ -7,6 +7,10 @@ class API {
     this.game = game
   }
 
+  getWeb3() {
+    return this.web3
+  }
+
   async isInCommitState() {
     const state = await this.game.getGameState();
     if (state.toNumber() == 0) {
@@ -65,7 +69,7 @@ class API {
 
   async getStakeSize() {
     const bet = await this.game.getStakeSize();
-    return this.web3.fromWei(bet.toNumber(), 'ether');
+    return this.web3.fromWei(bet.toNumber().toString(), 'ether');
   }
 
   async getWinners() {
@@ -112,8 +116,8 @@ class API {
     await this.game.unpause();
   }
 
-  async setMaxPlayers(num) {
-    await this.game.setMaxPlayers(num);
+  async setMaxPlayers(num, usr_addr) {
+    await this.game.setMaxPlayers(num, {from: usr_addr});
   }
 
   async getMaxPlayers() {
