@@ -120,7 +120,7 @@ func (gop *GameOperator) operate() {
 // be paused.
 func (gop *GameOperator) Stop() error {
 	if gop.playing == false {
-		log.Printf("WARNING GameOperator %s: game already stop", gop.contractAddress)
+		log.Printf("WARNING GameOperator %s: game already stopped\n", gop.contractAddress)
 		return errors.New("game already stopped")
 	}
 	gop.controlChannel <- DisconnectOperator

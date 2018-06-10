@@ -5,7 +5,7 @@ import Helper from './gameHelper.js';
 const FIXED_BET = web3.toWei(1,'ether');
 const MAX_PLAYERS = 10;
 const HASHNASH_ADDRESS = 0x2540099e9ed04aF369d557a40da2D8f9c2ab928D;
-const GAME_STAGE_LENGTH = 0;
+const GAME_STAGE_LENGTH = 6;
 const GAME_FEE_PERCENT = 5;
 
 var Game = artifacts.require("./TwoThirdsAverage.sol");
@@ -242,22 +242,61 @@ contract("2/3 of the Average Game", function([owner, donor]){
     //     assert(error = 0, "RevealsSubmitted event not emmited");
     // })
 
-    it("Should be forcable into states by owner", async () => {
+    it("Should be forceable into states by owner", async () => {
         const num_players = 3;
+
+        // console.log("blocks in the beginning")
+        // var csb = await api.getCommitStageStartBlock();
+        // var rsb = await api.getRevealStageStartBlock();
+        // console.log(csb);
+        // console.log(rsb);
 
         await api.setMaxPlayers(num_players, owner);
 
         await api.commitGuess(accounts[2], "45", "3");
-        await api.commitGuess(accounts[6], "30", "3");
 
-        await api.forceToRevealState();
+        // console.log("csb after first commit")
+        // csb = await api.getCommitStageStartBlock();
+        // console.log(csb);
+
+        await api.commitGuess(accounts[6], "30", "3");
+        
+        await helper.expectedThrow(api.forceToRevealState(), "force transition has to fail if called before GAME_STAGE_LENGTH blocks");
+        
+        // We try until the blockchain grows enough
+        for (;;){
+            try {
+                await api.forceToRevealState();
+                break;
+            } catch (error) {
+            }
+        }
+
+        // Expected to fail because in wrong state
+        await helper.expectedThrow(api.forceToRevealState(), "force transition has to fail if called before GAME_STAGE_LENGTH blocks");
+        
+        
+        // console.log("rsb after forced transition")        
+        // rsb = await api.getRevealStageStartBlock();
+        // console.log(rsb);
 
         var commitNumber = await api.getCurrentCommits();
         assert(commitNumber == 2, "Wrong commit number");
 
         await api.revealGuess(accounts[2], "45", "3");
 
-        await api.forceToPayoutState();
+
+        await helper.expectedThrow(api.forceToPayoutState(), "force to payout has to fail if called before GAME_STAGE_LENGTH blocks");
+        // We try until the blockchain grows enough
+        for (;;){
+            try {
+                await api.forceToPayoutState();
+                break;
+            } catch (error) {
+            }
+        }
+        // Expected to fail because in wrong state
+        await helper.expectedThrow(api.forceToPayoutState(), "force to payout has to fail if called before GAME_STAGE_LENGTH blocks");
 
         await api.payout();
 
@@ -265,5 +304,7 @@ contract("2/3 of the Average Game", function([owner, donor]){
 
         assert(winners.length == 1, winners.length);
         assert(winners[0] == accounts[2], winners[0]);
+
+       
     })
 });
