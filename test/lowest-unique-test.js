@@ -1,20 +1,30 @@
 var Web3Utils = require('web3-utils');
 import API from '../src/api/Game.js';
+import Helper from './lowestUniqueHelper.js';
+
+const FIXED_BET = web3.toWei(1,'ether');
+const MAX_PLAYERS = 10;
+const HASHNASH_ADDRESS = 0x2540099e9ed04aF369d557a40da2D8f9c2ab928D;
+const GAME_STAGE_LENGTH = 0;
+const GAME_FEE_PERCENT = 5;
 
 var Game = artifacts.require("./LowestUniqueNum.sol");
 
-let api
+let api, helper
 
 contract("Lowest Unique Game", function([owner, donor]){
 
-	var accounts;
+    let accounts, game
 
-	let game
-
-	beforeEach('setup contract for each test', async () => {
-        game = await Game.new(10);
+    beforeEach('setup contract for each test', async () => {
+        game = await Game.new(HASHNASH_ADDRESS,
+            GAME_FEE_PERCENT,
+            FIXED_BET,
+            MAX_PLAYERS,
+            GAME_STAGE_LENGTH);
 
         api = new API(web3, assert, game);
+        helper = new Helper(web3, assert, game, api);
 
         accounts = await new Promise(function(resolve, reject) {
             web3.eth.getAccounts( function (err, accounts) { resolve(accounts) })
@@ -22,15 +32,13 @@ contract("Lowest Unique Game", function([owner, donor]){
     })
 
     it("init", async () => {
-        const count = await api.getStakeSize(game);
+        const count = await api.getStakeSize();
         assert.equal(count, 1);
     });
-
 
     it("Single commit", async () => {
         
         const hash = api.hashGuess("66", "3");
-
         await api.commitGuess(donor, "66", "3");
 
         const curr_number_bets = await api.getCurrentCommits();
@@ -43,7 +51,7 @@ contract("Lowest Unique Game", function([owner, donor]){
     it("Single commit and single reveal", async () => {
        
         //Commit/Reveal
-        await api.setMaxPlayers(1);
+        await api.setMaxPlayers(1, owner);
 
         await api.commitGuess(donor, "66", "3");
 
@@ -61,7 +69,7 @@ contract("Lowest Unique Game", function([owner, donor]){
         // keccak256 , web3.sha3
         const bet = await api.getStakeSize(game);
 
-        await api.setMaxPlayers(3);
+        await api.setMaxPlayers(3, owner);
 
         await api.commitGuess( accounts[2], "3", "6534");
         await api.commitGuess( accounts[3], "3", "1004");
@@ -86,7 +94,7 @@ contract("Lowest Unique Game", function([owner, donor]){
         const bet = await game.getStakeSize();
 
         // Round 1
-        await runGame(bet, num_players, accounts, game);
+        await helper.runGame(bet, num_players, accounts, game, owner);
     })
 
     it("Should play multiple rounds of game correctly", async () => {
@@ -96,10 +104,10 @@ contract("Lowest Unique Game", function([owner, donor]){
         const bet = await api.getStakeSize(game);
 
         // Round 1-4
-        await runGame(bet, num_players, accounts, game);
-        await runGame(bet, num_players, accounts, game);
-        await runGame(bet, num_players, accounts, game);
-        await runGame(bet, num_players, accounts, game);
+        await helper.runGame(bet, num_players, accounts, game, owner);
+        await helper.runGame(bet, num_players, accounts, game, owner);
+        await helper.runGame(bet, num_players, accounts, game, owner);
+        await helper.runGame(bet, num_players, accounts, game, owner);
     })
 
 
@@ -107,7 +115,7 @@ contract("Lowest Unique Game", function([owner, donor]){
         // MAX IS 10, because max account number is 10
         const num_players = 2;
         
-        await api.setMaxPlayers(num_players);
+        await api.setMaxPlayers(num_players, owner);
 
         await api.commitGuess(accounts[2], "6", "3");
         await api.commitGuess(accounts[6], "2", "3");
@@ -127,7 +135,7 @@ contract("Lowest Unique Game", function([owner, donor]){
     it("Should fail if same user commits or reveals twice", async () => {
 
         const bet = await api.getStakeSize(game);
-        await api.setMaxPlayers(1);
+        await api.setMaxPlayers(1, owner);
 
         await api.commitGuess(accounts[2], "6", "6534");
 
@@ -159,7 +167,7 @@ contract("Lowest Unique Game", function([owner, donor]){
         });
 
         const bet = await api.getStakeSize(game);
-        await api.setMaxPlayers(3);
+        await api.setMaxPlayers(3, owner);
 
         await api.commitGuess(accounts[2], "6", "6534");
 
@@ -181,7 +189,7 @@ contract("Lowest Unique Game", function([owner, donor]){
         });
 
         const bet = await api.getStakeSize(game);
-        await api.setMaxPlayers(3);
+        await api.setMaxPlayers(3, owner);
 
         await api.commitGuess( accounts[2], "3", "6534");
         await api.commitGuess( accounts[3], "3", "1004");
@@ -196,109 +204,4 @@ contract("Lowest Unique Game", function([owner, donor]){
 
         assert(differror == false, "The user committed and revealed different numbers.");
     })
-
-
 });
-
-
-
-
-/////////////////////// HELPERS /////////////////////////
-
-async function runGame(bet, num_players, accounts, game) {
-
-    var guesses = createRandomGuesses(num_players, accounts);
-
-    await api.setMaxPlayers( num_players);
-
-    for(var i = 0; i < num_players; i++){
-        //const hash = Web3Utils.soliditySha3({type: 'string', value: guesses[1][i].toString()}, {type: 'string', value: "3"});
-        await api.commitGuess( accounts[i], guesses[i].toString(), "3");
-    }
-
-    var state = await api.isInRevealState(game);
-    assert(state == true, "Bad state transition, should be in REVEAL_STATE");
-    for(i = 0; i < num_players; i++){
-        await api.revealGuess( accounts[i], guesses[i].toString(), "3");
-    }
-
-    state = await api.isInPayoutState(game);
-    assert(state == true, "Bad state transition, should be in PAYOUT_STATE");
-
-    // Uncomment to check the balances
-/*    for(i = 0; i < num_players; i++){
-        var balance = web3.fromWei(web3.eth.getBalance(accounts[i]),'ether').toString()
-        console.log(balance);
-    }*/
-
-    await game.payout();
-
-    var gamelowest = findLowestUniqueNum(guesses);
-
-    var realLowest = await game.testLowest();
-
-    var loc_winner = findWinner(accounts, guesses, realLowest);
-    // Grab all the winners
-
-    var winner = await api.getWinners(game);
-
-    assert(winner.length == 1, "More than one winner");
-
-    assert(winner[0] == loc_winner, "Winner is incorrectly chosen")
-
-    state = await api.isInCommitState(game);
-    assert(state == true, "Bad state transition, should be in COMMIT_STATE");
-}
-
-function findWinner(player_addrs, guesses, lwst){
-
-    var winner; 
-
-    for(let i = 0; i < player_addrs.length; i++) {
-        
-        var cur_guess = guesses[i];
-
-        //If current guess is lowest unique number, set winner to guesser address
-        if(cur_guess == lwst){
-        	winner = player_addrs[i];
-        }
-    }
-
-    return winner;
-}
-
-function createRandomGuesses(max_players, accounts){
-
-    var guesses = new Array(max_players);
-    for(var i = 0; i < max_players; i++){
-        guesses[i] = Math.floor(Math.random() * 1000);
-
-    }
-
-    return guesses;
-}
-
-function findLowestUniqueNum(guesses){
-	//Initialize empty sets
-	var unique = new Set([]);
-	var notUnique = new Set([]);
-
-
-	for(var i = 0; i < guesses.length; i++){
-		if(unique.has(guesses[i])){
-			unique.delete(guesses[i]);
-			notUnique.add(guesses[i]);
-		} else if(!notUnique.has(guesses[i])){
-			unique.add(guesses[i]);
-		}
-	}
-
-	var lowest;
-    for(let num of unique.values()){
-    	if(num < lowest){
-    		lowest = num;
-    	}
-    }  
-
-    return lowest;
-}

@@ -1,3 +1,4 @@
+//go:generate abigen --sol ./../../contracts/Game.sol --pkg gm --out Game.go
 package gm
 
 import (
@@ -8,6 +9,9 @@ import (
 	"net/rpc"
 	"strconv"
 	"sync"
+
+	"github.com/ethereum/go-ethereum/accounts/abi/bind"
+	ethcrypto "github.com/ethereum/go-ethereum/crypto"
 )
 
 // The GM object. Runs on the server. Manages GameOperators, connects
@@ -17,6 +21,12 @@ type GM struct {
 	operatedGames map[string]*GameOperator
 	gmLock        sync.Mutex
 
+	// Ethereum stuff
+	auth *bind.TransactOpts
+
+	// debug mode
+	debug bool
+
 	// RPC stuff
 	dead bool
 	l    net.Listener
@@ -25,7 +35,27 @@ type GM struct {
 
 // Init initializes the game master. In particular, it should register the
 // game master for RPC.
-func (gm *GM) Init(ipAddr string, port int) error {
+func (gm *GM) Init(ipAddr string, port int, hexkey string, debug bool) error {
+
+	gm.gmLock.Lock()
+	defer gm.gmLock.Unlock()
+
+	gm.debug = debug
+
+	if debug == false {
+
+		// We need to create a transactor to be able to execute
+		// contract functions
+		privk, err := ethcrypto.HexToECDSA(hexkey)
+		if err != nil {
+			log.Fatalf("GM: bad private key")
+		}
+
+		gm.auth = bind.NewKeyedTransactor(privk)
+		if gm.auth == nil {
+			log.Fatalf("GM: failed to create authorized transactor: %v", err)
+		}
+	}
 
 	gm.operatedGames = make(map[string]*GameOperator)
 
@@ -58,7 +88,7 @@ func (gm *GM) Init(ipAddr string, port int) error {
 			}
 		}
 	}()
-	fmt.Println("gm initialization succesful...")
+	fmt.Printf("GM: Initialization succesful.\n")
 
 	return nil
 }
@@ -81,12 +111,13 @@ func (gm *GM) Connect(args ConnectCallArgs, res *ConnectCallReply) error {
 	// First we check if the game already has an operator on it
 	addr := args.ContractAddress
 	if gm.isOperated(addr) {
+		log.Printf("WARNING GM: %s already operated\n", addr)
 		return errors.New("GM: game already operated")
 	}
 
 	// Create a game operator
 	gop := &GameOperator{}
-	gop.Init(addr)
+	gop.Init(addr, gm)
 
 	// Add this GameOperator to the mapping
 	gm.operatedGames[addr] = gop
@@ -94,9 +125,12 @@ func (gm *GM) Connect(args ConnectCallArgs, res *ConnectCallReply) error {
 	// TODO: Give an option to not immediately start operating the game
 	e := gm.operatedGames[addr].Play()
 	if e != nil {
+		log.Fatalf("ERROR GM: inconsistent state")
 		panic("Error: inconsistent state in GM.Connect()")
 		//		return e
 	}
+
+	log.Printf("INFO GM: %s connected succesfully\n", addr)
 
 	return nil
 }
@@ -122,6 +156,8 @@ func (gm *GM) Disconnect(args DisconnectCallArgs, res *DisconnectCallReply) erro
 	// Remove the gameOperator from the map
 	delete(gm.operatedGames, addr)
 
+	log.Printf("INFO GM: %s disconnected succesfully\n", addr)
+
 	return nil
 }
 
@@ -135,6 +171,18 @@ func (gm *GM) isOperated(addr string) bool {
 
 // Kill the GM is something is wrong.
 func (gm *GM) Kill() {
+
+	gm.gmLock.Lock()
+	defer gm.gmLock.Unlock()
+
+	for _, v := range gm.operatedGames {
+		v.Stop()
+	}
+
+	log.Printf("INFO GM: all game operators stopped\n")
+
 	gm.dead = true
 	gm.l.Close()
+
+	log.Printf("INFO GM: dead\n")
 }

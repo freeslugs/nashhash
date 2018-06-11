@@ -7,14 +7,17 @@ import (
 
 func TestOperatorInit(t *testing.T) {
 	var gop GameOperator
-	gop.Init("0x1")
+	gm := &GM{debug: true}
+	gop.Init("0x1", gm)
 	assertEqual(t, gop.ContractAddress(), "0x1", "Wrong contract address")
 	assertEqual(t, gop.Playing(), false, "Bad state: should not be playing")
 }
 
 func TestPlay(t *testing.T) {
 	var gop GameOperator
-	gop.Init("0x1")
+	gm := &GM{debug: true}
+
+	gop.Init("0x1", gm)
 
 	err := gop.Play()
 	if err != nil {
@@ -32,7 +35,9 @@ func TestPlay(t *testing.T) {
 
 func TestRepeatedPlay(t *testing.T) {
 	var gop GameOperator
-	gop.Init("0x1")
+	gm := &GM{debug: true}
+
+	gop.Init("0x1", gm)
 
 	// Call play twice
 	err := gop.Play()

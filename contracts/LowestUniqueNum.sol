@@ -22,7 +22,12 @@ contract LowestUniqueNum is Game {
     // Debug
     uint public testLowest = 0;
 
-    constructor(uint maxp) public Game(maxp) {
+    constructor(
+        address _feeAddress,
+        uint _gameFeePercent,
+        uint _stakeSize,
+        uint _maxp, 
+        uint _gameStageLength) public Game(_feeAddress, _gameFeePercent, _stakeSize, _maxp, _gameStageLength) {
         rules.MIN_GUESS = 0;
         rules.MAX_GUESS = ~uint256(0) - 1;
     }
@@ -34,7 +39,7 @@ contract LowestUniqueNum is Game {
 
     function findWinners() private {
 
-       for(uint i = 0; i < state.currNumberReveals; i++){
+        for(uint i = 0; i < state.currNumberReveals; i++){
             uint tmp = stringToUint(gameData[gameDataKeys[i]]);
 
             //If guess is unique input guesser address to mapping
@@ -83,9 +88,3 @@ contract LowestUniqueNum is Game {
 
     } 
 }
-
-
-
-
-
-

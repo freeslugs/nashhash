@@ -15,7 +15,12 @@ contract TwoThirdsAverage is Game {
     //DEBUG
     uint public average23 = 0;
 
-    constructor(uint maxp) public Game(maxp) {
+    constructor(
+        address _feeAddress,
+        uint _gameFeePercent,
+        uint _stakeSize,
+        uint _maxp, 
+        uint _gameStageLength) public Game(_feeAddress, _gameFeePercent, _stakeSize, _maxp, _gameStageLength) {
         rules.MIN_GUESS = 0;
         rules.MAX_GUESS = 100;
     }

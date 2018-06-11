@@ -1,31 +1,17 @@
 pragma solidity ^0.4.23;
 
-
-
 /*
-!!!!!!!!!!! KNOWN BUGS !!!!!!!!!!!!!!!
-1) Repeated reveal still a problem!!! 
-
-
-!!!!!!!!!!!! POTENTIAL BUGS !!!!!!!!!!!!!!!!
-1) Ether being brought over to the next round due to rounding issues. 
-Check that this is not the case. 
 
 !!!!!!!!!! LOGICAL IMPROVEMENTS !!!!!!!!!!!!
 1) Send money to HOME address only once the fees reach a certain amount.
 2) I have this idea of introducing a system of rounds so our players get a receit.
 They can then use this receit to look up info about their game.
 
-!!!!!!!!!! PERFORMANCE INMPROVEMENTS !!!!!!!!!!!!!!!!
-
-!!!!!!!!!! REFACTORING GOALS !!!!!!!!!!!!!!!!!
-1) Get a goddamn constructor in here with a reasonable amount of arguments
-
 */
 
 
 /*
-Dear all, games should oinherit form this contract because this contract has the commit/reveal protocol
+Dear all, games should inherit form this contract because this contract has the commit/reveal protocol
 The specific game will have to only define two functions:
 
 -- guessCheck(string guess): the function has to error out in if the guess is not compliant with the rules
@@ -49,20 +35,21 @@ contract Game is Pausable, GameHelper {
         uint gameStateDebug;
         uint currNumberCommits;
         uint currNumberReveals;
-        uint finalCommitBlock;
-        uint startOfRoundBlock;
+        uint commitStageStartBlock;
+        uint revealStageStartBlock;
         uint round; // not implemented
+
     }
 
     struct Config {
-        uint GAME_STAGE_LENGTH;
-        uint MAX_PLAYERS;
 
         address FEE_ADDRESS;
         uint GAME_FEE_PERCENT;
         uint STAKE_SIZE;
 
-        uint originBlock;
+        uint GAME_STAGE_LENGTH;
+        uint MAX_PLAYERS;
+
     }
 
     struct GameInfo {
@@ -84,23 +71,28 @@ contract Game is Pausable, GameHelper {
     address[] internal gameDataKeys;
 
 
-    constructor(uint _maxp) public {
+    constructor(
+        address _feeAddress,
+        uint _gameFeePercent,
+        uint _stakeSize,
+        uint _maxp, 
+        uint _gameStageLength) public {
 
 
         owner = msg.sender;
 
-        config.GAME_STAGE_LENGTH = 6;
-        config.GAME_FEE_PERCENT = 5;
+        config.GAME_STAGE_LENGTH = _gameStageLength;
+        config.GAME_FEE_PERCENT = _gameFeePercent;
         config.MAX_PLAYERS = _maxp;
-        config.STAKE_SIZE = 1 ether;
-        config.FEE_ADDRESS = 0x2540099e9ed04aF369d557a40da2D8f9c2ab928D;
-        config.originBlock = block.number;
+        config.STAKE_SIZE = _stakeSize;//1 ether;
+        config.FEE_ADDRESS = _feeAddress;
 
         state.gameState = GameState.COMMIT_STATE;
         state.currNumberCommits = 0;
         state.currNumberReveals = 0;
-        state.finalCommitBlock = 0;
-        state.startOfRoundBlock = block.number;
+        state.commitStageStartBlock = ~uint(0) - config.GAME_STAGE_LENGTH;
+        state.revealStageStartBlock = ~uint(0) - config.GAME_STAGE_LENGTH;
+
 
         info.lastPrize = 0;
 
@@ -159,35 +151,23 @@ contract Game is Pausable, GameHelper {
     function setMaxPlayers(uint new_max) public onlyOwner {
         config.MAX_PLAYERS = new_max;
     }
+
+    function getCommitStageStartBlock() public view returns(uint) {
+        return state.commitStageStartBlock;
+    }
+
+    function getRevealStageStartBlock() public view returns(uint) {
+        return state.revealStageStartBlock;
+    }
     
-    // Reset the contract to the initial state
-    function resetGame() public onlyOwner whenNotPaused {  
-        toCommitState();
-
-        info.lastPrize = 0;
-        
-        uint i;
-        for (i = 0; i < info.lastWinnersLength; i++){
-            delete info.lastWinners[i];
-        }
-        info.lastWinnersLength = 0;
-        
-    }
-
-    function forceToRevealState() public onlyOwner whenNotPaused {
-        require(state.startOfRoundBlock + config.GAME_STAGE_LENGTH > block.number);
-        toRevealState();
-        emit CommitsSubmitted();
-    }
-
-    function forceToPayoutState() public onlyOwner whenNotPaused {
-        require(state.startOfRoundBlock + config.GAME_STAGE_LENGTH + config.GAME_STAGE_LENGTH > block.number);
-        toPayoutState();
-        emit RevealsSubmitted();
-    }
-
-    event CommitsSubmitted();
-
+    /*
+        The following two functions are the users gaming interface.
+            -- Call commit to commit a hash of your guess for the game. Its a hash, since
+            you probably dont want other players to see your guess
+            -- Call reveal to reveal your guess. You will not participate in the
+            round if you forget to reveal your guess, but your stake will still become
+            someone's prize! Make sure you reveal.
+    */
     function commit(bytes32 hashedCommit) public payable whenNotPaused {
         
         require(state.gameState == GameState.COMMIT_STATE);
@@ -201,27 +181,24 @@ contract Game is Pausable, GameHelper {
         commitsKeys[state.currNumberCommits] = msg.sender;
         state.currNumberCommits++;
 
+        // Start the 'commit stage timer', to protect the players in case the
+        // game master goes rogue
+        if (state.currNumberCommits == 1) {
+            state.commitStageStartBlock = block.number;
+        }
+
         // If we received the MAX_PLAYER number of commits, it is time for
         // us to change state.
         if (state.currNumberCommits == config.MAX_PLAYERS) {
             toRevealState();
-            emit CommitsSubmitted();
         }
     }
 
-    event RevealsSubmitted();
-
-    event DebugEvent(
-        string error
-    );
     function reveal(string guess, string random) public whenNotPaused {
         
-
         require(state.gameState == GameState.REVEAL_STATE);
         
-        // DEBUG: Need to make sure it throws if the guess is not integer
-        //uint guess_num = stringToUint(guess);
-        
+        // Function checks if the guess fits the requirement of the game
         checkGuess(guess);
 
         // Check that the hashes match
@@ -236,13 +213,27 @@ contract Game is Pausable, GameHelper {
         state.currNumberReveals++;
 
         if(state.currNumberReveals == config.MAX_PLAYERS){
-            emit RevealsSubmitted();
-            state.gameState = GameState.PAYOUT_STATE;
-            state.gameStateDebug = 2;
+            toPayoutState();
         }
     }
 
-    function checkGuess(string guess) private;
+
+
+    /*
+        The following three functions are GameMaster controlled functions.
+        GM is responsible for the state transitions of the contracts.
+    */
+    function forceToRevealState() public onlyOwner whenNotPaused {
+        require(state.gameState == GameState.COMMIT_STATE);
+        require(state.commitStageStartBlock + config.GAME_STAGE_LENGTH <= block.number);
+        toRevealState();
+    }
+
+    function forceToPayoutState() public onlyOwner whenNotPaused {
+        require(state.gameState == GameState.REVEAL_STATE);
+        require(state.revealStageStartBlock + config.GAME_STAGE_LENGTH <= block.number);
+        toPayoutState();
+    }
 
     function payout() public onlyOwner whenNotPaused {
         require(state.gameState == GameState.PAYOUT_STATE);
@@ -250,6 +241,31 @@ contract Game is Pausable, GameHelper {
         toCommitState();
     }
 
+    /* 
+        Function resets the game contract state to deployment state.
+        This is an emergency function.
+    */
+    function resetGame() public onlyOwner whenNotPaused {  
+        
+        toCommitState();
+
+        info.lastPrize = 0;
+        
+        uint i;
+        for (i = 0; i < info.lastWinnersLength; i++){
+            delete info.lastWinners[i];
+        }
+        info.lastWinnersLength = 0;
+    }
+
+
+
+    /* 
+        Function parforms a payout of money to the winners.
+        The function has to be called by the child contract once the winners are found
+        i.e the function has to be called in the end of findWinners().
+        TODO: Can performPayout call be better placed?
+    */
     function performPayout(address[] winners, uint numWinners, uint prize) internal {
         uint i = 0;
 
@@ -263,18 +279,44 @@ contract Game is Pausable, GameHelper {
 
 
 
-    event DebugWinner(address addr, uint n);
 
+
+    /* 
+        These are the abstract functions that the inheriting game
+        contracts will have to define. 
+    */
+    function checkGuess(string guess) private;
     function findWinners() private;
 
-    // Call this funtion to get to COMMIT_STATE
-    event DebugCommitState(uint last_win_l, uint win_l);
 
+
+
+
+
+    /* Contract state transition helpers */
+    event CommitsSubmitted();
+    function toRevealState() internal {
+        state.gameState = GameState.REVEAL_STATE;
+        state.gameStateDebug = 1;
+        state.revealStageStartBlock = block.number;
+        emit CommitsSubmitted();
+
+    }
+
+    event RevealsSubmitted();
+    function toPayoutState() internal {
+        state.gameState = GameState.PAYOUT_STATE;
+        state.gameStateDebug = 2;
+        emit RevealsSubmitted();
+    }
+
+    event NewRoundStarted();
     function toCommitState() internal {
-
+        // Set state
         state.gameState = GameState.COMMIT_STATE;
         state.gameStateDebug = 0;
 
+        // Cleanup the commits
         uint i;
         for(i = 0; i < state.currNumberCommits; i++){
             delete commits[commitsKeys[i]];
@@ -283,23 +325,13 @@ contract Game is Pausable, GameHelper {
         state.currNumberCommits = 0;
         state.currNumberReveals = 0;
 
-        state.startOfRoundBlock = block.number;
+        // TODO: Find a better way to do this
+        state.commitStageStartBlock = ~uint(0) - config.GAME_STAGE_LENGTH;
+        state.revealStageStartBlock = ~uint(0) - config.GAME_STAGE_LENGTH;
 
+        emit NewRoundStarted();
     }
 
-    // Call this function to get to REVEAL_STATE
-    function toRevealState() internal {
-
-        state.gameState = GameState.REVEAL_STATE;
-        state.gameStateDebug = 1;
-        state.finalCommitBlock = block.number;
-
-    }
-
-    function toPayoutState() internal {
-        state.gameState = GameState.PAYOUT_STATE;
-        state.gameStateDebug = 2;
-    }
 
 
 
