@@ -1,3 +1,4 @@
+//go:generate abigen --sol ./../../contracts/Game.sol --pkg gm --out Game.go
 package gm
 
 import (
