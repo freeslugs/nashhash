@@ -16,7 +16,7 @@ import (
 )
 
 // GameABI is the input ABI used to generate the binding from.
-const GameABI = "[{\"constant\":true,\"inputs\":[{\"name\":\"\",\"type\":\"address\"}],\"name\":\"gameData\",\"outputs\":[{\"name\":\"\",\"type\":\"string\"}],\"payable\":false,\"stateMutability\":\"view\",\"type\":\"function\"},{\"constant\":false,\"inputs\":[],\"name\":\"unpause\",\"outputs\":[],\"payable\":false,\"stateMutability\":\"nonpayable\",\"type\":\"function\"},{\"constant\":true,\"inputs\":[],\"name\":\"paused\",\"outputs\":[{\"name\":\"\",\"type\":\"bool\"}],\"payable\":false,\"stateMutability\":\"view\",\"type\":\"function\"},{\"constant\":false,\"inputs\":[],\"name\":\"renounceOwnership\",\"outputs\":[],\"payable\":false,\"stateMutability\":\"nonpayable\",\"type\":\"function\"},{\"constant\":true,\"inputs\":[{\"name\":\"\",\"type\":\"address\"}],\"name\":\"commits\",\"outputs\":[{\"name\":\"\",\"type\":\"bytes32\"}],\"payable\":false,\"stateMutability\":\"view\",\"type\":\"function\"},{\"constant\":false,\"inputs\":[],\"name\":\"pause\",\"outputs\":[],\"payable\":false,\"stateMutability\":\"nonpayable\",\"type\":\"function\"},{\"constant\":true,\"inputs\":[],\"name\":\"owner\",\"outputs\":[{\"name\":\"\",\"type\":\"address\"}],\"payable\":false,\"stateMutability\":\"view\",\"type\":\"function\"},{\"constant\":true,\"inputs\":[],\"name\":\"birthBlock\",\"outputs\":[{\"name\":\"\",\"type\":\"uint256\"}],\"payable\":false,\"stateMutability\":\"view\",\"type\":\"function\"},{\"constant\":false,\"inputs\":[{\"name\":\"newOwner\",\"type\":\"address\"}],\"name\":\"transferOwnership\",\"outputs\":[],\"payable\":false,\"stateMutability\":\"nonpayable\",\"type\":\"function\"},{\"inputs\":[{\"name\":\"_maxp\",\"type\":\"uint256\"}],\"payable\":false,\"stateMutability\":\"nonpayable\",\"type\":\"constructor\"},{\"anonymous\":false,\"inputs\":[],\"name\":\"CommitsSubmitted\",\"type\":\"event\"},{\"anonymous\":false,\"inputs\":[],\"name\":\"RevealsSubmitted\",\"type\":\"event\"},{\"anonymous\":false,\"inputs\":[{\"indexed\":false,\"name\":\"error\",\"type\":\"string\"}],\"name\":\"DebugEvent\",\"type\":\"event\"},{\"anonymous\":false,\"inputs\":[{\"indexed\":false,\"name\":\"addr\",\"type\":\"address\"},{\"indexed\":false,\"name\":\"n\",\"type\":\"uint256\"}],\"name\":\"DebugWinner\",\"type\":\"event\"},{\"anonymous\":false,\"inputs\":[{\"indexed\":false,\"name\":\"last_win_l\",\"type\":\"uint256\"},{\"indexed\":false,\"name\":\"win_l\",\"type\":\"uint256\"}],\"name\":\"DebugCommitState\",\"type\":\"event\"},{\"anonymous\":false,\"inputs\":[],\"name\":\"Pause\",\"type\":\"event\"},{\"anonymous\":false,\"inputs\":[],\"name\":\"Unpause\",\"type\":\"event\"},{\"anonymous\":false,\"inputs\":[{\"indexed\":true,\"name\":\"previousOwner\",\"type\":\"address\"}],\"name\":\"OwnershipRenounced\",\"type\":\"event\"},{\"anonymous\":false,\"inputs\":[{\"indexed\":true,\"name\":\"previousOwner\",\"type\":\"address\"},{\"indexed\":true,\"name\":\"newOwner\",\"type\":\"address\"}],\"name\":\"OwnershipTransferred\",\"type\":\"event\"},{\"constant\":true,\"inputs\":[],\"name\":\"getGameState\",\"outputs\":[{\"name\":\"\",\"type\":\"uint256\"}],\"payable\":false,\"stateMutability\":\"view\",\"type\":\"function\"},{\"constant\":true,\"inputs\":[],\"name\":\"getCurrentCommits\",\"outputs\":[{\"name\":\"\",\"type\":\"uint256\"}],\"payable\":false,\"stateMutability\":\"view\",\"type\":\"function\"},{\"constant\":true,\"inputs\":[],\"name\":\"getCurrentReveals\",\"outputs\":[{\"name\":\"\",\"type\":\"uint256\"}],\"payable\":false,\"stateMutability\":\"view\",\"type\":\"function\"},{\"constant\":true,\"inputs\":[],\"name\":\"getStakeSize\",\"outputs\":[{\"name\":\"\",\"type\":\"uint256\"}],\"payable\":false,\"stateMutability\":\"view\",\"type\":\"function\"},{\"constant\":false,\"inputs\":[{\"name\":\"new_stake\",\"type\":\"uint256\"}],\"name\":\"setStakeSize\",\"outputs\":[],\"payable\":false,\"stateMutability\":\"nonpayable\",\"type\":\"function\"},{\"constant\":true,\"inputs\":[],\"name\":\"getNumberOfWinners\",\"outputs\":[{\"name\":\"\",\"type\":\"uint256\"}],\"payable\":false,\"stateMutability\":\"view\",\"type\":\"function\"},{\"constant\":true,\"inputs\":[{\"name\":\"i\",\"type\":\"uint256\"}],\"name\":\"getLastWinners\",\"outputs\":[{\"name\":\"\",\"type\":\"address\"}],\"payable\":false,\"stateMutability\":\"view\",\"type\":\"function\"},{\"constant\":true,\"inputs\":[],\"name\":\"getLastPrize\",\"outputs\":[{\"name\":\"\",\"type\":\"uint256\"}],\"payable\":false,\"stateMutability\":\"view\",\"type\":\"function\"},{\"constant\":true,\"inputs\":[],\"name\":\"getGameFee\",\"outputs\":[{\"name\":\"\",\"type\":\"uint256\"}],\"payable\":false,\"stateMutability\":\"view\",\"type\":\"function\"},{\"constant\":true,\"inputs\":[],\"name\":\"getMaxPlayers\",\"outputs\":[{\"name\":\"\",\"type\":\"uint256\"}],\"payable\":false,\"stateMutability\":\"view\",\"type\":\"function\"},{\"constant\":false,\"inputs\":[{\"name\":\"new_max\",\"type\":\"uint256\"}],\"name\":\"setMaxPlayers\",\"outputs\":[],\"payable\":false,\"stateMutability\":\"nonpayable\",\"type\":\"function\"},{\"constant\":false,\"inputs\":[],\"name\":\"resetGame\",\"outputs\":[],\"payable\":false,\"stateMutability\":\"nonpayable\",\"type\":\"function\"},{\"constant\":false,\"inputs\":[],\"name\":\"forceToRevealState\",\"outputs\":[],\"payable\":false,\"stateMutability\":\"nonpayable\",\"type\":\"function\"},{\"constant\":false,\"inputs\":[],\"name\":\"forceToPayoutState\",\"outputs\":[],\"payable\":false,\"stateMutability\":\"nonpayable\",\"type\":\"function\"},{\"constant\":false,\"inputs\":[{\"name\":\"hashedCommit\",\"type\":\"bytes32\"}],\"name\":\"commit\",\"outputs\":[],\"payable\":true,\"stateMutability\":\"payable\",\"type\":\"function\"},{\"constant\":false,\"inputs\":[{\"name\":\"guess\",\"type\":\"string\"},{\"name\":\"random\",\"type\":\"string\"}],\"name\":\"reveal\",\"outputs\":[],\"payable\":false,\"stateMutability\":\"nonpayable\",\"type\":\"function\"},{\"constant\":false,\"inputs\":[],\"name\":\"payout\",\"outputs\":[],\"payable\":false,\"stateMutability\":\"nonpayable\",\"type\":\"function\"}]"
+const GameABI = "[{\"constant\":true,\"inputs\":[{\"name\":\"\",\"type\":\"address\"}],\"name\":\"gameData\",\"outputs\":[{\"name\":\"\",\"type\":\"string\"}],\"payable\":false,\"stateMutability\":\"view\",\"type\":\"function\"},{\"constant\":false,\"inputs\":[],\"name\":\"unpause\",\"outputs\":[],\"payable\":false,\"stateMutability\":\"nonpayable\",\"type\":\"function\"},{\"constant\":true,\"inputs\":[],\"name\":\"paused\",\"outputs\":[{\"name\":\"\",\"type\":\"bool\"}],\"payable\":false,\"stateMutability\":\"view\",\"type\":\"function\"},{\"constant\":false,\"inputs\":[],\"name\":\"renounceOwnership\",\"outputs\":[],\"payable\":false,\"stateMutability\":\"nonpayable\",\"type\":\"function\"},{\"constant\":true,\"inputs\":[{\"name\":\"\",\"type\":\"address\"}],\"name\":\"commits\",\"outputs\":[{\"name\":\"\",\"type\":\"bytes32\"}],\"payable\":false,\"stateMutability\":\"view\",\"type\":\"function\"},{\"constant\":false,\"inputs\":[],\"name\":\"pause\",\"outputs\":[],\"payable\":false,\"stateMutability\":\"nonpayable\",\"type\":\"function\"},{\"constant\":true,\"inputs\":[],\"name\":\"owner\",\"outputs\":[{\"name\":\"\",\"type\":\"address\"}],\"payable\":false,\"stateMutability\":\"view\",\"type\":\"function\"},{\"constant\":true,\"inputs\":[],\"name\":\"birthBlock\",\"outputs\":[{\"name\":\"\",\"type\":\"uint256\"}],\"payable\":false,\"stateMutability\":\"view\",\"type\":\"function\"},{\"constant\":false,\"inputs\":[{\"name\":\"newOwner\",\"type\":\"address\"}],\"name\":\"transferOwnership\",\"outputs\":[],\"payable\":false,\"stateMutability\":\"nonpayable\",\"type\":\"function\"},{\"inputs\":[{\"name\":\"_feeAddress\",\"type\":\"address\"},{\"name\":\"_gameFeePercent\",\"type\":\"uint256\"},{\"name\":\"_stakeSize\",\"type\":\"uint256\"},{\"name\":\"_maxp\",\"type\":\"uint256\"},{\"name\":\"_gameStageLength\",\"type\":\"uint256\"}],\"payable\":false,\"stateMutability\":\"nonpayable\",\"type\":\"constructor\"},{\"anonymous\":false,\"inputs\":[],\"name\":\"CommitsSubmitted\",\"type\":\"event\"},{\"anonymous\":false,\"inputs\":[],\"name\":\"RevealsSubmitted\",\"type\":\"event\"},{\"anonymous\":false,\"inputs\":[],\"name\":\"NewRoundStarted\",\"type\":\"event\"},{\"anonymous\":false,\"inputs\":[],\"name\":\"Pause\",\"type\":\"event\"},{\"anonymous\":false,\"inputs\":[],\"name\":\"Unpause\",\"type\":\"event\"},{\"anonymous\":false,\"inputs\":[{\"indexed\":true,\"name\":\"previousOwner\",\"type\":\"address\"}],\"name\":\"OwnershipRenounced\",\"type\":\"event\"},{\"anonymous\":false,\"inputs\":[{\"indexed\":true,\"name\":\"previousOwner\",\"type\":\"address\"},{\"indexed\":true,\"name\":\"newOwner\",\"type\":\"address\"}],\"name\":\"OwnershipTransferred\",\"type\":\"event\"},{\"constant\":true,\"inputs\":[],\"name\":\"getGameState\",\"outputs\":[{\"name\":\"\",\"type\":\"uint256\"}],\"payable\":false,\"stateMutability\":\"view\",\"type\":\"function\"},{\"constant\":true,\"inputs\":[],\"name\":\"getCurrentCommits\",\"outputs\":[{\"name\":\"\",\"type\":\"uint256\"}],\"payable\":false,\"stateMutability\":\"view\",\"type\":\"function\"},{\"constant\":true,\"inputs\":[],\"name\":\"getCurrentReveals\",\"outputs\":[{\"name\":\"\",\"type\":\"uint256\"}],\"payable\":false,\"stateMutability\":\"view\",\"type\":\"function\"},{\"constant\":true,\"inputs\":[],\"name\":\"getStakeSize\",\"outputs\":[{\"name\":\"\",\"type\":\"uint256\"}],\"payable\":false,\"stateMutability\":\"view\",\"type\":\"function\"},{\"constant\":false,\"inputs\":[{\"name\":\"new_stake\",\"type\":\"uint256\"}],\"name\":\"setStakeSize\",\"outputs\":[],\"payable\":false,\"stateMutability\":\"nonpayable\",\"type\":\"function\"},{\"constant\":true,\"inputs\":[],\"name\":\"getNumberOfWinners\",\"outputs\":[{\"name\":\"\",\"type\":\"uint256\"}],\"payable\":false,\"stateMutability\":\"view\",\"type\":\"function\"},{\"constant\":true,\"inputs\":[{\"name\":\"i\",\"type\":\"uint256\"}],\"name\":\"getLastWinners\",\"outputs\":[{\"name\":\"\",\"type\":\"address\"}],\"payable\":false,\"stateMutability\":\"view\",\"type\":\"function\"},{\"constant\":true,\"inputs\":[],\"name\":\"getLastPrize\",\"outputs\":[{\"name\":\"\",\"type\":\"uint256\"}],\"payable\":false,\"stateMutability\":\"view\",\"type\":\"function\"},{\"constant\":true,\"inputs\":[],\"name\":\"getGameFee\",\"outputs\":[{\"name\":\"\",\"type\":\"uint256\"}],\"payable\":false,\"stateMutability\":\"view\",\"type\":\"function\"},{\"constant\":true,\"inputs\":[],\"name\":\"getMaxPlayers\",\"outputs\":[{\"name\":\"\",\"type\":\"uint256\"}],\"payable\":false,\"stateMutability\":\"view\",\"type\":\"function\"},{\"constant\":false,\"inputs\":[{\"name\":\"new_max\",\"type\":\"uint256\"}],\"name\":\"setMaxPlayers\",\"outputs\":[],\"payable\":false,\"stateMutability\":\"nonpayable\",\"type\":\"function\"},{\"constant\":true,\"inputs\":[],\"name\":\"getCommitStageStartBlock\",\"outputs\":[{\"name\":\"\",\"type\":\"uint256\"}],\"payable\":false,\"stateMutability\":\"view\",\"type\":\"function\"},{\"constant\":true,\"inputs\":[],\"name\":\"getRevealStageStartBlock\",\"outputs\":[{\"name\":\"\",\"type\":\"uint256\"}],\"payable\":false,\"stateMutability\":\"view\",\"type\":\"function\"},{\"constant\":false,\"inputs\":[{\"name\":\"hashedCommit\",\"type\":\"bytes32\"}],\"name\":\"commit\",\"outputs\":[],\"payable\":true,\"stateMutability\":\"payable\",\"type\":\"function\"},{\"constant\":false,\"inputs\":[{\"name\":\"guess\",\"type\":\"string\"},{\"name\":\"random\",\"type\":\"string\"}],\"name\":\"reveal\",\"outputs\":[],\"payable\":false,\"stateMutability\":\"nonpayable\",\"type\":\"function\"},{\"constant\":false,\"inputs\":[],\"name\":\"forceToRevealState\",\"outputs\":[],\"payable\":false,\"stateMutability\":\"nonpayable\",\"type\":\"function\"},{\"constant\":false,\"inputs\":[],\"name\":\"forceToPayoutState\",\"outputs\":[],\"payable\":false,\"stateMutability\":\"nonpayable\",\"type\":\"function\"},{\"constant\":false,\"inputs\":[],\"name\":\"payout\",\"outputs\":[],\"payable\":false,\"stateMutability\":\"nonpayable\",\"type\":\"function\"},{\"constant\":false,\"inputs\":[],\"name\":\"resetGame\",\"outputs\":[],\"payable\":false,\"stateMutability\":\"nonpayable\",\"type\":\"function\"}]"
 
 // Game is an auto generated Go binding around an Ethereum contract.
 type Game struct {
@@ -238,6 +238,32 @@ func (_Game *GameCallerSession) GameData(arg0 common.Address) (string, error) {
 	return _Game.Contract.GameData(&_Game.CallOpts, arg0)
 }
 
+// GetCommitStageStartBlock is a free data retrieval call binding the contract method 0x6cb9a390.
+//
+// Solidity: function getCommitStageStartBlock() constant returns(uint256)
+func (_Game *GameCaller) GetCommitStageStartBlock(opts *bind.CallOpts) (*big.Int, error) {
+	var (
+		ret0 = new(*big.Int)
+	)
+	out := ret0
+	err := _Game.contract.Call(opts, out, "getCommitStageStartBlock")
+	return *ret0, err
+}
+
+// GetCommitStageStartBlock is a free data retrieval call binding the contract method 0x6cb9a390.
+//
+// Solidity: function getCommitStageStartBlock() constant returns(uint256)
+func (_Game *GameSession) GetCommitStageStartBlock() (*big.Int, error) {
+	return _Game.Contract.GetCommitStageStartBlock(&_Game.CallOpts)
+}
+
+// GetCommitStageStartBlock is a free data retrieval call binding the contract method 0x6cb9a390.
+//
+// Solidity: function getCommitStageStartBlock() constant returns(uint256)
+func (_Game *GameCallerSession) GetCommitStageStartBlock() (*big.Int, error) {
+	return _Game.Contract.GetCommitStageStartBlock(&_Game.CallOpts)
+}
+
 // GetCurrentCommits is a free data retrieval call binding the contract method 0x0d7099ea.
 //
 // Solidity: function getCurrentCommits() constant returns(uint256)
@@ -444,6 +470,32 @@ func (_Game *GameSession) GetNumberOfWinners() (*big.Int, error) {
 // Solidity: function getNumberOfWinners() constant returns(uint256)
 func (_Game *GameCallerSession) GetNumberOfWinners() (*big.Int, error) {
 	return _Game.Contract.GetNumberOfWinners(&_Game.CallOpts)
+}
+
+// GetRevealStageStartBlock is a free data retrieval call binding the contract method 0x9ebefb68.
+//
+// Solidity: function getRevealStageStartBlock() constant returns(uint256)
+func (_Game *GameCaller) GetRevealStageStartBlock(opts *bind.CallOpts) (*big.Int, error) {
+	var (
+		ret0 = new(*big.Int)
+	)
+	out := ret0
+	err := _Game.contract.Call(opts, out, "getRevealStageStartBlock")
+	return *ret0, err
+}
+
+// GetRevealStageStartBlock is a free data retrieval call binding the contract method 0x9ebefb68.
+//
+// Solidity: function getRevealStageStartBlock() constant returns(uint256)
+func (_Game *GameSession) GetRevealStageStartBlock() (*big.Int, error) {
+	return _Game.Contract.GetRevealStageStartBlock(&_Game.CallOpts)
+}
+
+// GetRevealStageStartBlock is a free data retrieval call binding the contract method 0x9ebefb68.
+//
+// Solidity: function getRevealStageStartBlock() constant returns(uint256)
+func (_Game *GameCallerSession) GetRevealStageStartBlock() (*big.Int, error) {
+	return _Game.Contract.GetRevealStageStartBlock(&_Game.CallOpts)
 }
 
 // GetStakeSize is a free data retrieval call binding the contract method 0x76cc4b7e.
@@ -897,9 +949,9 @@ func (_Game *GameFilterer) WatchCommitsSubmitted(opts *bind.WatchOpts, sink chan
 	}), nil
 }
 
-// GameDebugCommitStateIterator is returned from FilterDebugCommitState and is used to iterate over the raw logs and unpacked data for DebugCommitState events raised by the Game contract.
-type GameDebugCommitStateIterator struct {
-	Event *GameDebugCommitState // Event containing the contract specifics and raw log
+// GameNewRoundStartedIterator is returned from FilterNewRoundStarted and is used to iterate over the raw logs and unpacked data for NewRoundStarted events raised by the Game contract.
+type GameNewRoundStartedIterator struct {
+	Event *GameNewRoundStarted // Event containing the contract specifics and raw log
 
 	contract *bind.BoundContract // Generic contract to use for unpacking event data
 	event    string              // Event name to use for unpacking event data
@@ -913,7 +965,7 @@ type GameDebugCommitStateIterator struct {
 // Next advances the iterator to the subsequent event, returning whether there
 // are any more events found. In case of a retrieval or parsing error, false is
 // returned and Error() can be queried for the exact failure.
-func (it *GameDebugCommitStateIterator) Next() bool {
+func (it *GameNewRoundStartedIterator) Next() bool {
 	// If the iterator failed, stop iterating
 	if it.fail != nil {
 		return false
@@ -922,7 +974,7 @@ func (it *GameDebugCommitStateIterator) Next() bool {
 	if it.done {
 		select {
 		case log := <-it.logs:
-			it.Event = new(GameDebugCommitState)
+			it.Event = new(GameNewRoundStarted)
 			if err := it.contract.UnpackLog(it.Event, it.event, log); err != nil {
 				it.fail = err
 				return false
@@ -937,7 +989,7 @@ func (it *GameDebugCommitStateIterator) Next() bool {
 	// Iterator still in progress, wait for either a data or an error event
 	select {
 	case log := <-it.logs:
-		it.Event = new(GameDebugCommitState)
+		it.Event = new(GameNewRoundStarted)
 		if err := it.contract.UnpackLog(it.Event, it.event, log); err != nil {
 			it.fail = err
 			return false
@@ -953,42 +1005,40 @@ func (it *GameDebugCommitStateIterator) Next() bool {
 }
 
 // Error returns any retrieval or parsing error occurred during filtering.
-func (it *GameDebugCommitStateIterator) Error() error {
+func (it *GameNewRoundStartedIterator) Error() error {
 	return it.fail
 }
 
 // Close terminates the iteration process, releasing any pending underlying
 // resources.
-func (it *GameDebugCommitStateIterator) Close() error {
+func (it *GameNewRoundStartedIterator) Close() error {
 	it.sub.Unsubscribe()
 	return nil
 }
 
-// GameDebugCommitState represents a DebugCommitState event raised by the Game contract.
-type GameDebugCommitState struct {
-	LastWinL *big.Int
-	WinL     *big.Int
-	Raw      types.Log // Blockchain specific contextual infos
+// GameNewRoundStarted represents a NewRoundStarted event raised by the Game contract.
+type GameNewRoundStarted struct {
+	Raw types.Log // Blockchain specific contextual infos
 }
 
-// FilterDebugCommitState is a free log retrieval operation binding the contract event 0x278480b035975688c107f41ad805694077b1c71eb9ef9c10132f19f893c87c0c.
+// FilterNewRoundStarted is a free log retrieval operation binding the contract event 0xc80d42c5999c8ad689a434b47a3eecdc54fa3b27a31b49cb02b8c5075929fecc.
 //
-// Solidity: e DebugCommitState(last_win_l uint256, win_l uint256)
-func (_Game *GameFilterer) FilterDebugCommitState(opts *bind.FilterOpts) (*GameDebugCommitStateIterator, error) {
+// Solidity: e NewRoundStarted()
+func (_Game *GameFilterer) FilterNewRoundStarted(opts *bind.FilterOpts) (*GameNewRoundStartedIterator, error) {
 
-	logs, sub, err := _Game.contract.FilterLogs(opts, "DebugCommitState")
+	logs, sub, err := _Game.contract.FilterLogs(opts, "NewRoundStarted")
 	if err != nil {
 		return nil, err
 	}
-	return &GameDebugCommitStateIterator{contract: _Game.contract, event: "DebugCommitState", logs: logs, sub: sub}, nil
+	return &GameNewRoundStartedIterator{contract: _Game.contract, event: "NewRoundStarted", logs: logs, sub: sub}, nil
 }
 
-// WatchDebugCommitState is a free log subscription operation binding the contract event 0x278480b035975688c107f41ad805694077b1c71eb9ef9c10132f19f893c87c0c.
+// WatchNewRoundStarted is a free log subscription operation binding the contract event 0xc80d42c5999c8ad689a434b47a3eecdc54fa3b27a31b49cb02b8c5075929fecc.
 //
-// Solidity: e DebugCommitState(last_win_l uint256, win_l uint256)
-func (_Game *GameFilterer) WatchDebugCommitState(opts *bind.WatchOpts, sink chan<- *GameDebugCommitState) (event.Subscription, error) {
+// Solidity: e NewRoundStarted()
+func (_Game *GameFilterer) WatchNewRoundStarted(opts *bind.WatchOpts, sink chan<- *GameNewRoundStarted) (event.Subscription, error) {
 
-	logs, sub, err := _Game.contract.WatchLogs(opts, "DebugCommitState")
+	logs, sub, err := _Game.contract.WatchLogs(opts, "NewRoundStarted")
 	if err != nil {
 		return nil, err
 	}
@@ -998,253 +1048,8 @@ func (_Game *GameFilterer) WatchDebugCommitState(opts *bind.WatchOpts, sink chan
 			select {
 			case log := <-logs:
 				// New log arrived, parse the event and forward to the user
-				event := new(GameDebugCommitState)
-				if err := _Game.contract.UnpackLog(event, "DebugCommitState", log); err != nil {
-					return err
-				}
-				event.Raw = log
-
-				select {
-				case sink <- event:
-				case err := <-sub.Err():
-					return err
-				case <-quit:
-					return nil
-				}
-			case err := <-sub.Err():
-				return err
-			case <-quit:
-				return nil
-			}
-		}
-	}), nil
-}
-
-// GameDebugEventIterator is returned from FilterDebugEvent and is used to iterate over the raw logs and unpacked data for DebugEvent events raised by the Game contract.
-type GameDebugEventIterator struct {
-	Event *GameDebugEvent // Event containing the contract specifics and raw log
-
-	contract *bind.BoundContract // Generic contract to use for unpacking event data
-	event    string              // Event name to use for unpacking event data
-
-	logs chan types.Log        // Log channel receiving the found contract events
-	sub  ethereum.Subscription // Subscription for errors, completion and termination
-	done bool                  // Whether the subscription completed delivering logs
-	fail error                 // Occurred error to stop iteration
-}
-
-// Next advances the iterator to the subsequent event, returning whether there
-// are any more events found. In case of a retrieval or parsing error, false is
-// returned and Error() can be queried for the exact failure.
-func (it *GameDebugEventIterator) Next() bool {
-	// If the iterator failed, stop iterating
-	if it.fail != nil {
-		return false
-	}
-	// If the iterator completed, deliver directly whatever's available
-	if it.done {
-		select {
-		case log := <-it.logs:
-			it.Event = new(GameDebugEvent)
-			if err := it.contract.UnpackLog(it.Event, it.event, log); err != nil {
-				it.fail = err
-				return false
-			}
-			it.Event.Raw = log
-			return true
-
-		default:
-			return false
-		}
-	}
-	// Iterator still in progress, wait for either a data or an error event
-	select {
-	case log := <-it.logs:
-		it.Event = new(GameDebugEvent)
-		if err := it.contract.UnpackLog(it.Event, it.event, log); err != nil {
-			it.fail = err
-			return false
-		}
-		it.Event.Raw = log
-		return true
-
-	case err := <-it.sub.Err():
-		it.done = true
-		it.fail = err
-		return it.Next()
-	}
-}
-
-// Error returns any retrieval or parsing error occurred during filtering.
-func (it *GameDebugEventIterator) Error() error {
-	return it.fail
-}
-
-// Close terminates the iteration process, releasing any pending underlying
-// resources.
-func (it *GameDebugEventIterator) Close() error {
-	it.sub.Unsubscribe()
-	return nil
-}
-
-// GameDebugEvent represents a DebugEvent event raised by the Game contract.
-type GameDebugEvent struct {
-	Error string
-	Raw   types.Log // Blockchain specific contextual infos
-}
-
-// FilterDebugEvent is a free log retrieval operation binding the contract event 0x56f074d292557f2e3c567d982816e0fb5b72100ff196892f8fbd23b8a9073679.
-//
-// Solidity: e DebugEvent(error string)
-func (_Game *GameFilterer) FilterDebugEvent(opts *bind.FilterOpts) (*GameDebugEventIterator, error) {
-
-	logs, sub, err := _Game.contract.FilterLogs(opts, "DebugEvent")
-	if err != nil {
-		return nil, err
-	}
-	return &GameDebugEventIterator{contract: _Game.contract, event: "DebugEvent", logs: logs, sub: sub}, nil
-}
-
-// WatchDebugEvent is a free log subscription operation binding the contract event 0x56f074d292557f2e3c567d982816e0fb5b72100ff196892f8fbd23b8a9073679.
-//
-// Solidity: e DebugEvent(error string)
-func (_Game *GameFilterer) WatchDebugEvent(opts *bind.WatchOpts, sink chan<- *GameDebugEvent) (event.Subscription, error) {
-
-	logs, sub, err := _Game.contract.WatchLogs(opts, "DebugEvent")
-	if err != nil {
-		return nil, err
-	}
-	return event.NewSubscription(func(quit <-chan struct{}) error {
-		defer sub.Unsubscribe()
-		for {
-			select {
-			case log := <-logs:
-				// New log arrived, parse the event and forward to the user
-				event := new(GameDebugEvent)
-				if err := _Game.contract.UnpackLog(event, "DebugEvent", log); err != nil {
-					return err
-				}
-				event.Raw = log
-
-				select {
-				case sink <- event:
-				case err := <-sub.Err():
-					return err
-				case <-quit:
-					return nil
-				}
-			case err := <-sub.Err():
-				return err
-			case <-quit:
-				return nil
-			}
-		}
-	}), nil
-}
-
-// GameDebugWinnerIterator is returned from FilterDebugWinner and is used to iterate over the raw logs and unpacked data for DebugWinner events raised by the Game contract.
-type GameDebugWinnerIterator struct {
-	Event *GameDebugWinner // Event containing the contract specifics and raw log
-
-	contract *bind.BoundContract // Generic contract to use for unpacking event data
-	event    string              // Event name to use for unpacking event data
-
-	logs chan types.Log        // Log channel receiving the found contract events
-	sub  ethereum.Subscription // Subscription for errors, completion and termination
-	done bool                  // Whether the subscription completed delivering logs
-	fail error                 // Occurred error to stop iteration
-}
-
-// Next advances the iterator to the subsequent event, returning whether there
-// are any more events found. In case of a retrieval or parsing error, false is
-// returned and Error() can be queried for the exact failure.
-func (it *GameDebugWinnerIterator) Next() bool {
-	// If the iterator failed, stop iterating
-	if it.fail != nil {
-		return false
-	}
-	// If the iterator completed, deliver directly whatever's available
-	if it.done {
-		select {
-		case log := <-it.logs:
-			it.Event = new(GameDebugWinner)
-			if err := it.contract.UnpackLog(it.Event, it.event, log); err != nil {
-				it.fail = err
-				return false
-			}
-			it.Event.Raw = log
-			return true
-
-		default:
-			return false
-		}
-	}
-	// Iterator still in progress, wait for either a data or an error event
-	select {
-	case log := <-it.logs:
-		it.Event = new(GameDebugWinner)
-		if err := it.contract.UnpackLog(it.Event, it.event, log); err != nil {
-			it.fail = err
-			return false
-		}
-		it.Event.Raw = log
-		return true
-
-	case err := <-it.sub.Err():
-		it.done = true
-		it.fail = err
-		return it.Next()
-	}
-}
-
-// Error returns any retrieval or parsing error occurred during filtering.
-func (it *GameDebugWinnerIterator) Error() error {
-	return it.fail
-}
-
-// Close terminates the iteration process, releasing any pending underlying
-// resources.
-func (it *GameDebugWinnerIterator) Close() error {
-	it.sub.Unsubscribe()
-	return nil
-}
-
-// GameDebugWinner represents a DebugWinner event raised by the Game contract.
-type GameDebugWinner struct {
-	Addr common.Address
-	N    *big.Int
-	Raw  types.Log // Blockchain specific contextual infos
-}
-
-// FilterDebugWinner is a free log retrieval operation binding the contract event 0xece34cfb64cf1d40c8a91ac1e5395fb2f1586a6d85d750495dd23dd2b22a596d.
-//
-// Solidity: e DebugWinner(addr address, n uint256)
-func (_Game *GameFilterer) FilterDebugWinner(opts *bind.FilterOpts) (*GameDebugWinnerIterator, error) {
-
-	logs, sub, err := _Game.contract.FilterLogs(opts, "DebugWinner")
-	if err != nil {
-		return nil, err
-	}
-	return &GameDebugWinnerIterator{contract: _Game.contract, event: "DebugWinner", logs: logs, sub: sub}, nil
-}
-
-// WatchDebugWinner is a free log subscription operation binding the contract event 0xece34cfb64cf1d40c8a91ac1e5395fb2f1586a6d85d750495dd23dd2b22a596d.
-//
-// Solidity: e DebugWinner(addr address, n uint256)
-func (_Game *GameFilterer) WatchDebugWinner(opts *bind.WatchOpts, sink chan<- *GameDebugWinner) (event.Subscription, error) {
-
-	logs, sub, err := _Game.contract.WatchLogs(opts, "DebugWinner")
-	if err != nil {
-		return nil, err
-	}
-	return event.NewSubscription(func(quit <-chan struct{}) error {
-		defer sub.Unsubscribe()
-		for {
-			select {
-			case log := <-logs:
-				// New log arrived, parse the event and forward to the user
-				event := new(GameDebugWinner)
-				if err := _Game.contract.UnpackLog(event, "DebugWinner", log); err != nil {
+				event := new(GameNewRoundStarted)
+				if err := _Game.contract.UnpackLog(event, "NewRoundStarted", log); err != nil {
 					return err
 				}
 				event.Raw = log

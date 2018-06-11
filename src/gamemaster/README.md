@@ -9,7 +9,8 @@
         export GOPATH=$(pwd)
 You want to set it up to some/path/nashhash/src
 3. Genereate the go binding for the Game.sol
-        abigen --abi ../../abi/Game_sol_Game.abi --pkg gm --type Game --out GameContract.go
+        copypaste abi from game.json
+        abigen --abi ../../abi/Game_sol_Game.abi --pkg gm --type Game --out Game.go
 4. Run tests
         go test -v
 
