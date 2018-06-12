@@ -10,7 +10,8 @@
   "scripts": {
     "start": "react-scripts start",
     "build": "react-scripts build",
-    "eject": "react-scripts eject"
+    "eject": "react-scripts eject",
+    "test": "rm -r build && truffle compile && truffle migrate --reset && truffle develop && truffle test"
   },
   "author": "",
   "license": "ISC",
@@ -41,6 +42,7 @@
     "semantic-ui-react": "^0.80.0",
     "solc": "^0.4.24",
     "styled-components": "^3.2.6",
+    "truffle": "^4.1.11",
     "truffle-contract": "^3.0.5",
     "web3": "^1.0.0-beta.34",
     "web3-utils": "^1.0.0-beta.34"
