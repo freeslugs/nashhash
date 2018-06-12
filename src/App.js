@@ -12,6 +12,10 @@ import styled from 'styled-components';
 import { ToastContainer, toast } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
 
+import API from './api/Game.js'
+
+var Web3Utils = require('web3-utils');
+
 const GameContract = require('./contracts/Game.json');
 const contract = require('truffle-contract');
 
@@ -36,71 +40,71 @@ class App extends Component<props> {
   state = {
     web3: null,
     accounts: null,
-    GameInstance: null
+    game: null
   }
 
   async componentDidMount() { 
     const results = await getWeb3;
-    this.setState({ web3: results.web3 })
+    const web3 = results.web3;
+    this.setState({ web3 })
 
     const Game = contract(GameContract)
-    // const Game = GameContract.at("0xe4bf6b739f547a3d1d44501923048d11721a8d01")
-    Game.setProvider(this.state.web3.currentProvider)
+    Game.setProvider(web3.currentProvider)
 
-    this.state.web3.eth.getAccounts(async (error, accounts) => {
+    const accounts = await new Promise(function(resolve, reject) {
+      web3.eth.getAccounts( function (err, accounts) { resolve(accounts) })
+    });
+    this.setState({ accounts: accounts });
 
-      let instance
-      try {
-        // console.log(this.stateweb3)
-        // instance = await Game.deployed();  
-        const network = await this.state.web3.eth.net.getNetworkType();
-        if(network !== "rinkeby")
-          throw(new Error("Game has not been deployed to detected network (network/artifact mismatch)"))
-        instance = Game.at("0xfc72c65a63c28d03c99d40cbebc3b31fcf8b83b9") 
-        // console.log(instance)
-      } catch (e) {
-        console.log(e)
-        if(e.message == "Game has not been deployed to detected network (network/artifact mismatch)") {
-          toast.error('Make sure Metamask is set to Rinkeby.', {
-            position: "top-right",
-            autoClose: false,
-            hideProgressBar: false,
-            closeOnClick: true,
-            draggable: false,
-            draggablePercent: 0
-          })
-          // return false;
-        } else {
-          console.log(e)
-        }
-      }
-      this.setState({ accounts: accounts, GameInstance: instance });
-      const game = instance;
-      // await game.reset();
-      // console.log(game)
+    let instance
+    const network = await web3.eth.net.getNetworkType();
 
-      let curr_number_bets = await game.curr_number_bets();
-      console.log('current bets: ' + parseInt(curr_number_bets))
-      let state = await game.game_state_debug();
-      console.log('current state: ' +  parseInt(state))
-
-      // console.log(parseInt(result))
-    })
+    if(network === "private") { // localhost:9545
+      instance = await Game.deployed();  
+      toast('Configured with local network. Success!', {
+        position: "top-right",
+        autoClose: true,
+        hideProgressBar: false,
+        closeOnClick: true,
+        draggable: false,
+        draggablePercent: 0
+      })
+    } else if(network === "rinkeby") {
+      instance = Game.at("0xec9a2508a775d34d49625a860829f5733fbd4bc6") 
+      toast('Configured with Rinkeby network. Success!', {
+        position: "top-right",
+        autoClose: true,
+        hideProgressBar: false,
+        closeOnClick: true,
+        draggable: false,
+        draggablePercent: 0
+      })
+    } else {  
+      toast.error('Make sure Metamask is set to Rinkeby.', {
+        position: "top-right",
+        autoClose: false,
+        hideProgressBar: false,
+        closeOnClick: true,
+        draggable: false,
+        draggablePercent: 0
+      })
+      return false;
+    }
+  
+    this.setState({ game: instance });
   }
 
   resetGame = async () =>  {
-    console.log(1)
-    const results = await getWeb3;
-    const web3 = results.web3
-    console.log(2)
-    const Game = contract(GameContract)
-    Game.setProvider(this.state.web3.currentProvider)
-    console.log(3)
-    // this.state.web3.eth.getAccounts(async (error, accounts) => {
-    let instance = Game.at("0x9f9673f06ff9cba08b1cd38704ea376ad989de8c") 
-    // await instance.resetGame()
-    console.log(4)
-    // })
+    const { web3, game, accounts } = this.state;
+    const api = new API(web3.utils, () => {}, game);
+    console.log(api)
+    try {
+      // await api.setMaxPlayers(2, accounts[0])
+      await api.resetGame(accounts[0])
+      console.log('fuck yes')
+    } catch(e){
+      console.log(e)
+    }
   }
 
   render() {

@@ -3,6 +3,9 @@ import React, { Component } from 'react'
 import { Route, Link } from "react-router-dom";
 import { Segment, Button, Checkbox, Header, Form } from 'semantic-ui-react'
 import styled from 'styled-components';
+import API from './api/Game.js'
+import srs from 'secure-random-string'
+
 var Web3Utils = require('web3-utils');
 
 const Wrapper = styled(Segment)`
@@ -19,50 +22,44 @@ const Wrapper = styled(Segment)`
 type props = {};
 
 class CommitForm extends Component<props> {
-
   state = {
-    local_guess: null,
+    guess: null,
     loading: false
   }
 
-  componentDidMount = async () => {
-    const web3 = this.props.web3;
-    const account = this.props.accounts[0]
-    // console.log(this.props.balance);
-    const balance = await web3.eth.getBalance(account);
-    // console.log(balance)
-    this.props.setBalance(balance)
+  componentDidMount() {
+    this.props.setParentState({ state: "COMMIT" })
+  }
+
+  loading() {
+    const { web3, accounts, game } = this.props;
+    return !(web3 && accounts && accounts.length > 0 && game)
   }
 
   commit = async () => {
-    const account = this.props.accounts[0]
-    // console.log(account)
-    const game = this.props.GameInstance;
-    const bet = await game.BET_SIZE();
-    //Add random number generator
-    const hash = Web3Utils.soliditySha3({type: 'string', value: this.state.local_guess}, {type: 'string', value: "3"});
+    const web3 = this.props.web3;
+    const account = this.props.accounts[0];
+    const game = this.props.game;
+    
+    const api = new API(web3.utils, () => {}, game);
+    
+    const hashKey = /*this.props.hashKey || */ srs({length: 50});
+    this.props.setParentState({ hashKey })
 
-    this.props.setGuess(this.state.local_guess)
-
-    // const curr_number_bets = await game.curr_number_bets();
-    // console.log(parseInt(curr_number_bets))
-    // await game.set_MAX_PLAYERS(1, { from: account, gasPrice: 80000000000 });
-    // await game.commit(hash, { value: bet, from: donor });
-    // await game.reveal("66", "3", {from: donor});
-
+    const guess = this.state.guess
+    if(guess == null || guess.length == 0) {
+      console.log('no guess!')
+      return false;
+    }
     this.setState({loading: true})
     try {
-      await game.commit(hash, { value: bet, from: account, gasPrice: 80000000000 });
+      await api.commitGuess(account, guess, hashKey);
     } catch(e) {
-      console.log(e)
+      console.log(`error: ${e}`)
     }
     this.setState({loading: false})
-
-
-    // assert.equal(curr_number_bets, 1, "Number of bets did not increment");
-    // assert.equal(guess_commit, hash, "Hashes do not match");
-
-    this.props.history.push('/games/two-thirds/reveal')
+    this.props.setParentState({ guess: guess, state: "COMMITTED" })
+    this.props.history.push('/games/two-thirds/committed')
   }
 
   render() {
@@ -72,9 +69,9 @@ class CommitForm extends Component<props> {
           <Header as='h2'>Make a guess!</Header>     
           <Form.Field>
             <label>Guess</label>
-            <input placeholder='5' type="number" onChange={(e) => this.setState({local_guess: e.target.value})} />
+            <input placeholder='5' type="number" onChange={(e) => this.setState({guess: e.target.value})} />
           </Form.Field>
-          <Button loading={this.state.loading} color="purple" onClick={this.commit} type='submit'>Submit</Button>
+          <Button disabled={this.loading()} loading={this.state.loading} color="purple" onClick={this.commit} type='submit'>Submit</Button>
         </Form>      
       </Wrapper>
     )

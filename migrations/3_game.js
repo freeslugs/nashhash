@@ -7,6 +7,7 @@ const BET_1 = web3.toWei(1,'ether');
 const BET_01 = web3.toWei(0.1, 'ether');
 const BET_001 = web3.toWei(0.01, 'ether');
 const MAX_PLAYERS = 10;
+
 const HASHNASH_ADDRESS = 0x2540099e9ed04aF369d557a40da2D8f9c2ab928D;
 const GAME_STAGE_LENGTH = 0;
 const GAME_FEE_PERCENT = 5;
