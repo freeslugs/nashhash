@@ -1,3 +1,4 @@
+//go:generate abigen --sol ./../../contracts/Game.sol --pkg gm --out Game.go
 package gm
 
 import (
@@ -8,6 +9,9 @@ import (
 	"net/rpc"
 	"strconv"
 	"sync"
+
+	"github.com/ethereum/go-ethereum/accounts/abi/bind"
+	ethcrypto "github.com/ethereum/go-ethereum/crypto"
 )
 
 // The GM object. Runs on the server. Manages GameOperators, connects
@@ -16,6 +20,9 @@ type GM struct {
 	// handlers      []GameOperator
 	operatedGames map[string]*GameOperator
 	gmLock        sync.Mutex
+
+	// Ethereum stuff
+	auth *bind.TransactOpts
 
 	// debug mode
 	debug bool
@@ -28,9 +35,27 @@ type GM struct {
 
 // Init initializes the game master. In particular, it should register the
 // game master for RPC.
-func (gm *GM) Init(ipAddr string, port int, debug bool) error {
+func (gm *GM) Init(ipAddr string, port int, hexkey string, debug bool) error {
+
+	gm.gmLock.Lock()
+	defer gm.gmLock.Unlock()
 
 	gm.debug = debug
+
+	if debug == false {
+
+		// We need to create a transactor to be able to execute
+		// contract functions
+		privk, err := ethcrypto.HexToECDSA(hexkey)
+		if err != nil {
+			log.Fatalf("GM: bad private key")
+		}
+
+		gm.auth = bind.NewKeyedTransactor(privk)
+		if gm.auth == nil {
+			log.Fatalf("GM: failed to create authorized transactor: %v", err)
+		}
+	}
 
 	gm.operatedGames = make(map[string]*GameOperator)
 

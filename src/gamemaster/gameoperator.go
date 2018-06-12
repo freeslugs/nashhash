@@ -13,6 +13,8 @@ import (
 const (
 	// DisconnectOperator command to stop a game
 	DisconnectOperator = 0
+	// EthClientPath is the path to the geth.ipc
+	EthClientPath = "/Users/me/Library/Ethereum/rinkeby/geth.ipc"
 )
 
 // GameOperator operates a game contract
@@ -97,14 +99,14 @@ func (gop *GameOperator) playGame() {
 func (gop *GameOperator) operate() {
 
 	// Create an IPC based RPC connection to a remote node
-	conn, err := ethclient.Dial("/Users/me/Library/Ethereum/rinkeby/geth.ipc")
+	conn, err := ethclient.Dial(EthClientPath)
 	if err != nil {
 		log.Printf("Failed to connect to the Ethereum client: %v", err)
 	}
 	// Instantiate the contract and display its name
-	game, err := NewGame(common.HexToAddress("0xA1bC5593374C51E5Becfc7b03ae369B994C5e27E"), conn)
+	game, err := NewGame(common.HexToAddress(gop.contractAddress), conn)
 	if err != nil {
-		log.Printf("Failed to instantiate a Token contract: %v", err)
+		log.Printf("Failed to instantiate a Game contract: %v", err)
 	}
 	n, err := game.GetMaxPlayers(nil)
 	if err != nil {
@@ -120,7 +122,7 @@ func (gop *GameOperator) operate() {
 // be paused.
 func (gop *GameOperator) Stop() error {
 	if gop.playing == false {
-		log.Printf("WARNING GameOperator %s: game already stop", gop.contractAddress)
+		log.Printf("WARNING GameOperator %s: game already stopped\n", gop.contractAddress)
 		return errors.New("game already stopped")
 	}
 	gop.controlChannel <- DisconnectOperator

@@ -90,8 +90,9 @@ contract Game is Pausable, GameHelper {
         state.gameState = GameState.COMMIT_STATE;
         state.currNumberCommits = 0;
         state.currNumberReveals = 0;
-        state.revealStageStartBlock = 0;
-        state.commitStageStartBlock = 0;
+        state.commitStageStartBlock = ~uint(0) - config.GAME_STAGE_LENGTH;
+        state.revealStageStartBlock = ~uint(0) - config.GAME_STAGE_LENGTH;
+
 
         info.lastPrize = 0;
 
@@ -323,6 +324,10 @@ contract Game is Pausable, GameHelper {
         
         state.currNumberCommits = 0;
         state.currNumberReveals = 0;
+
+        // TODO: Find a better way to do this
+        state.commitStageStartBlock = ~uint(0) - config.GAME_STAGE_LENGTH;
+        state.revealStageStartBlock = ~uint(0) - config.GAME_STAGE_LENGTH;
 
         emit NewRoundStarted();
     }

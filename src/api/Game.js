@@ -164,12 +164,12 @@ class API {
 
   async getCommitStageStartBlock(){
     const csb = await this.game.getCommitStageStartBlock()
-    return csb
+    return csb.toNumber()
   }
 
   async getRevealStageStartBlock(){
     const rsb = await this.game.getRevealStageStartBlock()
-    return rsb
+    return rsb.toNumber()
   }
 
 
