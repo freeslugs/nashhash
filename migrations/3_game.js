@@ -20,7 +20,7 @@ module.exports = function(deployer) {
 
 		const TwoThirds1 = await gameFactory.createGame(
 			TWO_THIRDS_TYP,
-	    	0x2540099e9ed04aF369d557a40da2D8f9c2ab928D,
+	    	HASHNASH_ADDRESS,
 	        GAME_FEE_PERCENT,
 	        BET_1,
 	        MAX_PLAYERS, 
@@ -30,7 +30,7 @@ module.exports = function(deployer) {
 
 		const TwoThirds01 = await gameFactory.createGame(
 			TWO_THIRDS_TYP,
-	    	0x2540099e9ed04aF369d557a40da2D8f9c2ab928D,
+	    	HASHNASH_ADDRESS,
 	        GAME_FEE_PERCENT,
 	        BET_01,
 	        MAX_PLAYERS, 
@@ -40,7 +40,7 @@ module.exports = function(deployer) {
 
 		const TwoThirds001 = await gameFactory.createGame(
 			TWO_THIRDS_TYP,
-	    	0x2540099e9ed04aF369d557a40da2D8f9c2ab928D,
+	    	HASHNASH_ADDRESS,
 	        GAME_FEE_PERCENT,
 	        BET_001,
 	        MAX_PLAYERS, 
@@ -50,7 +50,7 @@ module.exports = function(deployer) {
 
 		const LUN1 = await gameFactory.createGame(
 			LUN_TYP,
-	    	0x2540099e9ed04aF369d557a40da2D8f9c2ab928D,
+	    	HASHNASH_ADDRESS,
 	        GAME_FEE_PERCENT,
 	        BET_1,
 	        MAX_PLAYERS, 
@@ -60,7 +60,7 @@ module.exports = function(deployer) {
 
 		const LUN01 = await gameFactory.createGame(
 			LUN_TYP,
-	    	0x2540099e9ed04aF369d557a40da2D8f9c2ab928D,
+	    	HASHNASH_ADDRESS,
 	        GAME_FEE_PERCENT,
 	        BET_01,
 	        MAX_PLAYERS, 
@@ -70,12 +70,14 @@ module.exports = function(deployer) {
 
 		const LUN001 = await gameFactory.createGame(
 			LUN_TYP,
-	    	0x2540099e9ed04aF369d557a40da2D8f9c2ab928D,
+	    	HASHNASH_ADDRESS,
 	        GAME_FEE_PERCENT,
 	        BET_001,
 	        MAX_PLAYERS, 
 	        GAME_STAGE_LENGTH,
 	    );
 	    gameAddresses.push(LUN001.address);
+
+	    gameFactory.changeGamesOwner(0x537CA571AEe8116575E8d7a79740c70f685EC856);
 	})
 };
