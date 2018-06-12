@@ -2,6 +2,9 @@
 import React, { Component } from 'react'
 import { Route, Link } from "react-router-dom";
 import { Button, Header, Checkbox, Form } from 'semantic-ui-react'
+import styled from 'styled-components';
+import API from './api/Game.js'
+
 var Web3Utils = require('web3-utils');
 
 type props = {};
@@ -12,40 +15,34 @@ class RevealForm extends Component<props> {
     loading: false
   }
 
+  loading() {
+    const { web3, accounts, game } = this.props;
+    return !(web3 && accounts && accounts.length > 0 && game)
+  }
+
   reveal = async () => { 
-
-    const account = this.props.accounts[0]
-
-    const game = this.props.GameInstance;
-    const bet = await game.BET_SIZE();
-    const hash = Web3Utils.soliditySha3({type: 'string', value: this.props.guess}, {type: 'string', value: "3"});
-
-    let curr_number_bets = await game.curr_number_bets();
-    console.log(parseInt(curr_number_bets))
-    let state = await game.game_state_debug();
-    console.log(parseInt(state))
+    const web3 = this.props.web3;
+    const account = this.props.accounts[0];
+    const game = this.props.game;
+    
+    const api = new API(web3.utils, () => {}, game);
 
     this.setState({loading: true})
     try {
-      await game.reveal(this.props.guess, "3", {from: account, gasPrice: 80000000000 });
+      await api.revealGuess(account, this.props.guess, this.props.hashKey);
     } catch(e) {
       console.log(e)
     }
     this.setState({loading: false})
-
-    curr_number_bets = await game.curr_number_bets();
-    console.log(parseInt(curr_number_bets))
-    state = await game.game_state_debug();
-    console.log(parseInt(state))
-
-    this.props.history.push('/games/two-thirds/payout') 
+    this.props.setParentState({ state: "REVEALED" })
+    this.props.history.push('/games/two-thirds/revealed') 
   }
 
   render() {
     return (
       <div>
         <Header as='h2'>Reveal your guess!</Header>      
-        <Button loading={this.state.loading} color="blue" onClick={this.reveal} type='submit'>Reveal</Button>
+        <Button disabled={this.loading()} loading={this.state.loading} color="blue" onClick={this.reveal} type='submit'>Reveal</Button>
       </div>
     )
   }

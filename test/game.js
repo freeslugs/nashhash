@@ -115,7 +115,7 @@ contract("2/3 of the Average Game", function([owner, donor]){
         var cur_bets = await api.getCurrentCommits();
         assert(cur_bets == 2, "Number of commits does not mathc");
 
-        await api.resetGame();
+        await api.resetGame(owner);
 
         cur_bets = await api.getCurrentCommits();
         assert(cur_bets == 0, "State was not reset properly");
@@ -132,7 +132,7 @@ contract("2/3 of the Average Game", function([owner, donor]){
         var cur_reveals = await api.getCurrentReveals();
         assert(cur_reveals == 1, "Number of reveals does not match in REVEAL_STATE");
 
-        await api.resetGame();
+        await api.resetGame(owner);
 
         cur_bets = await api.getCurrentCommits();
         assert(cur_bets == 0, "failed to reset: commits");

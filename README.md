@@ -39,6 +39,14 @@ Game theory games on the blockchain
 
 1. Copy assets to local `cp -r build/contracts src/contracts`
 
+## Test
+
+1. Purge assets `rm -r build;`
+2. `truffle develop`
+3. `compile`
+4. `migrate --reset`
+5. `test`
+
 ## Common errors
 
 ### `INVALID ADDRESS`
@@ -56,4 +64,11 @@ P3:
 
 
 
+## DEVELOPMENT REQUIREMENTS
 
+### Dear n000bs
+
+1. Don't push broken code to master
+  1. If you feel the need to push, just throw it up on a new branch and PR it later 
+2. Indent your fucking code. Like, seriously. 
+3. See #2 

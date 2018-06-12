@@ -12,7 +12,6 @@ const Wrapper = styled.div`
 
   h1.ui.header {
     margin-top: 1em;
-    /*margin-bottom: 1em;*/
     font-size: 2.7em;
     font-weight: normal;
     text-align: center;
@@ -48,7 +47,7 @@ const Games = styled.div`
   }
 `;
 
-const SelectPool = ({ setStake }) => <Wrapper>
+const SelectPool = ({ setParentState, history }) => <Wrapper>
   <Header as='h1'>2/3 Average</Header>      
   <Header as='h2'>Select a number between 0-100 with the intention of guessing 2/3 of the average guess.</Header>      
 
@@ -80,21 +79,21 @@ const SelectPool = ({ setStake }) => <Wrapper>
     <Header as='h2'>Select your stake.</Header>  
 
     <Card.Group itemsPerRow={3}>
-      <Card color='blue' onClick={() => setStake(0.01)}>
+      <Card color='blue' onClick={() => { setParentState({stake: 0.01}); history.push('/games/two-thirds/commit') } }>
         <Card.Content>
           <Card.Header>.01 ETH</Card.Header>
           <Card.Description>5 / 10 players</Card.Description>
         </Card.Content>
       </Card>
 
-      <Card color='purple' onClick={() => setStake(0.1)}>
+      <Card color='yellow' onClick={() => { setParentState({stake: 0.1}); history.push('/games/two-thirds/commit') } }>
         <Card.Content>
           <Card.Header>.1 ETH</Card.Header>
           <Card.Description>5 / 10 players</Card.Description>
         </Card.Content>
       </Card>
 
-      <Card color='red' onClick={() => setStake(1)}>
+      <Card color='red' onClick={() => { setParentState({stake: 1}); history.push('/games/two-thirds/commit') } }>
         <Card.Content>
           <Card.Header>1 ETH</Card.Header>
           <Card.Description>5 / 10 players</Card.Description>

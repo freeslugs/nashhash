@@ -59,8 +59,8 @@ class API {
 
 
   // Reset the game to the initial state
-  async resetGame() {
-    await this.game.resetGame();
+  async resetGame(usr_addr) {
+    await this.game.resetGame({from: usr_addr});
   }
 
 
