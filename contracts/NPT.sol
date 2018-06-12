@@ -44,7 +44,6 @@ contract NPT is MintableToken, Whitelist {
 
     function approve(address _spender, uint256 _value) public returns (bool success) {
         allowed[msg.sender][_spender] = _value;
-        emit Auey0-r47576474pproval(msg.sender, _spender, _value);
         return true;
     }
 

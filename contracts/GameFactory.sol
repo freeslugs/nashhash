@@ -1,27 +1,29 @@
 pragma solidity ^0.4.23;
 
-import "./LowestUniqueNum.sol"
-import "./TwoThirdsAverage.sol"
+import "./LowestUniqueNum.sol";
+import "./TwoThirdsAverage.sol";
 
 
 contract GameFactory is Ownable{
-    mapping(address => address) games;
+    address[] public games;
 
-    function createGame(string type) public onlyOwner{
-    	if (keecak256(type) == keecak256("LUN"){
-        	counters[msg.sender] = new LowestUn(msg.sender);
+    function createGame(string typ,
+				    	address _feeAddress,
+				        uint _gameFeePercent,
+				        uint _stakeSize,
+				        uint _maxp, 
+				        uint _gameStageLength
+				        ) public onlyOwner{
+
+    	if (keccak256(typ) == keccak256("TTA")){
+        	games.push(new TwoThirdsAverage(_feeAddress, _gameFeePercent, _stakeSize, _maxp, _gameStageLength));
     	}
-    	else if (keecak256(type) ==)
+    	else if (keccak256(typ) == keccak256("LUN")){
+    		games.push(new LowestUniqueNum(_feeAddress, _gameFeePercent, _stakeSize, _maxp, _gameStageLength));
+    	}
     }
     
-    function increment() public {
-        require (counters[msg.sender] != 0);
-        Counter(counters[msg.sender]).increment(msg.sender);
-    }
-    
-    function getCount(address account) public constant returns (uint) {
-        if (counters[account] != 0) {
-            return (Counter(counters[account]).getCount());
-        }
+    function getGames() public view returns (address[]) {
+    	return games;
     }
 }
