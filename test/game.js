@@ -36,10 +36,6 @@ contract("2/3 of the Average Game", function([owner, donor]){
         assert.equal(count, 1);
     });
 
-    it('test throw error', async () => {
-        assert.equal(1, 2, "fucking bloodly hell")
-    })
-
     it("Single commit", async () => {
         
         const hash = api.hashGuess("66", "3");
