@@ -15,6 +15,9 @@ jobs:
       - checkout
 
       # Node
+      - restore_cache:
+          key: node
+          
       - run: npm install 
       - save_cache:
           key: node
@@ -23,7 +26,10 @@ jobs:
 
       - run: sudo npm install truffle -g 
 
-      - run: truffle develop & sleep 5
+      - run: 
+          command: truffle develop
+          background: true
+
       - run:
           name: truffle tests
           command: npm run test
