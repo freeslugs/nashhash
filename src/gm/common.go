@@ -1,7 +1,7 @@
 package gm
 
 import (
-	"fmt"
+	"log"
 	"net/rpc"
 )
 
@@ -41,6 +41,6 @@ func call(c *rpc.Client, rpcname string,
 		return nil
 	}
 
-	fmt.Println(err)
+	log.Println(err)
 	return err
 }
