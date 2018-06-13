@@ -7,6 +7,7 @@ const MAX_PLAYERS = 10;
 const HASHNASH_ADDRESS = 0x2540099e9ed04aF369d557a40da2D8f9c2ab928D;
 const GAME_STAGE_LENGTH = 6;
 const GAME_FEE_PERCENT = 5;
+const NPT_ADDRESS = 0x345ca3e014aaf5dca488057592ee47305d9b3e10;
 
 var Game = artifacts.require("./TwoThirdsAverage.sol");
 
@@ -21,7 +22,8 @@ contract("2/3 of the Average Game", function([owner, donor]){
             GAME_FEE_PERCENT,
             FIXED_BET,
             MAX_PLAYERS,
-            GAME_STAGE_LENGTH);
+            GAME_STAGE_LENGTH,
+            NPT_ADDRESS);
         // init api
         api = new API(web3, assert, game);
         helper = new Helper(web3, assert, game, api);
