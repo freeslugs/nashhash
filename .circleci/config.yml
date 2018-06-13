@@ -16,12 +16,13 @@ jobs:
 
       # Node
       - run: npm install 
-      - run: npm install truffle
-
       - save_cache:
           key: node
           paths:
             - node_modules
+
+      - run: sudo npm install truffle -g 
+
 
       - run: truffle develop
       - run:
