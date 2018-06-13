@@ -12,6 +12,9 @@ jobs:
     steps:
       - checkout
       - run: 
+          name: install deps
+          command: npm install 
+      - run: 
           name: truffle develop
           command: truffle develop
       - run:
