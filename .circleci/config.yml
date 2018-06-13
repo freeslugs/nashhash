@@ -8,15 +8,19 @@ version: 2
 jobs:
   build:
     docker:
-      - image: debian:stretch
+      - image: circleci/node
     steps:
       - checkout
-      - run: 
-          name: install deps
-          command: npm install 
-      - run: 
-          name: truffle develop
-          command: truffle develop
+
+      # Node
+      - run: npm install 
+
+      - save_cache:
+          key: node
+          paths:
+            - node_modules
+            
+      - run: truffle develop
       - run:
           name: truffle tests
           command: npm run test
