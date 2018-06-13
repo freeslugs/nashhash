@@ -29,27 +29,6 @@ func assertNotEqual(t *testing.T, a interface{}, b interface{}, message string) 
 	t.Fatal(message)
 }
 
-func TestGMRPC(t *testing.T) {
-	var gm GM
-
-	// Init on localhost and port
-	gm.Init("", 11112, "", true)
-	defer gm.Kill()
-
-	var (
-		addr     = ":" + strconv.Itoa(11112)
-		request  = ExecuteCallArgs{Message: "test test test"}
-		response = &ExecuteCallReply{}
-	)
-
-	e := call(addr, "GM.Execute", request, response)
-	if e != nil {
-		panic("rpc failed")
-	}
-
-	fmt.Println(response.Response)
-}
-
 func TestConnectGame(t *testing.T) {
 	var gm GM
 
@@ -58,8 +37,17 @@ func TestConnectGame(t *testing.T) {
 	defer gm.Kill()
 	gmAddr := ":" + strconv.Itoa(11112)
 
-	e := connectGame(gmAddr, "0x1")
+	// Connect the clerk
+	var clerk Clerk
+	e := clerk.Init(gmAddr)
+	if e != nil {
+		log.Fatal(e)
+	}
+	defer clerk.Kill()
+
+	e = clerk.ConnectGame("0x1")
 	assertEqual(t, e, nil, "connect game failed")
+	assertEqual(t, len(gm.operatedGames), 1, "must have 1 operating game")
 
 	//time.Sleep(2 * time.Second)
 
@@ -73,10 +61,17 @@ func TestRepeatedConnectGame(t *testing.T) {
 	defer gm.Kill()
 	gmAddr := ":" + strconv.Itoa(11112)
 
-	e := connectGame(gmAddr, "0x1")
+	var clerk Clerk
+	e := clerk.Init(gmAddr)
+	if e != nil {
+		log.Fatal(e)
+	}
+	defer clerk.Kill()
+
+	e = clerk.ConnectGame("0x1")
 	assertEqual(t, e, nil, "connect game failed")
 
-	e = connectGame(gmAddr, "0x1")
+	e = clerk.ConnectGame("0x1")
 	assertNotEqual(t, e, nil, "repeated connect did not fail")
 
 	//time.Sleep(2 * time.Second)
@@ -91,14 +86,21 @@ func TestMultipleConnects(t *testing.T) {
 	defer gm.Kill()
 	gmAddr := ":" + strconv.Itoa(11112)
 
-	e := connectGame(gmAddr, "0x1")
+	var c Clerk
+	e := c.Init(gmAddr)
+	if e != nil {
+		log.Fatal(e)
+	}
+	defer c.Kill()
+
+	e = c.ConnectGame("0x1")
 	assertEqual(t, e, nil, "connect game failed")
-	e = connectGame(gmAddr, "0x2")
+	e = c.ConnectGame("0x2")
 	assertEqual(t, e, nil, "connect game failed")
-	e = connectGame(gmAddr, "0x3")
+	e = c.ConnectGame("0x3")
 	assertEqual(t, e, nil, "connect game failed")
 
-	e = connectGame(gmAddr, "0x1")
+	e = c.ConnectGame("0x1")
 	assertNotEqual(t, e, nil, "repeated connect did not fail")
 
 	assertEqual(t, len(gm.operatedGames), 3, "gm mapping has wrong size")
@@ -111,12 +113,19 @@ func TestDisconnect(t *testing.T) {
 	defer gm.Kill()
 	gmAddr := ":" + strconv.Itoa(11112)
 
-	e := connectGame(gmAddr, "0x1")
+	var c Clerk
+	e := c.Init(gmAddr)
+	if e != nil {
+		log.Fatal(e)
+	}
+	defer c.Kill()
+
+	e = c.ConnectGame("0x1")
 	assertEqual(t, e, nil, "connect game failed")
 	assertEqual(t, len(gm.operatedGames), 1, "gm mapping has wrong size")
 	time.Sleep(2 * time.Second)
 
-	e = disconnectGame(gmAddr, "0x1")
+	e = c.DisconnectGame("0x1")
 	assertEqual(t, e, nil, "disconnect game failed")
 
 	assertEqual(t, len(gm.operatedGames), 0, "gm mapping has wrong size")
@@ -132,17 +141,24 @@ func TestRepeatedDisconnectGame(t *testing.T) {
 	defer gm.Kill()
 	gmAddr := ":" + strconv.Itoa(11112)
 
+	var c Clerk
+	e := c.Init(gmAddr)
+	if e != nil {
+		log.Fatal(e)
+	}
+	defer c.Kill()
+
 	// Should fail because no games are connected
-	e := disconnectGame(gmAddr, "0x1")
+	e = c.DisconnectGame("0x1")
 	assertNotEqual(t, e, nil, "disconnect game failed")
 
-	e = connectGame(gmAddr, "0x1")
+	e = c.ConnectGame("0x1")
 	assertEqual(t, e, nil, "connect game failed")
 
-	e = disconnectGame(gmAddr, "0x1")
+	e = c.DisconnectGame("0x1")
 	assertEqual(t, e, nil, "disconnect game failed")
 
-	e = disconnectGame(gmAddr, "0x1")
+	e = c.DisconnectGame("0x1")
 	assertNotEqual(t, e, nil, "repeated connect did not fail")
 
 	//time.Sleep(2 * time.Second)
@@ -155,54 +171,61 @@ func TestBasic(t *testing.T) {
 	defer gm.Kill()
 	gmAddr := ":" + strconv.Itoa(11112)
 
-	e := connectGame(gmAddr, "0x1")
+	var c Clerk
+	e := c.Init(gmAddr)
+	if e != nil {
+		log.Fatal(e)
+	}
+	defer c.Kill()
+
+	e = c.ConnectGame("0x1")
 	assertEqual(t, e, nil, "connect game failed")
-	e = connectGame(gmAddr, "0x2")
+	e = c.ConnectGame("0x2")
 	assertEqual(t, e, nil, "connect game failed")
-	e = connectGame(gmAddr, "0x3")
+	e = c.ConnectGame("0x3")
 	assertEqual(t, e, nil, "connect game failed")
 
 	assertEqual(t, len(gm.operatedGames), 3, "gm mapping has wrong size")
 
 	// Disconnect 0x1
-	e = disconnectGame(gmAddr, "0x1")
+	e = c.DisconnectGame("0x1")
 	assertEqual(t, e, nil, "disconnect game failed")
 	assertEqual(t, len(gm.operatedGames), 2, "gm mapping has wrong size")
 
 	// Reconnect
-	e = connectGame(gmAddr, "0x1")
+	e = c.ConnectGame("0x1")
 	assertEqual(t, e, nil, "connect game failed")
-	e = connectGame(gmAddr, "0x1")
+	e = c.ConnectGame("0x1")
 	assertNotEqual(t, e, nil, "connect game failed")
 
 	assertEqual(t, len(gm.operatedGames), 3, "gm mapping has wrong size")
 
 	// Disconnect all
-	e = disconnectGame(gmAddr, "0x1")
+	e = c.DisconnectGame("0x1")
 	assertEqual(t, e, nil, "connect game failed")
-	e = disconnectGame(gmAddr, "0x2")
+	e = c.DisconnectGame("0x2")
 	assertEqual(t, e, nil, "connect game failed")
-	e = disconnectGame(gmAddr, "0x3")
+	e = c.DisconnectGame("0x3")
 	assertEqual(t, e, nil, "connect game failed")
 
 	assertEqual(t, len(gm.operatedGames), 0, "gm mapping has wrong size")
 
 	// Connect 3 more
-	e = connectGame(gmAddr, "0x4")
+	e = c.ConnectGame("0x4")
 	assertEqual(t, e, nil, "connect game failed")
-	e = connectGame(gmAddr, "0x5")
+	e = c.ConnectGame("0x5")
 	assertEqual(t, e, nil, "connect game failed")
-	e = connectGame(gmAddr, "0x6")
+	e = c.ConnectGame("0x6")
 	assertEqual(t, e, nil, "connect game failed")
 
 	assertEqual(t, len(gm.operatedGames), 3, "gm mapping has wrong size")
 
 	// Disconnect all
-	e = disconnectGame(gmAddr, "0x4")
+	e = c.DisconnectGame("0x4")
 	assertEqual(t, e, nil, "connect game failed")
-	e = disconnectGame(gmAddr, "0x5")
+	e = c.DisconnectGame("0x5")
 	assertEqual(t, e, nil, "connect game failed")
-	e = disconnectGame(gmAddr, "0x6")
+	e = c.DisconnectGame("0x6")
 	assertEqual(t, e, nil, "connect game failed")
 
 	assertEqual(t, len(gm.operatedGames), 0, "gm mapping has wrong size")
@@ -214,6 +237,14 @@ func TestBasicThreaded(t *testing.T) {
 	gm.Init("", 11112, "", true)
 	defer gm.Kill()
 	gmAddr := ":" + strconv.Itoa(11112)
+
+	var c Clerk
+	e := c.Init(gmAddr)
+	if e != nil {
+		log.Fatal(e)
+	}
+	defer c.Kill()
+
 	numThreads := 10
 
 	var wg sync.WaitGroup
@@ -222,7 +253,7 @@ func TestBasicThreaded(t *testing.T) {
 	// Connect bunch of games, each connection goes in its own thread
 	for i := 0; i < numThreads; i++ {
 		go func(i int) {
-			e := connectGame(gmAddr, "0x"+strconv.Itoa(i))
+			e := c.ConnectGame("0x" + strconv.Itoa(i))
 			assertEqual(t, e, nil, "connect game failed")
 			wg.Done()
 		}(i)
@@ -236,7 +267,7 @@ func TestBasicThreaded(t *testing.T) {
 	wg.Add(numThreads)
 	for i := 0; i < numThreads; i++ {
 		go func(i int) {
-			e := disconnectGame(gmAddr, "0x"+strconv.Itoa(i))
+			e := c.DisconnectGame("0x" + strconv.Itoa(i))
 			assertEqual(t, e, nil, "connect game failed")
 			wg.Done()
 		}(i)
@@ -258,6 +289,7 @@ func TestClerkInit(t *testing.T) {
 	if e != nil {
 		log.Fatal(e)
 	}
+	defer clerk.Kill()
 
 }
 
@@ -315,7 +347,10 @@ func TestEthereum(t *testing.T) {
 	gmAddr := ":" + strconv.Itoa(11112)
 	const numThreads = 10
 
-	clerk := &Clerk{GMAddr: gmAddr}
+	var clerk Clerk
+	clerk.Init(gmAddr)
+	defer clerk.Kill()
+
 	clerk.ConnectGame("0x7B9d950cC1ecD94eD0cF3916989B0ac56C70AB24")
 
 	time.Sleep(5 * time.Second)

@@ -35,12 +35,36 @@ func (gmk *Clerk) Kill() {
 // By default, GM will start managing the states of the game
 // after succesful connection
 func (gmk *Clerk) ConnectGame(gameAddr string) error {
-	e := connectGame(gmk.GMAddr, gameAddr)
+	e := gmk.connectGame(gameAddr)
 	return e
 }
 
 // DisconnectGame disconnect a game at @gameAddr from the master
 func (gmk *Clerk) DisconnectGame(gameAddr string) error {
-	e := disconnectGame(gmk.GMAddr, gameAddr)
+	e := gmk.disconnectGame(gameAddr)
 	return e
+}
+
+// connectGame. Asks gm at gmAddr to connect game at contract address gameAddr
+func (gmk *Clerk) connectGame(gameAddr string) error {
+	args := ConnectCallArgs{ContractAddress: gameAddr}
+	reply := &ConnectCallReply{}
+
+	e := call(gmk.c, "GM.Connect", args, reply)
+	if e != nil {
+		return e
+	}
+	return nil
+}
+
+// disconnectGame, asks gm at gmAddre to disconnect the game at gameAddr
+func (gmk *Clerk) disconnectGame(gameAddr string) error {
+	args := DisconnectCallArgs{ContractAddress: gameAddr}
+	reply := &DisconnectCallReply{}
+
+	e := call(gmk.c, "GM.Disconnect", args, reply)
+	if e != nil {
+		return e
+	}
+	return nil
 }

@@ -88,7 +88,7 @@ func (gm *GM) Init(ipAddr string, port int, hexkey string, debug bool) error {
 			}
 		}
 	}()
-	fmt.Printf("GM: Initialization succesful.\n")
+	log.Printf("INFO GM: Initialization succesful.\n")
 
 	return nil
 }
