@@ -50,6 +50,8 @@ contract Game is Pausable, GameHelper {
         uint GAME_STAGE_LENGTH;
         uint MAX_PLAYERS;
 
+        address NPT_ADDRESS;
+
     }
 
     struct GameInfo {
@@ -76,7 +78,8 @@ contract Game is Pausable, GameHelper {
         uint _gameFeePercent,
         uint _stakeSize,
         uint _maxp, 
-        uint _gameStageLength) public {
+        uint _gameStageLength,
+        address _nptAddress) public {
 
 
         owner = msg.sender;
@@ -86,6 +89,7 @@ contract Game is Pausable, GameHelper {
         config.MAX_PLAYERS = _maxp;
         config.STAKE_SIZE = _stakeSize;//1 ether;
         config.FEE_ADDRESS = _feeAddress;
+        config.NPT_ADDRESS = _nptAddress;
 
         state.gameState = GameState.COMMIT_STATE;
         state.currNumberCommits = 0;
@@ -159,7 +163,7 @@ contract Game is Pausable, GameHelper {
     function getRevealStageStartBlock() public view returns(uint) {
         return state.revealStageStartBlock;
     }
-    
+
     /*
         The following two functions are the users gaming interface.
             -- Call commit to commit a hash of your guess for the game. Its a hash, since
@@ -239,7 +243,7 @@ contract Game is Pausable, GameHelper {
         require(state.gameState == GameState.PAYOUT_STATE);
         findWinners();
         toCommitState();
-    }
+    } 
 
     /* 
         Function resets the game contract state to deployment state.
