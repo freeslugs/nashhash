@@ -23,8 +23,7 @@ jobs:
 
       - run: sudo npm install truffle -g 
 
-
-      - run: truffle develop
+      - run: truffle develop & sleep 5
       - run:
           name: truffle tests
           command: npm run test
