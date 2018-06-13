@@ -10,8 +10,7 @@
   "scripts": {
     "start": "react-scripts start",
     "build": "react-scripts build",
-    "eject": "react-scripts eject",
-    "test": "truffle test"
+    "eject": "react-scripts eject"
   },
   "author": "",
   "license": "ISC",
