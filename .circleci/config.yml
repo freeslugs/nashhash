@@ -14,12 +14,13 @@ jobs:
 
       # Node
       - run: npm install 
+      - run: npm install truffle -g 
 
       - save_cache:
           key: node
           paths:
             - node_modules
-            
+
       - run: truffle develop
       - run:
           name: truffle tests
