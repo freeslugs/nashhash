@@ -10,6 +10,8 @@ You want to set it up to some/path/nashhash/src
 4. Genereate the go binding for the Game.sol
         cd gm
         go generate
+5. In a separate terminal window, starth geth on rinkeby. It might take sometime to sync.
+        geth --rinkeby
 5. Run tests
         go test -v
 

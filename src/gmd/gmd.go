@@ -10,24 +10,37 @@ import (
 
 func main() {
 
-	// Our flags
+	// Get the flags
 	ipp := flag.String("ip", "127.0.0.1", "the ip address for the game master to listen for connections on")
 	portp := flag.String("port", "50000", "the port the game master listens for connections on: 49151 <= port <= 65535 ")
+	hexkeyp := flag.String("key", "dead", "secret key of the owner address")
 	flag.Parse()
+
 	ip := *ipp
 	port := *portp
+	portnum, err := strconv.Atoi(port)
+	if err != nil {
+		log.Fatalf("Usage: %v\n", err)
+	}
+	hexkey := *hexkeyp
 
 	checkInput(ip, port)
 
-	gmAddr := ip + ":" + port
-	var clerk gm.Clerk
-	e := clerk.Init(gmAddr)
+	if hexkey == "dead" {
+		log.Fatalf("Usage: must provide a key. ./gmd -h for help\n")
+	}
+
+	// Init the game master
+	var gm gm.GM
+	e := gm.Init(ip, portnum, hexkey, false)
 	if e != nil {
 		log.Fatal(e)
 	}
-	defer clerk.Kill()
+	defer gm.Kill()
+	log.Printf("INFO gmd: gamemaster initialized succesfully on %s:%s\n", ip, port)
 
-	clerk.ConnectGame("0x7B9d950cC1ecD94eD0cF3916989B0ac56C70AB24")
+	// Now we siply sit here indefinately
+	select {}
 
 }
 
