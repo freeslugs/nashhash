@@ -13,14 +13,15 @@ contract GameFactory is Ownable{
 				        uint _gameFeePercent,
 				        uint _stakeSize,
 				        uint _maxp, 
-				        uint _gameStageLength
+				        uint _gameStageLength,
+                        address _nptAddress
 				        ) public onlyOwner{
 
     	if (keccak256(typ) == keccak256("TTA")){
-        	games.push(new TwoThirdsAverage(_feeAddress, _gameFeePercent, _stakeSize, _maxp, _gameStageLength));
+        	games.push(new TwoThirdsAverage(_feeAddress, _gameFeePercent, _stakeSize, _maxp, _gameStageLength, _nptAddress));
     	}
     	else if (keccak256(typ) == keccak256("LUN")){
-    		games.push(new LowestUniqueNum(_feeAddress, _gameFeePercent, _stakeSize, _maxp, _gameStageLength));
+    		games.push(new LowestUniqueNum(_feeAddress, _gameFeePercent, _stakeSize, _maxp, _gameStageLength, _nptAddress));
     	}
     }
     

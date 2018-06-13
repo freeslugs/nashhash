@@ -1,5 +1,8 @@
 var Game = artifacts.require("TwoThirdsAverage");
+var NPT = artifacts.require("NPT");
+
 var Web3Utils = require('web3-utils');
+
 
 const BET = web3.toWei(0.1, 'ether');
 const MAX_PLAYERS = 5;
@@ -13,6 +16,14 @@ module.exports = function(deployer) {
     GAME_FEE_PERCENT,
     BET,
     MAX_PLAYERS,
-    GAME_STAGE_LENGTH
-    );
-  };
+    GAME_STAGE_LENGTH,
+    HASHNASH_ADDRESS
+    ).then(async () => {
+        const game = await Game.at(Game.address);
+        const npt = await NPT.deployed();
+        const NPT_ADDRESS = npt.address;
+
+        await game.setNPTAddress(NPT_ADDRESS);
+    })
+};
+

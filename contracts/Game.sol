@@ -164,6 +164,11 @@ contract Game is Pausable, GameHelper {
         return state.revealStageStartBlock;
     }
 
+    //ONLY FOR DEBUGGING PURPOSES! REMOVE LATER!!
+    function setNPTAddress(address npt_addr) public onlyOwner {
+        config.NPT_ADDRESS = npt_addr;
+    }
+
     /*
         The following two functions are the users gaming interface.
             -- Call commit to commit a hash of your guess for the game. Its a hash, since

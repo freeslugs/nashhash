@@ -32,7 +32,7 @@ module.exports = function(deployer) {
 	    );
 
 		gameAddresses.push(TwoThirds1.address);
-		npt.addMinter(TwoThirds1.address);
+		//npt.addMinter(TwoThirds1.address);
 
 		const TwoThirds01 = await gameFactory.createGame(
 			TWO_THIRDS_TYP,
@@ -44,7 +44,7 @@ module.exports = function(deployer) {
 	        NPT_ADDRESS
 	    );
 		gameAddresses.push(TwoThirds01.address);
-		npt.addMinter(TwoThirds01.address);
+		//npt.addMinter(TwoThirds01.address);
 
 		const TwoThirds001 = await gameFactory.createGame(
 			TWO_THIRDS_TYP,
@@ -67,7 +67,7 @@ module.exports = function(deployer) {
 	        NPT_ADDRESS
 	    );
 		gameAddresses.push(LUN1.address);
-		npt.addMinter(LUN1.address);
+		//npt.addMinter(LUN1.address);
 
 		const LUN01 = await gameFactory.createGame(
 			LUN_TYP,
@@ -79,7 +79,7 @@ module.exports = function(deployer) {
 	        NPT_ADDRESS
 	    );
 		gameAddresses.push(LUN01.address);
-		npt.addMinter(LUN01.address);
+		//npt.addMinter(LUN01.address);
 
 		const LUN001 = await gameFactory.createGame(
 			LUN_TYP,
@@ -91,7 +91,7 @@ module.exports = function(deployer) {
 	        NPT_ADDRESS
 	    );
 	    gameAddresses.push(LUN001.address);
-	    npt.addMinter(LUN001.address);
+	    //npt.addMinter(LUN001.address);
 
 	    gameFactory.changeGamesOwner(0x537CA571AEe8116575E8d7a79740c70f685EC856);
 	})

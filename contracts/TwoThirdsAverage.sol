@@ -20,7 +20,8 @@ contract TwoThirdsAverage is Game {
         uint _gameFeePercent,
         uint _stakeSize,
         uint _maxp, 
-        uint _gameStageLength) public Game(_feeAddress, _gameFeePercent, _stakeSize, _maxp, _gameStageLength) {
+        uint _gameStageLength,
+        address _nptAddress) public Game(_feeAddress, _gameFeePercent, _stakeSize, _maxp, _gameStageLength, _nptAddress) {
         rules.MIN_GUESS = 0;
         rules.MAX_GUESS = 100;
     }
