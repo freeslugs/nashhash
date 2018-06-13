@@ -3,7 +3,6 @@ package gm
 
 import (
 	"errors"
-	"fmt"
 	"log"
 	"net"
 	"net/rpc"
@@ -83,12 +82,12 @@ func (gm *GM) Init(ipAddr string, port int, hexkey string, debug bool) error {
 				conn.Close()
 			}
 			if err != nil && gm.dead == false {
-				fmt.Printf("GM accept: %v\n", err.Error())
+				log.Printf("ERROR GM accept: %v\n", err.Error())
 				gm.Kill()
 			}
 		}
 	}()
-	fmt.Printf("GM: Initialization succesful.\n")
+	log.Printf("INFO GM: Initialization succesful.\n")
 
 	return nil
 }

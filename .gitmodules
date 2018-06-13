@@ -1,0 +1,6 @@
+[submodule "src/github.com/go-ethereum"]
+	path = src/github.com/go-ethereum
+	url = https://github.com/ethereum/go-ethereum.git
+[submodule "src/github.com/ethereum/go-ethereum"]
+	path = src/github.com/ethereum/go-ethereum
+	url = https://github.com/ethereum/go-ethereum.git

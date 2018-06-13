@@ -2,17 +2,16 @@
 
 ## Build
 
-1. Go to gamemaster directory
-        cd gamemaster
-2. Install golang        
+1. Install golang        
         brew install go
 3. Setup the GOPATH
-        cd ..
         export GOPATH=$(pwd)
-        cd -
 You want to set it up to some/path/nashhash/src
 4. Genereate the go binding for the Game.sol
+        cd gm
         go generate
+5. In a separate terminal window, starth geth on rinkeby. It might take sometime to sync.
+        geth --rinkeby
 5. Run tests
         go test -v
 

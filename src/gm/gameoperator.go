@@ -96,6 +96,13 @@ func (gop *GameOperator) playGame() {
 // This function is the heart of operator. Does the following:
 // 1) Figure out in which state the game is
 // 2) Force a state transition or payout
+
+const (
+	GameCommitState = 0
+	GameRevealState = 1
+	GamePayoutState = 2
+)
+
 func (gop *GameOperator) operate() {
 
 	// Create an IPC based RPC connection to a remote node
@@ -108,11 +115,46 @@ func (gop *GameOperator) operate() {
 	if err != nil {
 		log.Printf("Failed to instantiate a Game contract: %v", err)
 	}
-	n, err := game.GetMaxPlayers(nil)
+
+	auth := gop.gm.auth
+
+	state, err := game.GetGameState(nil)
 	if err != nil {
-		log.Printf("Failed to retrieve token name: %v", err)
+		log.Printf("Failed to retrieve game state: %v", err)
 	}
-	fmt.Println("Max players:", n)
+
+	//Initiate appropriate transitions
+	switch s := state.Int64(); s {
+	case GameCommitState:
+		tx, txerr := game.ForceToRevealState(auth)
+		if txerr != nil {
+			log.Printf("Failed to force game into reveal: %v", txerr)
+		} else {
+			log.Printf("INFO game operator: ForceToReveal SUCCESS 0x%x\n", tx.Hash())
+		}
+
+	case GameRevealState:
+		tx, txerr := game.ForceToPayoutState(auth)
+		if txerr != nil {
+			log.Printf("Failed to force game into payout: %v", txerr)
+		} else {
+			log.Printf("INFO game operator: ForceToPayout SUCCESS 0x%x\n", tx.Hash())
+		}
+
+	case GamePayoutState:
+		tx, txerr := game.ResetGame(auth)
+		if txerr != nil {
+			log.Printf("Failed to perform payout: %v", txerr)
+		} else {
+			log.Printf("INFO game operator: SUCCSFUL RESET 0x%x\n", tx.Hash())
+		}
+
+	default:
+		log.Println("game operator: unknown operation state")
+
+	}
+
+	fmt.Println("Game State:", state)
 
 	//fmt.Printf("wow look at me I am operating hard %s\n", gop.contractAddress)
 	log.Printf("INFO GameOperator %s: operate succesful\n", gop.contractAddress)
