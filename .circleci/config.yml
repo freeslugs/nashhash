@@ -1,3 +1,9 @@
+machine:
+  services:
+    - docker
+  node:
+    version: 7.6.0
+
 version: 2
 jobs:
   build:
@@ -5,6 +11,9 @@ jobs:
       - image: debian:stretch
     steps:
       - checkout
+      - run: 
+          name: truffle develop
+          command: truffle develop
       - run:
-          name: Truffle tests
-          command: yarn test
+          name: truffle tests
+          command: npm run test

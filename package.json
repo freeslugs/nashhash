@@ -1,6 +1,6 @@
 {
-  "name": "pet-shop",
-  "version": "1.0.0",
+  "name": "nashhash",
+  "version": "0.0.8",
   "private": true,
   "description": "",
   "main": "truffle.js",
@@ -11,7 +11,7 @@
     "start": "react-scripts start",
     "build": "react-scripts build",
     "eject": "react-scripts eject",
-    "test": "rm -r build && truffle compile && truffle migrate --reset && truffle develop && truffle test"
+    "test": "truffle test"
   },
   "author": "",
   "license": "ISC",
