@@ -5,4 +5,4 @@
 1. Build
         go build
 2. Run
-        ./gmc <gm_ip>:<port>
+        ./gmc <gm_ip> <port>
