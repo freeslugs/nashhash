@@ -11,16 +11,17 @@ const GAME_STAGE_LENGTH = 0;
 const GAME_FEE_PERCENT = 5;
 
 module.exports = function async(deployer) {
-    const npt = await NPT.deployed();
-    const NPT_ADDRESS = npt.address;
+    NPT.deployed().then(npt => {
+        const NPT_ADDRESS = npt.address;
 
-    deployer.deploy(Game,
-        HASHNASH_ADDRESS,
-        GAME_FEE_PERCENT,
-        BET,
-        MAX_PLAYERS,
-        GAME_STAGE_LENGTH,
-        NPT_ADDRESS,
-    )}
+        deployer.deploy(Game,
+            HASHNASH_ADDRESS,
+            GAME_FEE_PERCENT,
+            BET,
+            MAX_PLAYERS,
+            GAME_STAGE_LENGTH,
+            NPT_ADDRESS
+        )
+    })
 };
 
