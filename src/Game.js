@@ -20,8 +20,19 @@ class Game extends Component<props> {
   }
 
   componentDidMount() {
-    // const json = JSON.parse(localStorage.getItem("state"));
-    // const { state, stake, guess, hashKey } = json;
+    const json = JSON.parse(localStorage.getItem("state"));
+    // console.log(`LS state: ${JSON.stringify(json)}`)
+    // console.log("mounted")
+
+    const { state, stake, guess, hashKey } = json;
+    let newState = {}
+    Object.keys(json).forEach((key) => {
+      if(!this.state[key]) {
+        newState[key] = json[key]
+      }
+    })
+    
+    this.setState(newState)
     // this.setState({ state, stake, guess, hashKey })
     // if(state == "COMMIT")
     //   this.props.history.push('/games/two-thirds/commit')
@@ -32,13 +43,14 @@ class Game extends Component<props> {
   componentWillUpdate(nextProps, nextState) {
     // if diff, write to local storage
     if(this.state != nextState) {
+      // console.log(`componentWillUpdate ${JSON.stringify(nextState)}`)
       localStorage.setItem("state", JSON.stringify(nextState));
     }
   }
 
   setParentState = (newState) => {
     this.setState(newState, () => {
-      console.log(this.state)
+      // console.log(`set parent state ${JSON.stringify(this.state)}`)
       localStorage.setItem("state", JSON.stringify(this.state));  
     });
   }

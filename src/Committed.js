@@ -70,8 +70,8 @@ class Committed extends Component<props> {
         clearInterval(this.state.interval);
         console.log('done')
         this.setState({interval: null})
-        this.props.setParentState({ state: "PAYOUT" })
-        this.props.history.push('/games/two-thirds/payout')
+        this.props.setParentState({ state: "REVEAL" })
+        this.props.history.push('/games/two-thirds/reveal')
       }, 2);
     }
   }

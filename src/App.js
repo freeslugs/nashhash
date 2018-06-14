@@ -59,8 +59,20 @@ class App extends Component<props> {
     let instance
     const network = await web3.eth.net.getNetworkType();
 
+    if(accounts.length == 0) {
+      toast.error('Be sure to log into Metamask.', {
+        position: "top-right",
+        autoClose: false,
+        hideProgressBar: false,
+        closeOnClick: true,
+        draggable: false,
+        draggablePercent: 0
+      })
+      return false
+    }
     if(network === "private") { // localhost:9545
-      instance = await Game.deployed();  
+      // instance = await Game.deployed();  
+      instance = Game.at("0x51815cebef59b88dafd1a5f24095eee1236ffcdd") 
       toast('Configured with local network. Success!', {
         position: "top-right",
         autoClose: true,
