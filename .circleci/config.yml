@@ -1,0 +1,35 @@
+machine:
+  environment:
+    PATH: "${PATH}:${HOME}/${CIRCLE_PROJECT_REPONAME}/node_modules/.bin"
+  services:
+    - docker
+  node:
+    version: 7.6.0
+
+version: 2
+jobs:
+  build:
+    docker:
+      - image: circleci/node
+    steps:
+      - checkout
+
+      # Node
+      - restore_cache:
+          key: node
+
+      - run: npm install 
+      - save_cache:
+          key: node
+          paths:
+            - node_modules
+
+      - run: sudo npm install truffle -g 
+
+      - run: 
+          command: truffle develop
+          background: true
+
+      - run:
+          name: truffle test
+          command: truffle test

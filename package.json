@@ -1,6 +1,6 @@
 {
-  "name": "pet-shop",
-  "version": "1.0.0",
+  "name": "nashhash",
+  "version": "0.0.8",
   "private": true,
   "description": "",
   "main": "truffle.js",
@@ -41,6 +41,7 @@
     "semantic-ui-react": "^0.80.0",
     "solc": "^0.4.24",
     "styled-components": "^3.2.6",
+    "truffle": "^4.1.11",
     "truffle-contract": "^3.0.5",
     "web3": "^1.0.0-beta.34",
     "web3-utils": "^1.0.0-beta.34"
