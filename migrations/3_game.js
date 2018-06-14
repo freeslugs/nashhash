@@ -1,21 +1,23 @@
-var GameFactory = artifacts.require("GameFactory");
-var NPT = artifacts.require("NPT");
-var Web3Utils = require('web3-utils');
+module.exports = (deployer, network, accounts) => {
+	var GameFactory = artifacts.require("GameFactory");
+	var NPT = artifacts.require("NPT");
+	var Web3Utils = require('web3-utils');
 
-const TWO_THIRDS_TYP = "TTA";
-const LUN_TYP = "LUN";
-const BET_1 = web3.toWei(1,'ether');
-const BET_01 = web3.toWei(0.1, 'ether');
-const BET_001 = web3.toWei(0.01, 'ether');
-const MAX_PLAYERS = 10;
+	const TWO_THIRDS_TYP = "TTA";
+	const LUN_TYP = "LUN";
+	const BET_1 = web3.toWei(1,'ether');
+	const BET_01 = web3.toWei(0.1, 'ether');
+	const BET_001 = web3.toWei(0.01, 'ether');
+	const MAX_PLAYERS = 10;
 
-const HASHNASH_ADDRESS = 0x2540099e9ed04aF369d557a40da2D8f9c2ab928D;
-const GAME_STAGE_LENGTH = 0;
-const GAME_FEE_PERCENT = 5;
+	const HASHNASH_ADDRESS = 0x2540099e9ed04aF369d557a40da2D8f9c2ab928D;
+	const GAME_STAGE_LENGTH = 0;
+	const GAME_FEE_PERCENT = 5;
 
-var gameAddresses = [];
+	const TX_DEFAULTS = { from: accounts[0], gas: 4000000 };
 
-module.exports = function(deployer) {
+	var gameAddresses = [];
+
 	deployer.deploy(GameFactory).then(async () => {
 		const gameFactory = await GameFactory.at(GameFactory.address);
 		const npt = await NPT.deployed();
@@ -31,8 +33,8 @@ module.exports = function(deployer) {
 	        NPT_ADDRESS
 	    );
 
-		gameAddresses.push(TwoThirds1.address);
-		//npt.addMinter(TwoThirds1.address);
+		gameAddresses.push(TwoThirds1);
+		//await npt.addMinter(TwoThirds1);
 
 		const TwoThirds01 = await gameFactory.createGame(
 			TWO_THIRDS_TYP,
