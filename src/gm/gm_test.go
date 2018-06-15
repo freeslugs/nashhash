@@ -344,6 +344,18 @@ func TestClerkThreaded(t *testing.T) {
 
 }
 
+func TestKeccak(t *testing.T) {
+	guess := []byte("10")
+	secret := []byte("3")
+
+	h := crypto.Keccak256(guess, secret)
+	hash := fmt.Sprintf("0x%x", h)
+	res := "0xf3e73e27cf4cda7ebc973aa432f8a54a97200c0745d43e1bc9c2879ffe79cc53"
+	assertEqual(t, hash, res, hash)
+
+	fmt.Println(string(guess[:]))
+}
+
 func TestEthereumBasic(t *testing.T) {
 	var gm GM
 	hexkey := "76a23cff887b294bb60ccde7ad1eb800f0f6ede70d33b154a53eadb20681a4e3"
@@ -364,7 +376,7 @@ func TestEthereumBasic(t *testing.T) {
 	auth := gm.auth
 	assertNotEqual(t, auth, nil, "authenticator should be created")
 	guess := []byte("10")
-	// secret := []byte("3")
+	secret := []byte("3")
 
 	// Reset the game
 	tx, txerr := game.ResetGame(auth)
@@ -378,7 +390,7 @@ func TestEthereumBasic(t *testing.T) {
 	}
 	fmt.Println(state.Int64())
 
-	h := crypto.Keccak256(guess)
+	h := crypto.Keccak256(guess, secret)
 	var hash [32]byte
 	copy(hash[:], h[:31])
 
@@ -389,8 +401,34 @@ func TestEthereumBasic(t *testing.T) {
 	tx, txerr = game.Commit(auth, hash)
 	if txerr != nil {
 		log.Fatal(txerr.Error())
+	} else {
+		log.Printf("commit succesful 0x%x\n", tx.Hash())
 	}
-	log.Printf("commit succesful 0x%x\n", tx.Hash())
+	time.Sleep(30 * time.Second)
+	auth.Value = nil
+
+	tx, txerr = game.ForceToRevealState(auth)
+	if txerr != nil {
+		log.Printf("Failed to force game into reveal: %v", txerr)
+	} else {
+		log.Printf("ForceToReveal succesful 0x%x\n", tx.Hash())
+	}
+
+	time.Sleep(60 * time.Second)
+	state, err = game.GetGameState(nil)
+	if err != nil {
+		log.Printf("Failed to retrieve game state: %v", err)
+	}
+	fmt.Println(state.Int64())
+
+	// time.Sleep(30 * time.Second)
+	// tx, txerr = game.Reveal(auth, "10", "3")
+	// if txerr != nil {
+	// 	log.Fatal(txerr.Error())
+	// } else {
+	// 	log.Printf("reveal succesful 0x%x\n", tx.Hash())
+	// }
+	// time.Sleep(5 * time.Second)
 
 }
 

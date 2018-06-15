@@ -17,10 +17,10 @@ contract GameFactory is Ownable{
                         address _nptAddress
 				        ) public onlyOwner{
 
-    	if (keccak256(typ) == keccak256("TTA")){
+    	if (keccak256(abi.encodePacked(typ)) == keccak256(abi.encodePacked("TTA"))){
         	games.push(new TwoThirdsAverage(_feeAddress, _gameFeePercent, _stakeSize, _maxp, _gameStageLength, _nptAddress));
     	}
-    	else if (keccak256(typ) == keccak256("LUN")){
+    	else if (keccak256(abi.encodePacked(typ)) == keccak256(abi.encodePacked("LUN"))){
     		games.push(new LowestUniqueNum(_feeAddress, _gameFeePercent, _stakeSize, _maxp, _gameStageLength, _nptAddress));
     	}
     }

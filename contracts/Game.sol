@@ -211,7 +211,7 @@ contract Game is Pausable, GameHelper {
         checkGuess(guess);
 
         // Check that the hashes match
-        require(commits[msg.sender] == keccak256(guess, random));
+        require(commits[msg.sender] == keccak256(abi.encodePacked(guess, random)));
 
         //Prevents user from revealing twice because above require will fail.
         delete commits[msg.sender];
