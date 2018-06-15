@@ -1,10 +1,8 @@
 pragma solidity ^0.4.23;
 
 import "openzeppelin-solidity/contracts/token/ERC20/RBACMintableToken.sol";
-import "openzeppelin-solidity/contracts/ownership/Whitelist.sol";
 
-
-contract NPT is RBACMintableToken, Whitelist {
+contract NPT is RBACMintableToken {
     mapping (address => uint256) private balances; //Should it be private?
     mapping (address => mapping (address => uint256)) private allowed;
     uint256 public totalSupply;

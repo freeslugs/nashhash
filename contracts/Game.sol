@@ -21,7 +21,7 @@ The specific game will have to only define two functions:
 
 import "./Pausable.sol";
 import "./GameHelper.sol";
-
+// import "./NPT.sol";
 
 contract Game is Pausable, GameHelper {
 
@@ -105,9 +105,6 @@ contract Game is Pausable, GameHelper {
 
         info.lastWinners = new address[](_maxp);
         info.lastWinnersLength = 0;
-
-
-
     }
 
     // Contrcact public API
