@@ -169,6 +169,37 @@ contract Game is Pausable, GameHelper {
         config.NPT_ADDRESS = npt_addr;
     }
 
+    //A broder game state report useful to the game master
+    function getGameStateInfo() public view returns (
+        uint _state,
+        uint _currNumberCommits,
+        uint _currNumberReveals,
+        uint _commitStageStartBlock,
+        uint _revealStageStartBlock,
+        uint _stageLength
+    ){
+        return (state.gameStateDebug,
+        state.currNumberCommits,
+        state.currNumberReveals,
+        state.commitStageStartBlock,
+        state.revealStageStartBlock,
+        config.GAME_STAGE_LENGTH);
+    }
+    // function getGameStateInfo() public view returns (
+    //     uint,uint,uint,uint,uint,uint
+    // ){
+    //     return (state.gameStateDebug,
+    //     state.currNumberCommits,
+    //     state.currNumberReveals,
+    //     state.commitStageStartBlock,
+    //     state.revealStageStartBlock,
+    //     config.GAME_STAGE_LENGTH);
+    // }
+
+    function getGameStageLength() public view returns(uint) {
+        return config.GAME_STAGE_LENGTH;
+    }
+
     /*
         The following two functions are the users gaming interface.
             -- Call commit to commit a hash of your guess for the game. Its a hash, since

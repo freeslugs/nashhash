@@ -14,6 +14,11 @@ import (
 	"github.com/ethereum/go-ethereum/ethclient"
 )
 
+const (
+	GameContractAddress = "0xe75bc7aeb49bf82525e1ce0657ce293156259a31"
+	OwnerHexKey         = "76a23cff887b294bb60ccde7ad1eb800f0f6ede70d33b154a53eadb20681a4e3"
+)
+
 func assertEqual(t *testing.T, a interface{}, b interface{}, message string) {
 	if a == b {
 		return
@@ -359,10 +364,10 @@ func TestKeccak(t *testing.T) {
 	fmt.Println(string(guess[:]))
 }
 
-func TestEthereumBasic(t *testing.T) {
+func TestEthereumRetrieveState(t *testing.T) {
 	var gm GM
-	hexkey := "76a23cff887b294bb60ccde7ad1eb800f0f6ede70d33b154a53eadb20681a4e3"
-	gm.Init("", 11112, hexkey, false)
+	//hexkey := "76a23cff887b294bb60ccde7ad1eb800f0f6ede70d33b154a53eadb20681a4e3"
+	gm.Init("", 11112, OwnerHexKey, false)
 	defer gm.Kill()
 
 	// Create an IPC based RPC connection to a remote node
@@ -371,7 +376,40 @@ func TestEthereumBasic(t *testing.T) {
 		log.Printf("Failed to connect to the Ethereum client: %v", err)
 	}
 	// Instantiate the contract and display its name
-	game, err := NewGame(common.HexToAddress("0x42d0705ddc5f9e96f65eb2947a822c9aff801f3c"), conn)
+	game, err := NewGame(common.HexToAddress(GameContractAddress), conn)
+	if err != nil {
+		log.Printf("Failed to instantiate a Game contract: %v", err)
+	}
+
+	auth := gm.auth
+	assertNotEqual(t, auth, nil, "authenticator should be created")
+
+	stageLength, err := game.GetGameStageLength(nil)
+	if err != nil {
+		log.Fatalf("Failed to retrieve game stage length: %v", err)
+	}
+	log.Printf("%v\n", stageLength)
+
+	state, err := game.GetGameStateInfo(nil)
+	if err != nil {
+		log.Fatalf("Failed to retrieve game state: %v", err)
+	}
+	log.Printf("%v\n", state)
+}
+
+func TestEthereumBasic(t *testing.T) {
+	var gm GM
+	//hexkey := "76a23cff887b294bb60ccde7ad1eb800f0f6ede70d33b154a53eadb20681a4e3"
+	gm.Init("", 11112, OwnerHexKey, false)
+	defer gm.Kill()
+
+	// Create an IPC based RPC connection to a remote node
+	conn, err := ethclient.Dial(EthClientPath)
+	if err != nil {
+		log.Printf("Failed to connect to the Ethereum client: %v", err)
+	}
+	// Instantiate the contract and display its name
+	game, err := NewGame(common.HexToAddress(GameContractAddress), conn)
 	if err != nil {
 		log.Printf("Failed to instantiate a Game contract: %v", err)
 	}
@@ -454,8 +492,8 @@ func TestEthereumBasic(t *testing.T) {
 func TestEthereum(t *testing.T) {
 
 	var gm GM
-	hexkey := "76a23cff887b294bb60ccde7ad1eb800f0f6ede70d33b154a53eadb20681a4e3"
-	gm.Init("", 11112, hexkey, false)
+	//hexkey := "76a23cff887b294bb60ccde7ad1eb800f0f6ede70d33b154a53eadb20681a4e3"
+	gm.Init("", 11112, OwnerHexKey, false)
 	defer gm.Kill()
 	gmAddr := ":" + strconv.Itoa(11112)
 
@@ -463,7 +501,7 @@ func TestEthereum(t *testing.T) {
 	clerk.Init(gmAddr)
 	defer clerk.Kill()
 
-	clerk.ConnectGame("0xb6738d9bfb3335e9c853c78d17d82e69441371f5")
+	clerk.ConnectGame(GameContractAddress)
 
 	time.Sleep(60 * time.Second)
 

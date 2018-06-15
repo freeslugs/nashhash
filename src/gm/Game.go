@@ -16,18 +16,18 @@ import (
 )
 
 // GameABI is the input ABI used to generate the binding from.
-const GameABI = "[{\"constant\":true,\"inputs\":[],\"name\":\"getLastPrize\",\"outputs\":[{\"name\":\"\",\"type\":\"uint256\"}],\"payable\":false,\"stateMutability\":\"view\",\"type\":\"function\"},{\"constant\":true,\"inputs\":[],\"name\":\"getCurrentCommits\",\"outputs\":[{\"name\":\"\",\"type\":\"uint256\"}],\"payable\":false,\"stateMutability\":\"view\",\"type\":\"function\"},{\"constant\":false,\"inputs\":[{\"name\":\"new_max\",\"type\":\"uint256\"}],\"name\":\"setMaxPlayers\",\"outputs\":[],\"payable\":false,\"stateMutability\":\"nonpayable\",\"type\":\"function\"},{\"constant\":true,\"inputs\":[{\"name\":\"\",\"type\":\"address\"}],\"name\":\"gameData\",\"outputs\":[{\"name\":\"\",\"type\":\"string\"}],\"payable\":false,\"stateMutability\":\"view\",\"type\":\"function\"},{\"constant\":true,\"inputs\":[],\"name\":\"getCurrentReveals\",\"outputs\":[{\"name\":\"\",\"type\":\"uint256\"}],\"payable\":false,\"stateMutability\":\"view\",\"type\":\"function\"},{\"constant\":false,\"inputs\":[],\"name\":\"unpause\",\"outputs\":[],\"payable\":false,\"stateMutability\":\"nonpayable\",\"type\":\"function\"},{\"constant\":false,\"inputs\":[{\"name\":\"guess\",\"type\":\"string\"},{\"name\":\"random\",\"type\":\"string\"}],\"name\":\"reveal\",\"outputs\":[],\"payable\":false,\"stateMutability\":\"nonpayable\",\"type\":\"function\"},{\"constant\":true,\"inputs\":[],\"name\":\"getGameFee\",\"outputs\":[{\"name\":\"\",\"type\":\"uint256\"}],\"payable\":false,\"stateMutability\":\"view\",\"type\":\"function\"},{\"constant\":true,\"inputs\":[],\"name\":\"paused\",\"outputs\":[{\"name\":\"\",\"type\":\"bool\"}],\"payable\":false,\"stateMutability\":\"view\",\"type\":\"function\"},{\"constant\":false,\"inputs\":[],\"name\":\"payout\",\"outputs\":[],\"payable\":false,\"stateMutability\":\"nonpayable\",\"type\":\"function\"},{\"constant\":true,\"inputs\":[{\"name\":\"i\",\"type\":\"uint256\"}],\"name\":\"getLastWinners\",\"outputs\":[{\"name\":\"\",\"type\":\"address\"}],\"payable\":false,\"stateMutability\":\"view\",\"type\":\"function\"},{\"constant\":true,\"inputs\":[],\"name\":\"getCommitStageStartBlock\",\"outputs\":[{\"name\":\"\",\"type\":\"uint256\"}],\"payable\":false,\"stateMutability\":\"view\",\"type\":\"function\"},{\"constant\":false,\"inputs\":[],\"name\":\"renounceOwnership\",\"outputs\":[],\"payable\":false,\"stateMutability\":\"nonpayable\",\"type\":\"function\"},{\"constant\":false,\"inputs\":[],\"name\":\"forceToPayoutState\",\"outputs\":[],\"payable\":false,\"stateMutability\":\"nonpayable\",\"type\":\"function\"},{\"constant\":true,\"inputs\":[],\"name\":\"getStakeSize\",\"outputs\":[{\"name\":\"\",\"type\":\"uint256\"}],\"payable\":false,\"stateMutability\":\"view\",\"type\":\"function\"},{\"constant\":true,\"inputs\":[{\"name\":\"\",\"type\":\"address\"}],\"name\":\"commits\",\"outputs\":[{\"name\":\"\",\"type\":\"bytes32\"}],\"payable\":false,\"stateMutability\":\"view\",\"type\":\"function\"},{\"constant\":false,\"inputs\":[],\"name\":\"pause\",\"outputs\":[],\"payable\":false,\"stateMutability\":\"nonpayable\",\"type\":\"function\"},{\"constant\":false,\"inputs\":[],\"name\":\"forceToRevealState\",\"outputs\":[],\"payable\":false,\"stateMutability\":\"nonpayable\",\"type\":\"function\"},{\"constant\":true,\"inputs\":[],\"name\":\"getMaxPlayers\",\"outputs\":[{\"name\":\"\",\"type\":\"uint256\"}],\"payable\":false,\"stateMutability\":\"view\",\"type\":\"function\"},{\"constant\":true,\"inputs\":[],\"name\":\"owner\",\"outputs\":[{\"name\":\"\",\"type\":\"address\"}],\"payable\":false,\"stateMutability\":\"view\",\"type\":\"function\"},{\"constant\":true,\"inputs\":[],\"name\":\"getNumberOfWinners\",\"outputs\":[{\"name\":\"\",\"type\":\"uint256\"}],\"payable\":false,\"stateMutability\":\"view\",\"type\":\"function\"},{\"constant\":true,\"inputs\":[],\"name\":\"getRevealStageStartBlock\",\"outputs\":[{\"name\":\"\",\"type\":\"uint256\"}],\"payable\":false,\"stateMutability\":\"view\",\"type\":\"function\"},{\"constant\":true,\"inputs\":[],\"name\":\"getGameState\",\"outputs\":[{\"name\":\"\",\"type\":\"uint256\"}],\"payable\":false,\"stateMutability\":\"view\",\"type\":\"function\"},{\"constant\":false,\"inputs\":[],\"name\":\"resetGame\",\"outputs\":[],\"payable\":false,\"stateMutability\":\"nonpayable\",\"type\":\"function\"},{\"constant\":true,\"inputs\":[],\"name\":\"birthBlock\",\"outputs\":[{\"name\":\"\",\"type\":\"uint256\"}],\"payable\":false,\"stateMutability\":\"view\",\"type\":\"function\"},{\"constant\":false,\"inputs\":[{\"name\":\"hashedCommit\",\"type\":\"bytes32\"}],\"name\":\"commit\",\"outputs\":[],\"payable\":true,\"stateMutability\":\"payable\",\"type\":\"function\"},{\"constant\":false,\"inputs\":[{\"name\":\"newOwner\",\"type\":\"address\"}],\"name\":\"transferOwnership\",\"outputs\":[],\"payable\":false,\"stateMutability\":\"nonpayable\",\"type\":\"function\"},{\"constant\":false,\"inputs\":[{\"name\":\"new_stake\",\"type\":\"uint256\"}],\"name\":\"setStakeSize\",\"outputs\":[],\"payable\":false,\"stateMutability\":\"nonpayable\",\"type\":\"function\"},{\"inputs\":[{\"name\":\"_feeAddress\",\"type\":\"address\"},{\"name\":\"_gameFeePercent\",\"type\":\"uint256\"},{\"name\":\"_stakeSize\",\"type\":\"uint256\"},{\"name\":\"_maxp\",\"type\":\"uint256\"},{\"name\":\"_gameStageLength\",\"type\":\"uint256\"}],\"payable\":false,\"stateMutability\":\"nonpayable\",\"type\":\"constructor\"},{\"anonymous\":false,\"inputs\":[],\"name\":\"CommitsSubmitted\",\"type\":\"event\"},{\"anonymous\":false,\"inputs\":[],\"name\":\"RevealsSubmitted\",\"type\":\"event\"},{\"anonymous\":false,\"inputs\":[],\"name\":\"NewRoundStarted\",\"type\":\"event\"},{\"anonymous\":false,\"inputs\":[],\"name\":\"Pause\",\"type\":\"event\"},{\"anonymous\":false,\"inputs\":[],\"name\":\"Unpause\",\"type\":\"event\"},{\"anonymous\":false,\"inputs\":[{\"indexed\":true,\"name\":\"previousOwner\",\"type\":\"address\"}],\"name\":\"OwnershipRenounced\",\"type\":\"event\"},{\"anonymous\":false,\"inputs\":[{\"indexed\":true,\"name\":\"previousOwner\",\"type\":\"address\"},{\"indexed\":true,\"name\":\"newOwner\",\"type\":\"address\"}],\"name\":\"OwnershipTransferred\",\"type\":\"event\"}]"
+const GameABI = "[{\"constant\":true,\"inputs\":[],\"name\":\"getLastPrize\",\"outputs\":[{\"name\":\"\",\"type\":\"uint256\"}],\"payable\":false,\"stateMutability\":\"view\",\"type\":\"function\"},{\"constant\":true,\"inputs\":[],\"name\":\"getCurrentCommits\",\"outputs\":[{\"name\":\"\",\"type\":\"uint256\"}],\"payable\":false,\"stateMutability\":\"view\",\"type\":\"function\"},{\"constant\":false,\"inputs\":[{\"name\":\"new_max\",\"type\":\"uint256\"}],\"name\":\"setMaxPlayers\",\"outputs\":[],\"payable\":false,\"stateMutability\":\"nonpayable\",\"type\":\"function\"},{\"constant\":true,\"inputs\":[{\"name\":\"\",\"type\":\"address\"}],\"name\":\"gameData\",\"outputs\":[{\"name\":\"\",\"type\":\"string\"}],\"payable\":false,\"stateMutability\":\"view\",\"type\":\"function\"},{\"constant\":true,\"inputs\":[],\"name\":\"getGameStageLength\",\"outputs\":[{\"name\":\"\",\"type\":\"uint256\"}],\"payable\":false,\"stateMutability\":\"view\",\"type\":\"function\"},{\"constant\":true,\"inputs\":[],\"name\":\"getCurrentReveals\",\"outputs\":[{\"name\":\"\",\"type\":\"uint256\"}],\"payable\":false,\"stateMutability\":\"view\",\"type\":\"function\"},{\"constant\":false,\"inputs\":[],\"name\":\"unpause\",\"outputs\":[],\"payable\":false,\"stateMutability\":\"nonpayable\",\"type\":\"function\"},{\"constant\":true,\"inputs\":[],\"name\":\"getGameStateInfo\",\"outputs\":[{\"name\":\"_state\",\"type\":\"uint256\"},{\"name\":\"_currNumberCommits\",\"type\":\"uint256\"},{\"name\":\"_currNumberReveals\",\"type\":\"uint256\"},{\"name\":\"_commitStageStartBlock\",\"type\":\"uint256\"},{\"name\":\"_revealStageStartBlock\",\"type\":\"uint256\"},{\"name\":\"_stageLength\",\"type\":\"uint256\"}],\"payable\":false,\"stateMutability\":\"view\",\"type\":\"function\"},{\"constant\":false,\"inputs\":[{\"name\":\"guess\",\"type\":\"string\"},{\"name\":\"random\",\"type\":\"string\"}],\"name\":\"reveal\",\"outputs\":[],\"payable\":false,\"stateMutability\":\"nonpayable\",\"type\":\"function\"},{\"constant\":true,\"inputs\":[],\"name\":\"getGameFee\",\"outputs\":[{\"name\":\"\",\"type\":\"uint256\"}],\"payable\":false,\"stateMutability\":\"view\",\"type\":\"function\"},{\"constant\":true,\"inputs\":[],\"name\":\"paused\",\"outputs\":[{\"name\":\"\",\"type\":\"bool\"}],\"payable\":false,\"stateMutability\":\"view\",\"type\":\"function\"},{\"constant\":false,\"inputs\":[],\"name\":\"payout\",\"outputs\":[],\"payable\":false,\"stateMutability\":\"nonpayable\",\"type\":\"function\"},{\"constant\":false,\"inputs\":[{\"name\":\"npt_addr\",\"type\":\"address\"}],\"name\":\"setNPTAddress\",\"outputs\":[],\"payable\":false,\"stateMutability\":\"nonpayable\",\"type\":\"function\"},{\"constant\":true,\"inputs\":[{\"name\":\"i\",\"type\":\"uint256\"}],\"name\":\"getLastWinners\",\"outputs\":[{\"name\":\"\",\"type\":\"address\"}],\"payable\":false,\"stateMutability\":\"view\",\"type\":\"function\"},{\"constant\":true,\"inputs\":[],\"name\":\"getCommitStageStartBlock\",\"outputs\":[{\"name\":\"\",\"type\":\"uint256\"}],\"payable\":false,\"stateMutability\":\"view\",\"type\":\"function\"},{\"constant\":false,\"inputs\":[],\"name\":\"renounceOwnership\",\"outputs\":[],\"payable\":false,\"stateMutability\":\"nonpayable\",\"type\":\"function\"},{\"constant\":false,\"inputs\":[],\"name\":\"forceToPayoutState\",\"outputs\":[],\"payable\":false,\"stateMutability\":\"nonpayable\",\"type\":\"function\"},{\"constant\":true,\"inputs\":[],\"name\":\"getStakeSize\",\"outputs\":[{\"name\":\"\",\"type\":\"uint256\"}],\"payable\":false,\"stateMutability\":\"view\",\"type\":\"function\"},{\"constant\":true,\"inputs\":[{\"name\":\"\",\"type\":\"address\"}],\"name\":\"commits\",\"outputs\":[{\"name\":\"\",\"type\":\"bytes32\"}],\"payable\":false,\"stateMutability\":\"view\",\"type\":\"function\"},{\"constant\":false,\"inputs\":[],\"name\":\"pause\",\"outputs\":[],\"payable\":false,\"stateMutability\":\"nonpayable\",\"type\":\"function\"},{\"constant\":false,\"inputs\":[],\"name\":\"forceToRevealState\",\"outputs\":[],\"payable\":false,\"stateMutability\":\"nonpayable\",\"type\":\"function\"},{\"constant\":true,\"inputs\":[],\"name\":\"getMaxPlayers\",\"outputs\":[{\"name\":\"\",\"type\":\"uint256\"}],\"payable\":false,\"stateMutability\":\"view\",\"type\":\"function\"},{\"constant\":true,\"inputs\":[],\"name\":\"owner\",\"outputs\":[{\"name\":\"\",\"type\":\"address\"}],\"payable\":false,\"stateMutability\":\"view\",\"type\":\"function\"},{\"constant\":true,\"inputs\":[],\"name\":\"getNumberOfWinners\",\"outputs\":[{\"name\":\"\",\"type\":\"uint256\"}],\"payable\":false,\"stateMutability\":\"view\",\"type\":\"function\"},{\"constant\":true,\"inputs\":[],\"name\":\"getRevealStageStartBlock\",\"outputs\":[{\"name\":\"\",\"type\":\"uint256\"}],\"payable\":false,\"stateMutability\":\"view\",\"type\":\"function\"},{\"constant\":true,\"inputs\":[],\"name\":\"getGameState\",\"outputs\":[{\"name\":\"\",\"type\":\"uint256\"}],\"payable\":false,\"stateMutability\":\"view\",\"type\":\"function\"},{\"constant\":false,\"inputs\":[],\"name\":\"resetGame\",\"outputs\":[],\"payable\":false,\"stateMutability\":\"nonpayable\",\"type\":\"function\"},{\"constant\":true,\"inputs\":[],\"name\":\"birthBlock\",\"outputs\":[{\"name\":\"\",\"type\":\"uint256\"}],\"payable\":false,\"stateMutability\":\"view\",\"type\":\"function\"},{\"constant\":false,\"inputs\":[{\"name\":\"hashedCommit\",\"type\":\"bytes32\"}],\"name\":\"commit\",\"outputs\":[],\"payable\":true,\"stateMutability\":\"payable\",\"type\":\"function\"},{\"constant\":false,\"inputs\":[{\"name\":\"newOwner\",\"type\":\"address\"}],\"name\":\"transferOwnership\",\"outputs\":[],\"payable\":false,\"stateMutability\":\"nonpayable\",\"type\":\"function\"},{\"constant\":false,\"inputs\":[{\"name\":\"new_stake\",\"type\":\"uint256\"}],\"name\":\"setStakeSize\",\"outputs\":[],\"payable\":false,\"stateMutability\":\"nonpayable\",\"type\":\"function\"},{\"inputs\":[{\"name\":\"_feeAddress\",\"type\":\"address\"},{\"name\":\"_gameFeePercent\",\"type\":\"uint256\"},{\"name\":\"_stakeSize\",\"type\":\"uint256\"},{\"name\":\"_maxp\",\"type\":\"uint256\"},{\"name\":\"_gameStageLength\",\"type\":\"uint256\"},{\"name\":\"_nptAddress\",\"type\":\"address\"}],\"payable\":false,\"stateMutability\":\"nonpayable\",\"type\":\"constructor\"},{\"anonymous\":false,\"inputs\":[],\"name\":\"CommitsSubmitted\",\"type\":\"event\"},{\"anonymous\":false,\"inputs\":[],\"name\":\"RevealsSubmitted\",\"type\":\"event\"},{\"anonymous\":false,\"inputs\":[],\"name\":\"NewRoundStarted\",\"type\":\"event\"},{\"anonymous\":false,\"inputs\":[],\"name\":\"Pause\",\"type\":\"event\"},{\"anonymous\":false,\"inputs\":[],\"name\":\"Unpause\",\"type\":\"event\"},{\"anonymous\":false,\"inputs\":[{\"indexed\":true,\"name\":\"previousOwner\",\"type\":\"address\"}],\"name\":\"OwnershipRenounced\",\"type\":\"event\"},{\"anonymous\":false,\"inputs\":[{\"indexed\":true,\"name\":\"previousOwner\",\"type\":\"address\"},{\"indexed\":true,\"name\":\"newOwner\",\"type\":\"address\"}],\"name\":\"OwnershipTransferred\",\"type\":\"event\"}]"
 
 // GameBin is the compiled bytecode used for deploying new contracts.
 const GameBin = `0x`
 
 // DeployGame deploys a new Ethereum contract, binding an instance of Game to it.
-func DeployGame(auth *bind.TransactOpts, backend bind.ContractBackend, _feeAddress common.Address, _gameFeePercent *big.Int, _stakeSize *big.Int, _maxp *big.Int, _gameStageLength *big.Int) (common.Address, *types.Transaction, *Game, error) {
+func DeployGame(auth *bind.TransactOpts, backend bind.ContractBackend, _feeAddress common.Address, _gameFeePercent *big.Int, _stakeSize *big.Int, _maxp *big.Int, _gameStageLength *big.Int, _nptAddress common.Address) (common.Address, *types.Transaction, *Game, error) {
 	parsed, err := abi.JSON(strings.NewReader(GameABI))
 	if err != nil {
 		return common.Address{}, nil, nil, err
 	}
-	address, tx, contract, err := bind.DeployContract(auth, parsed, common.FromHex(GameBin), backend, _feeAddress, _gameFeePercent, _stakeSize, _maxp, _gameStageLength)
+	address, tx, contract, err := bind.DeployContract(auth, parsed, common.FromHex(GameBin), backend, _feeAddress, _gameFeePercent, _stakeSize, _maxp, _gameStageLength, _nptAddress)
 	if err != nil {
 		return common.Address{}, nil, nil, err
 	}
@@ -358,6 +358,32 @@ func (_Game *GameCallerSession) GetGameFee() (*big.Int, error) {
 	return _Game.Contract.GetGameFee(&_Game.CallOpts)
 }
 
+// GetGameStageLength is a free data retrieval call binding the contract method 0x349570d5.
+//
+// Solidity: function getGameStageLength() constant returns(uint256)
+func (_Game *GameCaller) GetGameStageLength(opts *bind.CallOpts) (*big.Int, error) {
+	var (
+		ret0 = new(*big.Int)
+	)
+	out := ret0
+	err := _Game.contract.Call(opts, out, "getGameStageLength")
+	return *ret0, err
+}
+
+// GetGameStageLength is a free data retrieval call binding the contract method 0x349570d5.
+//
+// Solidity: function getGameStageLength() constant returns(uint256)
+func (_Game *GameSession) GetGameStageLength() (*big.Int, error) {
+	return _Game.Contract.GetGameStageLength(&_Game.CallOpts)
+}
+
+// GetGameStageLength is a free data retrieval call binding the contract method 0x349570d5.
+//
+// Solidity: function getGameStageLength() constant returns(uint256)
+func (_Game *GameCallerSession) GetGameStageLength() (*big.Int, error) {
+	return _Game.Contract.GetGameStageLength(&_Game.CallOpts)
+}
+
 // GetGameState is a free data retrieval call binding the contract method 0xb7d0628b.
 //
 // Solidity: function getGameState() constant returns(uint256)
@@ -382,6 +408,58 @@ func (_Game *GameSession) GetGameState() (*big.Int, error) {
 // Solidity: function getGameState() constant returns(uint256)
 func (_Game *GameCallerSession) GetGameState() (*big.Int, error) {
 	return _Game.Contract.GetGameState(&_Game.CallOpts)
+}
+
+// GetGameStateInfo is a free data retrieval call binding the contract method 0x5086f330.
+//
+// Solidity: function getGameStateInfo() constant returns(_state uint256, _currNumberCommits uint256, _currNumberReveals uint256, _commitStageStartBlock uint256, _revealStageStartBlock uint256, _stageLength uint256)
+func (_Game *GameCaller) GetGameStateInfo(opts *bind.CallOpts) (struct {
+	State                 *big.Int
+	CurrNumberCommits     *big.Int
+	CurrNumberReveals     *big.Int
+	CommitStageStartBlock *big.Int
+	RevealStageStartBlock *big.Int
+	StageLength           *big.Int
+}, error) {
+	ret := new(struct {
+		State                 *big.Int
+		CurrNumberCommits     *big.Int
+		CurrNumberReveals     *big.Int
+		CommitStageStartBlock *big.Int
+		RevealStageStartBlock *big.Int
+		StageLength           *big.Int
+	})
+	out := ret
+	err := _Game.contract.Call(opts, out, "getGameStateInfo")
+	return *ret, err
+}
+
+// GetGameStateInfo is a free data retrieval call binding the contract method 0x5086f330.
+//
+// Solidity: function getGameStateInfo() constant returns(_state uint256, _currNumberCommits uint256, _currNumberReveals uint256, _commitStageStartBlock uint256, _revealStageStartBlock uint256, _stageLength uint256)
+func (_Game *GameSession) GetGameStateInfo() (struct {
+	State                 *big.Int
+	CurrNumberCommits     *big.Int
+	CurrNumberReveals     *big.Int
+	CommitStageStartBlock *big.Int
+	RevealStageStartBlock *big.Int
+	StageLength           *big.Int
+}, error) {
+	return _Game.Contract.GetGameStateInfo(&_Game.CallOpts)
+}
+
+// GetGameStateInfo is a free data retrieval call binding the contract method 0x5086f330.
+//
+// Solidity: function getGameStateInfo() constant returns(_state uint256, _currNumberCommits uint256, _currNumberReveals uint256, _commitStageStartBlock uint256, _revealStageStartBlock uint256, _stageLength uint256)
+func (_Game *GameCallerSession) GetGameStateInfo() (struct {
+	State                 *big.Int
+	CurrNumberCommits     *big.Int
+	CurrNumberReveals     *big.Int
+	CommitStageStartBlock *big.Int
+	RevealStageStartBlock *big.Int
+	StageLength           *big.Int
+}, error) {
+	return _Game.Contract.GetGameStateInfo(&_Game.CallOpts)
 }
 
 // GetLastPrize is a free data retrieval call binding the contract method 0x0cfa6131.
@@ -779,6 +857,27 @@ func (_Game *GameSession) SetMaxPlayers(new_max *big.Int) (*types.Transaction, e
 // Solidity: function setMaxPlayers(new_max uint256) returns()
 func (_Game *GameTransactorSession) SetMaxPlayers(new_max *big.Int) (*types.Transaction, error) {
 	return _Game.Contract.SetMaxPlayers(&_Game.TransactOpts, new_max)
+}
+
+// SetNPTAddress is a paid mutator transaction binding the contract method 0x6588ba5b.
+//
+// Solidity: function setNPTAddress(npt_addr address) returns()
+func (_Game *GameTransactor) SetNPTAddress(opts *bind.TransactOpts, npt_addr common.Address) (*types.Transaction, error) {
+	return _Game.contract.Transact(opts, "setNPTAddress", npt_addr)
+}
+
+// SetNPTAddress is a paid mutator transaction binding the contract method 0x6588ba5b.
+//
+// Solidity: function setNPTAddress(npt_addr address) returns()
+func (_Game *GameSession) SetNPTAddress(npt_addr common.Address) (*types.Transaction, error) {
+	return _Game.Contract.SetNPTAddress(&_Game.TransactOpts, npt_addr)
+}
+
+// SetNPTAddress is a paid mutator transaction binding the contract method 0x6588ba5b.
+//
+// Solidity: function setNPTAddress(npt_addr address) returns()
+func (_Game *GameTransactorSession) SetNPTAddress(npt_addr common.Address) (*types.Transaction, error) {
+	return _Game.Contract.SetNPTAddress(&_Game.TransactOpts, npt_addr)
 }
 
 // SetStakeSize is a paid mutator transaction binding the contract method 0xf3b9204e.
@@ -1726,7 +1825,7 @@ func (_Game *GameFilterer) WatchUnpause(opts *bind.WatchOpts, sink chan<- *GameU
 const GameHelperABI = "[]"
 
 // GameHelperBin is the compiled bytecode used for deploying new contracts.
-const GameHelperBin = `0x6080604052348015600f57600080fd5b50603580601d6000396000f3006080604052600080fd00a165627a7a72305820d7ec50b37877d61cd598eac8bae6326cb1cf3bf434beb5d8798fb8de561de6280029`
+const GameHelperBin = `0x6080604052348015600f57600080fd5b50603580601d6000396000f3006080604052600080fd00a165627a7a7230582032efe2ea0cf6cb66aa419d74a4d2935e34c8b6fbb79d815aa271db0f39619c540029`
 
 // DeployGameHelper deploys a new Ethereum contract, binding an instance of GameHelper to it.
 func DeployGameHelper(auth *bind.TransactOpts, backend bind.ContractBackend) (common.Address, *types.Transaction, *GameHelper, error) {
