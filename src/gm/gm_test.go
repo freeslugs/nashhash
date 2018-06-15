@@ -3,10 +3,15 @@ package gm
 import (
 	"fmt"
 	"log"
+	"math/big"
 	"strconv"
 	"sync"
 	"testing"
 	"time"
+
+	"github.com/ethereum/go-ethereum/common"
+	"github.com/ethereum/go-ethereum/crypto"
+	"github.com/ethereum/go-ethereum/ethclient"
 )
 
 func assertEqual(t *testing.T, a interface{}, b interface{}, message string) {
@@ -339,20 +344,70 @@ func TestClerkThreaded(t *testing.T) {
 
 }
 
+func TestEthereumBasic(t *testing.T) {
+	var gm GM
+	hexkey := "76a23cff887b294bb60ccde7ad1eb800f0f6ede70d33b154a53eadb20681a4e3"
+	gm.Init("", 11112, hexkey, false)
+	defer gm.Kill()
+
+	// Create an IPC based RPC connection to a remote node
+	conn, err := ethclient.Dial(EthClientPath)
+	if err != nil {
+		log.Printf("Failed to connect to the Ethereum client: %v", err)
+	}
+	// Instantiate the contract and display its name
+	game, err := NewGame(common.HexToAddress("0xb6738d9bfb3335e9c853c78d17d82e69441371f5"), conn)
+	if err != nil {
+		log.Printf("Failed to instantiate a Game contract: %v", err)
+	}
+
+	auth := gm.auth
+	assertNotEqual(t, auth, nil, "authenticator should be created")
+	guess := []byte("10")
+	// secret := []byte("3")
+
+	// Reset the game
+	tx, txerr := game.ResetGame(auth)
+	assertEqual(t, txerr, nil, "error")
+
+	time.Sleep(1 * time.Second)
+
+	state, err := game.GetGameState(nil)
+	if err != nil {
+		log.Printf("Failed to retrieve game state: %v", err)
+	}
+	fmt.Println(state.Int64())
+
+	h := crypto.Keccak256(guess)
+	var hash [32]byte
+	copy(hash[:], h[:31])
+
+	auth.Value = big.NewInt(100000000000000000)
+	//auth.GasLimit = 7000000
+	//auth.GasPrice = big.NewInt(1000000000)
+
+	tx, txerr = game.Commit(auth, hash)
+	if txerr != nil {
+		log.Fatal(txerr.Error())
+	}
+	log.Printf("commit succesful 0x%x\n", tx.Hash())
+
+}
+
 func TestEthereum(t *testing.T) {
+
 	var gm GM
 	hexkey := "76a23cff887b294bb60ccde7ad1eb800f0f6ede70d33b154a53eadb20681a4e3"
 	gm.Init("", 11112, hexkey, false)
 	defer gm.Kill()
 	gmAddr := ":" + strconv.Itoa(11112)
-	const numThreads = 10
 
 	var clerk Clerk
 	clerk.Init(gmAddr)
 	defer clerk.Kill()
 
-	clerk.ConnectGame("0xb6738d9bfb3335e9c853c78d17d82e69441371f5")
+	// clerk.ConnectGame("0xb6738d9bfb3335e9c853c78d17d82e69441371f5")
 
-	time.Sleep(5 * time.Second)
+	// time.Sleep(10 * time.Second)
 
 }

@@ -89,7 +89,6 @@ func (gop *GameOperator) playGame() {
 				gop.operate()
 			}
 		}
-		time.Sleep(1 * time.Second)
 	}
 }
 
@@ -103,6 +102,7 @@ const (
 	GamePayoutState = 2
 )
 
+// TODO: Not open a new connection every time
 func (gop *GameOperator) operate() {
 
 	// Create an IPC based RPC connection to a remote node
@@ -138,7 +138,7 @@ func (gop *GameOperator) operate() {
 		if txerr != nil {
 			log.Printf("Failed to force game into payout: %v", txerr)
 		} else {
-			log.Printf("INFO game operator: ForceToPayout SUCCESS 0x%x\n", tx.Hash())
+			log.Printf("INFO game operator: ForceToPayout was called 0x%x\n", tx.Hash())
 		}
 
 	case GamePayoutState:
@@ -146,18 +146,16 @@ func (gop *GameOperator) operate() {
 		if txerr != nil {
 			log.Printf("Failed to perform payout: %v", txerr)
 		} else {
-			log.Printf("INFO game operator: SUCCSFUL RESET 0x%x\n", tx.Hash())
+			log.Printf("INFO GameOperator: Reset was called 0x%x\n", tx.Hash())
 		}
 
 	default:
-		log.Println("game operator: unknown operation state")
+		log.Println("WARNING GameOperator: unknown operation state")
 
 	}
 
 	fmt.Println("Game State:", state)
-
-	//fmt.Printf("wow look at me I am operating hard %s\n", gop.contractAddress)
-	log.Printf("INFO GameOperator %s: operate succesful\n", gop.contractAddress)
+	time.Sleep(5 * time.Second)
 }
 
 // Stop stops the operator from operating the game. The game ideally should also
