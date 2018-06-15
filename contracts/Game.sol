@@ -214,7 +214,7 @@ contract Game is Pausable, GameHelper {
         require(commits[msg.sender] == keccak256(abi.encodePacked(guess, random)));
 
         //Prevents user from revealing twice because above require will fail.
-        delete commits[msg.sender];
+        //delete commits[msg.sender];
 
         // When they do, we add the revealed guess to game data
         gameData[msg.sender] = guess;

@@ -40,10 +40,10 @@ contract("2/3 of the Average Game", function([owner, donor]){
 
     it("Single commit", async () => {
 
-        //console.log(api.hashGuess("10", "3"))
+        console.log(api.hashGuess("10", "3"))
         
-        const hash = api.hashGuess("66", "3");
-        await api.commitGuess(donor, "66", "3");
+        const hash = api.hashGuess("10", "3");
+        await api.commitGuess(donor, "10", "3");
 
         const curr_number_bets = await api.getCurrentCommits();
         const guess_commit = await game.commits(donor);
@@ -57,12 +57,12 @@ contract("2/3 of the Average Game", function([owner, donor]){
         //Commit/Reveal
         await api.setMaxPlayers(1, owner);
 
-        await api.commitGuess(donor, "66", "3");
-        await api.revealGuess(donor, "66", "3");
+        await api.commitGuess(donor, "10", "3");
+        await api.revealGuess(donor, "10", "3");
         
         const guess = await game.gameData(donor);
 
-        assert.equal(guess, '66', "Revealed guesses do not match");
+        assert.equal(guess, '10', "Revealed guesses do not match");
     })
 
     it("Winner is found correclty, prizes distributed correctly. Two players, different guesses", async () => {

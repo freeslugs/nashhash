@@ -17,13 +17,6 @@ module.exports = function(deployer) {
     BET,
     MAX_PLAYERS,
     GAME_STAGE_LENGTH,
-    HASHNASH_ADDRESS
-    ).then(async () => {
-        const game = await Game.at(Game.address);
-        const npt = await NPT.deployed();
-        const NPT_ADDRESS = npt.address;
-
-        await game.setNPTAddress(NPT_ADDRESS);
-    })
+    "0x1")
 };
 

@@ -349,6 +349,9 @@ func TestKeccak(t *testing.T) {
 	secret := []byte("3")
 
 	h := crypto.Keccak256(guess, secret)
+	fmt.Println(h)
+	var hassh [32]byte
+	copy(hassh[:], h[:32])
 	hash := fmt.Sprintf("0x%x", h)
 	res := "0xf3e73e27cf4cda7ebc973aa432f8a54a97200c0745d43e1bc9c2879ffe79cc53"
 	assertEqual(t, hash, res, hash)
@@ -368,7 +371,7 @@ func TestEthereumBasic(t *testing.T) {
 		log.Printf("Failed to connect to the Ethereum client: %v", err)
 	}
 	// Instantiate the contract and display its name
-	game, err := NewGame(common.HexToAddress("0xb6738d9bfb3335e9c853c78d17d82e69441371f5"), conn)
+	game, err := NewGame(common.HexToAddress("0x42d0705ddc5f9e96f65eb2947a822c9aff801f3c"), conn)
 	if err != nil {
 		log.Printf("Failed to instantiate a Game contract: %v", err)
 	}
@@ -392,7 +395,7 @@ func TestEthereumBasic(t *testing.T) {
 
 	h := crypto.Keccak256(guess, secret)
 	var hash [32]byte
-	copy(hash[:], h[:31])
+	copy(hash[:], h[:32])
 
 	auth.Value = big.NewInt(100000000000000000)
 	//auth.GasLimit = 7000000
@@ -409,26 +412,42 @@ func TestEthereumBasic(t *testing.T) {
 
 	tx, txerr = game.ForceToRevealState(auth)
 	if txerr != nil {
-		log.Printf("Failed to force game into reveal: %v", txerr)
+		log.Fatalf("Failed to force game into reveal: %v", txerr)
 	} else {
 		log.Printf("ForceToReveal succesful 0x%x\n", tx.Hash())
 	}
 
-	time.Sleep(60 * time.Second)
+	time.Sleep(30 * time.Second)
 	state, err = game.GetGameState(nil)
 	if err != nil {
-		log.Printf("Failed to retrieve game state: %v", err)
+		log.Fatalf("Failed to retrieve game state: %v", err)
 	}
 	fmt.Println(state.Int64())
 
-	// time.Sleep(30 * time.Second)
-	// tx, txerr = game.Reveal(auth, "10", "3")
-	// if txerr != nil {
-	// 	log.Fatal(txerr.Error())
-	// } else {
-	// 	log.Printf("reveal succesful 0x%x\n", tx.Hash())
-	// }
-	// time.Sleep(5 * time.Second)
+	time.Sleep(30 * time.Second)
+	tx, txerr = game.Reveal(auth, "10", "3")
+	if txerr != nil {
+		log.Fatal(txerr.Error())
+	} else {
+		log.Printf("reveal succesful 0x%x\n", tx.Hash())
+	}
+
+	time.Sleep(30 * time.Second)
+	tx, txerr = game.ForceToPayoutState(auth)
+	if txerr != nil {
+		log.Fatal(txerr.Error())
+
+	} else {
+		log.Printf("succesful ForceToPayout 0x%x\n", tx.Hash())
+	}
+
+	time.Sleep(30 * time.Second)
+	tx, txerr = game.Payout(auth)
+	if txerr != nil {
+		log.Fatal(txerr.Error())
+	} else {
+		log.Printf("succesful Payout() 0x%x\n", tx.Hash())
+	}
 
 }
 
