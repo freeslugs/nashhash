@@ -2,7 +2,6 @@ package gm
 
 import (
 	"errors"
-	"fmt"
 	"log"
 	"time"
 
@@ -89,7 +88,6 @@ func (gop *GameOperator) playGame() {
 				gop.operate()
 			}
 		}
-		time.Sleep(1 * time.Second)
 	}
 }
 
@@ -103,24 +101,25 @@ const (
 	GamePayoutState = 2
 )
 
+// TODO: Not open a new connection every time
 func (gop *GameOperator) operate() {
 
 	// Create an IPC based RPC connection to a remote node
 	conn, err := ethclient.Dial(EthClientPath)
 	if err != nil {
-		log.Printf("Failed to connect to the Ethereum client: %v", err)
+		log.Printf("ERROR GameOperator %s: failed to connect to the Ethereum client: %v", gop.contractAddress, err)
 	}
 	// Instantiate the contract and display its name
 	game, err := NewGame(common.HexToAddress(gop.contractAddress), conn)
 	if err != nil {
-		log.Printf("Failed to instantiate a Game contract: %v", err)
+		log.Printf("ERROR GameOperator %s: failed to instantiate a Game contract: %v", gop.contractAddress, err)
 	}
 
 	auth := gop.gm.auth
 
 	state, err := game.GetGameState(nil)
 	if err != nil {
-		log.Printf("Failed to retrieve game state: %v", err)
+		log.Printf("ERROR GameOperator %s: failed to retrieve game state: %v", gop.contractAddress, err)
 	}
 
 	//Initiate appropriate transitions
@@ -128,36 +127,34 @@ func (gop *GameOperator) operate() {
 	case GameCommitState:
 		tx, txerr := game.ForceToRevealState(auth)
 		if txerr != nil {
-			log.Printf("Failed to force game into reveal: %v", txerr)
+			log.Printf("ERROR GameOperator %s: failed to force game into reveal: %v", gop.contractAddress, txerr)
 		} else {
-			log.Printf("INFO game operator: ForceToReveal SUCCESS 0x%x\n", tx.Hash())
+			log.Printf("INFO GameOperator %s: succesful ForceToReveal 0x%x\n", gop.contractAddress, tx.Hash())
 		}
 
 	case GameRevealState:
 		tx, txerr := game.ForceToPayoutState(auth)
 		if txerr != nil {
-			log.Printf("Failed to force game into payout: %v", txerr)
+			log.Printf("ERROR GameOperator %s: failed to force game into payout: %v", gop.contractAddress, txerr)
 		} else {
-			log.Printf("INFO game operator: ForceToPayout SUCCESS 0x%x\n", tx.Hash())
+			log.Printf("INFO GameOperator %s: succesful ForceToPayout 0x%x\n", gop.contractAddress, tx.Hash())
 		}
 
 	case GamePayoutState:
-		tx, txerr := game.ResetGame(auth)
+		tx, txerr := game.Payout(auth)
 		if txerr != nil {
-			log.Printf("Failed to perform payout: %v", txerr)
+			log.Printf("ERROR GameOperator %s: failed to perform payout: %v", gop.contractAddress, txerr)
 		} else {
-			log.Printf("INFO game operator: SUCCSFUL RESET 0x%x\n", tx.Hash())
+			log.Printf("INFO GameOperator %s: succesful Payout() 0x%x\n", gop.contractAddress, tx.Hash())
 		}
 
 	default:
-		log.Println("game operator: unknown operation state")
+		log.Printf("WARNING GameOperator %s: unknown operation state", gop.contractAddress)
 
 	}
 
-	fmt.Println("Game State:", state)
-
-	//fmt.Printf("wow look at me I am operating hard %s\n", gop.contractAddress)
-	log.Printf("INFO GameOperator %s: operate succesful\n", gop.contractAddress)
+	log.Printf("INFO GameOperator: game state %d\n", state)
+	time.Sleep(15 * time.Second)
 }
 
 // Stop stops the operator from operating the game. The game ideally should also

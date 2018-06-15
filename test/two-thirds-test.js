@@ -45,6 +45,8 @@ contract("2/3 of the Average Game", function([owner, donor]){
     });
 
     it("Single commit", async () => {
+
+        //console.log(api.hashGuess("10", "3"))
         
         const hash = api.hashGuess("66", "3");
         await api.commitGuess(donor, "66", "3");
