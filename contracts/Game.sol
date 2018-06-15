@@ -19,9 +19,9 @@ The specific game will have to only define two functions:
 
 */
 
-import "./Pausable.sol";
+import "openzeppelin-solidity/contracts/lifecycle/Pausable.sol";
 import "./GameHelper.sol";
-// import "./NPT.sol";
+import "./NPT.sol";
 
 contract Game is Pausable, GameHelper {
 
@@ -72,6 +72,8 @@ contract Game is Pausable, GameHelper {
     mapping (address => string) public gameData;
     address[] internal gameDataKeys;
 
+    //Nashpoints contract
+    NPT nashpoints;
 
     constructor(
         address _feeAddress,
@@ -105,6 +107,9 @@ contract Game is Pausable, GameHelper {
 
         info.lastWinners = new address[](_maxp);
         info.lastWinnersLength = 0;
+
+        nashpoints = NPT(config.NPT_ADDRESS);
+
     }
 
     // Contrcact public API
@@ -174,6 +179,7 @@ contract Game is Pausable, GameHelper {
             round if you forget to reveal your guess, but your stake will still become
             someone's prize! Make sure you reveal.
     */
+
     function commit(bytes32 hashedCommit) public payable whenNotPaused {
         
         require(state.gameState == GameState.COMMIT_STATE);
@@ -186,6 +192,9 @@ contract Game is Pausable, GameHelper {
         commits[msg.sender] = hashedCommit;
         commitsKeys[state.currNumberCommits] = msg.sender;
         state.currNumberCommits++;
+
+        //Issue nashpoints to committer
+        nashpoints.mint(msg.sender, 10);
 
         // Start the 'commit stage timer', to protect the players in case the
         // game master goes rogue
