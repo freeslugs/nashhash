@@ -444,8 +444,8 @@ func TestEthereum(t *testing.T) {
 	clerk.Init(gmAddr)
 	defer clerk.Kill()
 
-	// clerk.ConnectGame("0xb6738d9bfb3335e9c853c78d17d82e69441371f5")
+	clerk.ConnectGame("0xb6738d9bfb3335e9c853c78d17d82e69441371f5")
 
-	// time.Sleep(10 * time.Second)
+	time.Sleep(60 * time.Second)
 
 }
