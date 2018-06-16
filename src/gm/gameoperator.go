@@ -1,6 +1,7 @@
 package gm
 
 import (
+	"context"
 	"errors"
 	"log"
 	"time"
@@ -117,14 +118,36 @@ func (gop *GameOperator) operate() {
 
 	auth := gop.gm.auth
 
-	state, err := game.GetGameState(nil)
+	state, err := game.GetGameStateInfo(nil)
 	if err != nil {
 		log.Printf("ERROR GameOperator %s: failed to retrieve game state: %v", gop.contractAddress, err)
 	}
 
 	//Initiate appropriate transitions
-	switch s := state.Int64(); s {
+	switch s := state.State.Int64(); s {
 	case GameCommitState:
+
+		header, err := conn.HeaderByNumber(context.Background(), nil)
+		if err != nil {
+			log.Print(err)
+		}
+
+		// We deploy bots if we are in commiy and 3/4 of gamelength have passed
+		// We need to make sure that CommitStageStart block was set this round
+		if state.CommitStageStartBlock.IsInt64() {
+
+			deadline := state.CommitStageStartBlock.Int64() + ((state.StageLength.Int64() * 2) / 4)
+
+			if header.Number.Int64() > deadline {
+				log.Printf("INFO GameOperator %s: adding bots\n", gop.contractAddress)
+			} else {
+				log.Printf("INFO GameOperator %s: nothig to be done yet\n", gop.contractAddress)
+			}
+
+		} else {
+			log.Printf("INFO GameOperator %s: nothing to be done\n", gop.contractAddress)
+		}
+
 		tx, txerr := game.ForceToRevealState(auth)
 		if txerr != nil {
 			log.Printf("ERROR GameOperator %s: failed to force game into reveal: %v", gop.contractAddress, txerr)

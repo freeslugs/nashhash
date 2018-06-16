@@ -1,6 +1,7 @@
 package gm
 
 import (
+	"context"
 	"fmt"
 	"log"
 	"math/big"
@@ -397,6 +398,27 @@ func TestEthereumRetrieveState(t *testing.T) {
 	log.Printf("%v\n", state)
 }
 
+func TestEthereumGetCurrentBlock(t *testing.T) {
+	var gm GM
+	//hexkey := "76a23cff887b294bb60ccde7ad1eb800f0f6ede70d33b154a53eadb20681a4e3"
+	gm.Init("", 11112, OwnerHexKey, false)
+	defer gm.Kill()
+
+	// Create an IPC based RPC connection to a remote node
+	conn, err := ethclient.Dial(EthClientPath)
+	if err != nil {
+		log.Printf("Failed to connect to the Ethereum client: %v", err)
+	}
+
+	header, err := conn.HeaderByNumber(context.Background(), nil)
+	if err != nil {
+		log.Fatal(err)
+	}
+
+	log.Println(header.Number)
+
+}
+
 func TestEthereumBasic(t *testing.T) {
 	var gm GM
 	//hexkey := "76a23cff887b294bb60ccde7ad1eb800f0f6ede70d33b154a53eadb20681a4e3"
@@ -489,7 +511,7 @@ func TestEthereumBasic(t *testing.T) {
 
 }
 
-func TestEthereum(t *testing.T) {
+func TestEthereumGM(t *testing.T) {
 
 	var gm GM
 	//hexkey := "76a23cff887b294bb60ccde7ad1eb800f0f6ede70d33b154a53eadb20681a4e3"
