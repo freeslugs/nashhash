@@ -105,6 +105,8 @@ const (
 // TODO: Not open a new connection every time
 func (gop *GameOperator) operate() {
 
+	defer time.Sleep(15 * time.Second)
+
 	// Create an IPC based RPC connection to a remote node
 	conn, err := ethclient.Dial(EthClientPath)
 	if err != nil {
@@ -136,7 +138,7 @@ func (gop *GameOperator) operate() {
 		// We need to make sure that CommitStageStart block was set this round
 		if state.CommitStageStartBlock.IsInt64() {
 
-			deadline := state.CommitStageStartBlock.Int64() + ((state.StageLength.Int64() * 2) / 4)
+			deadline := state.CommitStageStartBlock.Int64() + ((state.StageLength.Int64() * 1) / 2)
 
 			if header.Number.Int64() > deadline {
 				log.Printf("INFO GameOperator %s: adding bots\n", gop.contractAddress)
@@ -146,6 +148,7 @@ func (gop *GameOperator) operate() {
 
 		} else {
 			log.Printf("INFO GameOperator %s: nothing to be done\n", gop.contractAddress)
+			return
 		}
 
 		tx, txerr := game.ForceToRevealState(auth)
@@ -177,7 +180,7 @@ func (gop *GameOperator) operate() {
 	}
 
 	log.Printf("INFO GameOperator: game state %d\n", state)
-	time.Sleep(15 * time.Second)
+
 }
 
 // Stop stops the operator from operating the game. The game ideally should also

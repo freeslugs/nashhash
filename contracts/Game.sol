@@ -265,13 +265,13 @@ contract Game is Pausable, GameHelper {
     */
     function forceToRevealState() public onlyOwner whenNotPaused {
         require(state.gameState == GameState.COMMIT_STATE);
-        //require(state.commitStageStartBlock + config.GAME_STAGE_LENGTH <= block.number);
+        require(state.commitStageStartBlock + config.GAME_STAGE_LENGTH <= block.number);
         toRevealState();
     }
 
     function forceToPayoutState() public onlyOwner whenNotPaused {
         require(state.gameState == GameState.REVEAL_STATE);
-        //require(state.revealStageStartBlock + config.GAME_STAGE_LENGTH <= block.number);
+        require(state.revealStageStartBlock + config.GAME_STAGE_LENGTH <= block.number);
         toPayoutState();
     }
 
