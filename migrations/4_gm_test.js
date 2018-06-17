@@ -4,7 +4,7 @@ var NPT = artifacts.require("NPT");
 var Web3Utils = require('web3-utils');
 
 
-const BET = web3.toWei(0.1, 'ether');
+const BET = web3.toWei(0.01, 'ether');
 const MAX_PLAYERS = 5;
 const HASHNASH_ADDRESS = 0x2540099e9ed04aF369d557a40da2D8f9c2ab928D;
 const GAME_STAGE_LENGTH = 2;

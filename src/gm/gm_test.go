@@ -16,9 +16,10 @@ import (
 )
 
 const (
-	GameContract            = "0x42168d0eb5fcee26ae3c51e4ab2e3e9565e8855d"
-	ZeroStageLengthContract = "0x583de5cbf9101fd7c2e078dee33324967dc1eb87"
+	GameContract            = "0x6ff5655c93780ce620dbf35c5cd9c506299d45a9"
+	ZeroStageLengthContract = "0xa5bf7aee277b4a035ccb7c7f38d1deebffdb025a"
 	OwnerHexKey             = "76a23cff887b294bb60ccde7ad1eb800f0f6ede70d33b154a53eadb20681a4e3"
+	StakeSize               = 10000000000000000 // 0.01 ETH
 )
 
 func assertEqual(t *testing.T, a interface{}, b interface{}, message string) {
@@ -458,7 +459,7 @@ func TestEthereumBasic(t *testing.T) {
 	var hash [32]byte
 	copy(hash[:], h[:32])
 
-	auth.Value = big.NewInt(100000000000000000)
+	auth.Value = big.NewInt(StakeSize)
 	tx, txerr = game.Commit(auth, hash)
 	if txerr != nil {
 		log.Fatal(txerr.Error())
@@ -485,7 +486,7 @@ func TestEthereumBasic(t *testing.T) {
 	time.Sleep(30 * time.Second)
 	tx, txerr = game.Reveal(auth, "10", "3")
 	if txerr != nil {
-		log.Fatal(txerr.Error())
+		log.Fatal("failed to reveal: %s\n", txerr.Error())
 	} else {
 		log.Printf("reveal succesful 0x%x\n", tx.Hash())
 	}
@@ -493,8 +494,7 @@ func TestEthereumBasic(t *testing.T) {
 	time.Sleep(30 * time.Second)
 	tx, txerr = game.ForceToPayoutState(auth)
 	if txerr != nil {
-		log.Fatal(txerr.Error())
-
+		log.Fatalf("failed force payout %s\n", txerr.Error())
 	} else {
 		log.Printf("succesful ForceToPayout 0x%x\n", tx.Hash())
 	}
@@ -502,7 +502,7 @@ func TestEthereumBasic(t *testing.T) {
 	time.Sleep(30 * time.Second)
 	tx, txerr = game.Payout(auth)
 	if txerr != nil {
-		log.Fatal(txerr.Error())
+		log.Fatalf("failed payout: %s\n", txerr.Error())
 	} else {
 		log.Printf("succesful Payout() 0x%x\n", tx.Hash())
 	}
@@ -523,12 +523,12 @@ func TestEthereumGM(t *testing.T) {
 	// Create an IPC based RPC connection to a remote node
 	conn, err := ethclient.Dial(EthClientPath)
 	if err != nil {
-		log.Printf("Failed to connect to the Ethereum client: %v", err)
+		log.Fatalf("Failed to connect to the Ethereum client: %v", err)
 	}
 	// Instantiate the contract and display its name
 	game, err := NewGame(common.HexToAddress(GameContract), conn)
 	if err != nil {
-		log.Printf("Failed to instantiate a Game contract: %v", err)
+		log.Fatalf("Failed to instantiate a Game contract: %v", err)
 	}
 
 	// Reset the game
@@ -547,7 +547,7 @@ func TestEthereumGM(t *testing.T) {
 	var hash [32]byte
 	copy(hash[:], h[:32])
 	auth := gm.auth
-	auth.Value = big.NewInt(100000000000000000)
+	auth.Value = big.NewInt(StakeSize)
 	tx, txerr := game.Commit(auth, hash)
 	if txerr != nil {
 		log.Fatal(txerr.Error())
