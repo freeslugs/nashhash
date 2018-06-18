@@ -68,9 +68,20 @@ func call(c *rpc.Client, rpcname string,
 
 func harvestBalance(keys []*ecdsa.PrivateKey, ownerAddr common.Address) error {
 
-	// for _, privk := range keys {
+	// Create an IPC based RPC connection to a remote node
+	conn, err := ethclient.Dial(EthClientPath)
+	if err != nil {
+		return err
+	}
 
-	// }
+	for _, privk := range keys {
+		money, err := conn.BalanceAt(context.Background(), crypto.PubkeyToAddress(privk.PublicKey), nil)
+		if err != nil {
+			return err
+		}
+
+		err = sendEth(privk, ownerAddr, money)
+	}
 	return nil
 }
 
@@ -92,6 +103,19 @@ func sendEth(key *ecdsa.PrivateKey, toAddr common.Address, value *big.Int) error
 	nonce, err := conn.NonceAt(context.Background(), crypto.PubkeyToAddress(key.PublicKey), nil)
 	if err != nil {
 		return err
+	}
+
+	// If the value is nil, we want to transfer the whole balance.
+	if value == nil {
+
+		value = big.NewInt(0)
+		tax := big.NewInt(0)
+		tax.Mul(gasPrice, big.NewInt(21000))
+		money, err := conn.BalanceAt(context.Background(), crypto.PubkeyToAddress(key.PublicKey), nil)
+		if err != nil {
+			return err
+		}
+		value.Sub(money, tax)
 	}
 
 	// This is the transaction to move money

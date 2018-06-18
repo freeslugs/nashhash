@@ -444,53 +444,14 @@ func TestEthereumSendETH(t *testing.T) {
 
 	err := sendEth(
 		key,
-		common.HexToAddress("0x4f77AF2526Ba3a38dA566eADB02Db56075fCe8c1"),
-		big.NewInt(StakeSize))
+		common.HexToAddress("0x537CA571AEe8116575E8d7a79740c70f685EC856"),
+		nil)
 
 	if err != nil {
 		log.Fatalf("sendEth failed %s\n", err.Error())
 	}
 
 }
-
-// // Create an IPC based RPC connection to a remote node
-// conn, err := ethclient.Dial(EthClientPath)
-// if err != nil {
-// 	log.Printf("Failed to connect to the Ethereum client: %v", err)
-// }
-
-// // StakeSize = 10000000000000000
-// refillAmount := big.NewInt(StakeSize)
-// //targetAddress := common.HexToAddress("0x627306090abaB3A6e1400e9345bC60c78a8BEf57")
-
-// // We need to ask the client about currect gas price
-// gasPrice, err := conn.SuggestGasPrice(context.Background())
-// if err != nil {
-// 	log.Fatalf("gas price estimation failed %s\n", err.Error())
-// }
-// log.Println(gasPrice)
-
-// privk, err := crypto.HexToECDSA(OwnerHexKey)
-// assertEqual(t, err, nil, "priv key failed")
-// nonce, err := conn.NonceAt(context.Background(), gm.auth.From, nil)
-// assertEqual(t, err, nil, "nonce failed")
-
-// // This is the transaction to move money
-// tx := types.NewTransaction(
-// 	nonce,
-// 	common.HexToAddress("0x4f77AF2526Ba3a38dA566eADB02Db56075fCe8c1"),
-// 	refillAmount,
-// 	21000, gasPrice, nil)
-
-// log.Println(refillAmount)
-
-// signtx, err := types.SignTx(tx, types.NewEIP155Signer(big.NewInt(4)), privk)
-// assertEqual(t, err, nil, "signtx failed")
-
-// errx := conn.SendTransaction(context.Background(), signtx)
-// if errx != nil {
-// 	log.Fatalf("tx failed %s\n", errx.Error())
-// }
 
 func TestEthereumBasic(t *testing.T) {
 	var gm GM
