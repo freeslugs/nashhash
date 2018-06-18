@@ -5,6 +5,18 @@ import (
 	"net/rpc"
 )
 
+// IMPORTANT CONFIGS
+const (
+	// GameOperator Stuff
+	// DisconnectOperator command to stop a game
+	DisconnectOperator = 0
+	// EthClientPath is the path to the geth.ipc
+	EthClientPath = "/Users/me/Library/Ethereum/rinkeby/geth.ipc"
+
+	// BotDispatcher stuff
+	NetworkID = 4
+)
+
 type ExecuteCallArgs struct {
 	Message string
 }

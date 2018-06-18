@@ -11,7 +11,6 @@ import (
 
 	"github.com/ethereum/go-ethereum/accounts/abi/bind"
 	"github.com/ethereum/go-ethereum/core/types"
-	"github.com/ethereum/go-ethereum/crypto"
 	"github.com/ethereum/go-ethereum/ethclient"
 )
 
@@ -94,13 +93,13 @@ func (bd *BotDispatcher) Dispatch(howMany int) error {
 // that is launched from Init() and is killed in Kill(). Runs in a separate go routine.
 func (bd *BotDispatcher) refill() {
 
-	var nonce uint64
 	var limit big.Int
 	limit.Mul(bd.stakeSize, big.NewInt(5))
 	var refillAmount big.Int
 	refillAmount.Mul(&limit, big.NewInt(3))
 
-	for i := 0; i < bd.botPoolSize; i++ {
+	for i := 0; i < bd.botPoolSize; i = (i + 1) % bd.botPoolSize {
+
 		select {
 		// If we receive a kill signal, stop the goroutine
 		case <-bd.refilldead:
@@ -114,6 +113,7 @@ func (bd *BotDispatcher) refill() {
 			conn, err := ethclient.Dial(EthClientPath)
 			if err != nil {
 				log.Printf("Failed to connect to the Ethereum client: %v", err)
+				continue
 			}
 			money, err := conn.BalanceAt(context.Background(), bd.bots[i].From, nil)
 			if err != nil {
@@ -127,7 +127,14 @@ func (bd *BotDispatcher) refill() {
 				// We need to ask the client about currect gas price
 				gasPrice, err := conn.SuggestGasPrice(context.Background())
 				if err != nil {
-					log.Printf("ERROR BotDispatcher %s: gas price estimation failed\n", bd.contractAddress)
+					log.Printf("ERROR BotDispatcher %s: gas price estimation failed %s\n", bd.contractAddress, err.Error())
+					continue
+				}
+
+				// We need to find out the nonce associated with the address
+				nonce, err := conn.NonceAt(context.Background(), bd.bots[i].From, nil)
+				if err != nil {
+					log.Printf("ERROR BotDispatcher %s: nonce discovery failed %s\n", bd.contractAddress, err.Error())
 					continue
 				}
 
@@ -136,18 +143,26 @@ func (bd *BotDispatcher) refill() {
 					nonce,
 					bd.bots[i].From,
 					&refillAmount,
-					21000, gasPrice, nil)
+					21000,
+					gasPrice,
+					nil)
 
-				signature, _ := crypto.Sign(tx.Hash().Bytes(), bd.sugarBotKey)
-				signedtx, _ := tx.WithSignature(types.NewEIP155Signer(nil), signature)
-				conn.SendTransaction(context.Background(), signedtx)
+				// We sign the transaction with the sugarBotKey
+				signtx, err := types.SignTx(tx, types.NewEIP155Signer(big.NewInt(NetworkID)), bd.sugarBotKey)
+				if err != nil {
+					log.Printf("ERROR BotDispatcher %s: failed to sign tx %s\n", bd.contractAddress, err.Error())
+					continue
+				}
+
+				// Send the transaction into the client
+				err = conn.SendTransaction(context.Background(), signtx)
+				if err != nil {
+					log.Fatalf("tx failed %s\n", err.Error())
+					continue
+				}
+				log.Printf("INFO BotDispatcher %s: succesful refill of %s\n", bd.contractAddress, bd.bots[i].From)
 			}
 
 		}
-
-		// Doing iteration this way to check the dead channel often
-		i++
-		i = i % bd.botPoolSize
-		nonce++
 	}
 }

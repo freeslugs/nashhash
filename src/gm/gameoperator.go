@@ -10,13 +10,6 @@ import (
 	"github.com/ethereum/go-ethereum/ethclient"
 )
 
-const (
-	// DisconnectOperator command to stop a game
-	DisconnectOperator = 0
-	// EthClientPath is the path to the geth.ipc
-	EthClientPath = "/Users/me/Library/Ethereum/rinkeby/geth.ipc"
-)
-
 // GameOperator operates a game contract
 type GameOperator struct {
 	contractAddress string

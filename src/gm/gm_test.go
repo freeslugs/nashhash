@@ -20,7 +20,7 @@ const (
 	GameContract            = "0x6ff5655c93780ce620dbf35c5cd9c506299d45a9"
 	ZeroStageLengthContract = "0xa5bf7aee277b4a035ccb7c7f38d1deebffdb025a"
 	OwnerHexKey             = "76a23cff887b294bb60ccde7ad1eb800f0f6ede70d33b154a53eadb20681a4e3"
-	StakeSize               = 10000000000000000 // 0.01 ETH
+	StakeSize               = 100000000000000000 // 0.01 ETH
 )
 
 func assertEqual(t *testing.T, a interface{}, b interface{}, message string) {
@@ -469,7 +469,7 @@ func TestEthereumSendETH(t *testing.T) {
 	// This is the transaction to move money
 	tx := types.NewTransaction(
 		nonce,
-		common.HexToAddress("0x627306090abaB3A6e1400e9345bC60c78a8BEf57"),
+		common.HexToAddress("0x4f77AF2526Ba3a38dA566eADB02Db56075fCe8c1"),
 		refillAmount,
 		21000, gasPrice, nil)
 
@@ -487,7 +487,6 @@ func TestEthereumSendETH(t *testing.T) {
 
 func TestEthereumBasic(t *testing.T) {
 	var gm GM
-	//hexkey := "76a23cff887b294bb60ccde7ad1eb800f0f6ede70d33b154a53eadb20681a4e3"
 	gm.Init("", 11112, OwnerHexKey, false)
 	defer gm.Kill()
 
