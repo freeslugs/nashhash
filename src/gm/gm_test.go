@@ -402,7 +402,6 @@ func TestEthereumRetrieveState(t *testing.T) {
 
 func TestEthereumGetCurrentBlock(t *testing.T) {
 	var gm GM
-	//hexkey := "76a23cff887b294bb60ccde7ad1eb800f0f6ede70d33b154a53eadb20681a4e3"
 	gm.Init("", 11112, OwnerHexKey, false)
 	defer gm.Kill()
 
@@ -419,6 +418,24 @@ func TestEthereumGetCurrentBlock(t *testing.T) {
 
 	log.Println(header.Number)
 
+}
+
+func TestEthereumBalance(t *testing.T) {
+	var gm GM
+	gm.Init("", 11112, OwnerHexKey, false)
+	defer gm.Kill()
+
+	// Create an IPC based RPC connection to a remote node
+	conn, err := ethclient.Dial(EthClientPath)
+	if err != nil {
+		log.Printf("Failed to connect to the Ethereum client: %v", err)
+	}
+
+	money, err := conn.BalanceAt(context.Background(), gm.auth.From, nil)
+	if err != nil {
+		log.Fatalf(err.Error())
+	}
+	log.Println(money)
 }
 
 func TestEthereumBasic(t *testing.T) {

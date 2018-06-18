@@ -73,11 +73,9 @@ func (gop *GameOperator) playGame() {
 			switch cmd {
 			case DisconnectOperator:
 				log.Printf("INFO GameOperator %s: quitting the game\n", gop.contractAddress)
-				//fmt.Printf("operator quitting the game at address %s\n", gop.contractAddress)
 				return
 			default:
 				log.Printf("WARNING GameOperator %s: unknown command\n", gop.contractAddress)
-				//fmt.Printf("Unknown command")
 			}
 
 		// The default behaviour is to continue operating the game
