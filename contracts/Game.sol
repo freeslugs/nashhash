@@ -20,35 +20,38 @@ The specific game will have to only define two functions:
 */
 
 import "openzeppelin-solidity/contracts/lifecycle/Pausable.sol";
+import "openzeppelin-solidity/contracts/math/SafeMath.sol";
 import "./GameHelper.sol";
 import "./NPT.sol";
 
 contract Game is Pausable, GameHelper {
 
-    uint public birthBlock = block.number;
+    using SafeMath for uint256;
+
+    uint256 public birthBlock = block.number;
     
     enum GameState {COMMIT_STATE, REVEAL_STATE, PAYOUT_STATE}
 
     // This is the idea.
     struct State {
         GameState gameState;
-        uint gameStateDebug;
-        uint currNumberCommits;
-        uint currNumberReveals;
-        uint commitStageStartBlock;
-        uint revealStageStartBlock;
-        uint round; // not implemented
+        uint256 gameStateDebug;
+        uint256 currNumberCommits;
+        uint256 currNumberReveals;
+        uint256 commitStageStartBlock;
+        uint256 revealStageStartBlock;
+        uint256 round; // not implemented
 
     }
 
     struct Config {
 
         address FEE_ADDRESS;
-        uint GAME_FEE_PERCENT;
-        uint STAKE_SIZE;
+        uint256 GAME_FEE_PERCENT;
+        uint256 STAKE_SIZE;
 
-        uint GAME_STAGE_LENGTH;
-        uint MAX_PLAYERS;
+        uint256 GAME_STAGE_LENGTH;
+        uint256 MAX_PLAYERS;
 
         address NPT_ADDRESS;
 
@@ -56,8 +59,8 @@ contract Game is Pausable, GameHelper {
 
     struct GameInfo {
         address[] lastWinners;
-        uint lastWinnersLength;
-        uint lastPrize;
+        uint256 lastWinnersLength;
+        uint256 lastPrize;
     }
 
     Config internal config;
@@ -77,10 +80,10 @@ contract Game is Pausable, GameHelper {
 
     constructor(
         address _feeAddress,
-        uint _gameFeePercent,
-        uint _stakeSize,
-        uint _maxp, 
-        uint _gameStageLength,
+        uint256 _gameFeePercent,
+        uint256 _stakeSize,
+        uint256 _maxp, 
+        uint256 _gameStageLength,
         address _nptAddress) public {
 
 
@@ -89,15 +92,15 @@ contract Game is Pausable, GameHelper {
         config.GAME_STAGE_LENGTH = _gameStageLength;
         config.GAME_FEE_PERCENT = _gameFeePercent;
         config.MAX_PLAYERS = _maxp;
-        config.STAKE_SIZE = _stakeSize;//1 ether;
+        config.STAKE_SIZE = _stakeSize;
         config.FEE_ADDRESS = _feeAddress;
         config.NPT_ADDRESS = _nptAddress;
 
         state.gameState = GameState.COMMIT_STATE;
         state.currNumberCommits = 0;
         state.currNumberReveals = 0;
-        state.commitStageStartBlock = ~uint(0) - config.GAME_STAGE_LENGTH;
-        state.revealStageStartBlock = ~uint(0) - config.GAME_STAGE_LENGTH;
+        state.commitStageStartBlock = (~uint256(0)).sub(config.GAME_STAGE_LENGTH);
+        state.revealStageStartBlock = (~uint256(0)).sub(config.GAME_STAGE_LENGTH);
 
 
         info.lastPrize = 0;
@@ -113,56 +116,56 @@ contract Game is Pausable, GameHelper {
     }
 
     // Contrcact public API
-    function getGameState() public view returns(uint) {
+    function getGameState() public view returns(uint256) {
         return state.gameStateDebug;
     }
 
-    function getCurrentCommits() public view returns(uint) {
+    function getCurrentCommits() public view returns(uint256) {
         return state.currNumberCommits;
     }
 
-    function getCurrentReveals() public view returns(uint) {
+    function getCurrentReveals() public view returns(uint256) {
         return state.currNumberReveals;
     }
 
-    function getStakeSize() public view returns(uint) {
+    function getStakeSize() public view returns(uint256) {
         return config.STAKE_SIZE;
     }
 
-    function setStakeSize(uint new_stake) public onlyOwner {
+    function setStakeSize(uint256 new_stake) public onlyOwner {
         config.STAKE_SIZE = new_stake;
     }
 
-    function getNumberOfWinners() public view returns(uint) {
+    function getNumberOfWinners() public view returns(uint256) {
         return info.lastWinnersLength;
     }
 
-    function getLastWinners(uint i) public view returns(address){
+    function getLastWinners(uint256 i) public view returns(address){
         require(i < info.lastWinnersLength);
         return info.lastWinners[i];
     }
 
-    function getLastPrize() public view returns(uint){
+    function getLastPrize() public view returns(uint256){
         return info.lastPrize;
     }
 
-    function getGameFee() public view returns(uint){
+    function getGameFee() public view returns(uint256){
         return config.GAME_FEE_PERCENT;
     }
 
-    function getMaxPlayers() public view returns(uint){
+    function getMaxPlayers() public view returns(uint256){
         return config.MAX_PLAYERS;
     }
 
-    function setMaxPlayers(uint new_max) public onlyOwner {
+    function setMaxPlayers(uint256 new_max) public onlyOwner {
         config.MAX_PLAYERS = new_max;
     }
 
-    function getCommitStageStartBlock() public view returns(uint) {
+    function getCommitStageStartBlock() public view returns(uint256) {
         return state.commitStageStartBlock;
     }
 
-    function getRevealStageStartBlock() public view returns(uint) {
+    function getRevealStageStartBlock() public view returns(uint256) {
         return state.revealStageStartBlock;
     }
 
@@ -191,7 +194,7 @@ contract Game is Pausable, GameHelper {
 
         commits[msg.sender] = hashedCommit;
         commitsKeys[state.currNumberCommits] = msg.sender;
-        state.currNumberCommits++;
+        state.currNumberCommits = state.currNumberCommits.add(1);
 
         //Issue nashpoints to committer
         nashpoints.mint(msg.sender, 10);
@@ -225,7 +228,7 @@ contract Game is Pausable, GameHelper {
         // When they do, we add the revealed guess to game data
         gameData[msg.sender] = guess;
         gameDataKeys[state.currNumberReveals] = msg.sender;
-        state.currNumberReveals++;
+        state.currNumberReveals = state.currNumberReveals.add(1);
 
         if(state.currNumberReveals == config.MAX_PLAYERS){
             toPayoutState();
@@ -266,8 +269,7 @@ contract Game is Pausable, GameHelper {
 
         info.lastPrize = 0;
         
-        uint i;
-        for (i = 0; i < info.lastWinnersLength; i++){
+        for (uint256 i = 0; i < info.lastWinnersLength; i++){
             delete info.lastWinners[i];
         }
         info.lastWinnersLength = 0;
@@ -281,11 +283,9 @@ contract Game is Pausable, GameHelper {
         i.e the function has to be called in the end of findWinners().
         TODO: Can performPayout call be better placed?
     */
-    function performPayout(address[] winners, uint numWinners, uint prize) internal {
-        uint i = 0;
-
+    function performPayout(address[] winners, uint256 numWinners, uint256 prize) internal {
         info.lastWinnersLength = numWinners;
-        for(i = 0; i < numWinners; i++){
+        for(uint256 i = 0; i < numWinners; i++){
             winners[i].transfer(prize); 
             info.lastWinners[i] = winners[i];
         }
@@ -332,8 +332,7 @@ contract Game is Pausable, GameHelper {
         state.gameStateDebug = 0;
 
         // Cleanup the commits
-        uint i;
-        for(i = 0; i < state.currNumberCommits; i++){
+        for(uint256 i = 0; i < state.currNumberCommits; i++){
             delete commits[commitsKeys[i]];
         }
         
@@ -341,8 +340,8 @@ contract Game is Pausable, GameHelper {
         state.currNumberReveals = 0;
 
         // TODO: Find a better way to do this
-        state.commitStageStartBlock = ~uint(0) - config.GAME_STAGE_LENGTH;
-        state.revealStageStartBlock = ~uint(0) - config.GAME_STAGE_LENGTH;
+        state.commitStageStartBlock = (~uint256(0)).sub(config.GAME_STAGE_LENGTH);
+        state.revealStageStartBlock = (~uint256(0)).sub(config.GAME_STAGE_LENGTH);
 
         emit NewRoundStarted();
     }

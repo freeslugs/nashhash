@@ -5,43 +5,44 @@ import "./Game.sol";
 
 //NEEDED: Account for scenario where no one wins (no unique number) !!!
 contract LowestUniqueNum is Game {
+    using SafeMath for uint256;
 
     address NULL_ADDR = config.FEE_ADDRESS;
 
     // Guesses and guesser addresses
-    mapping (uint => address) private guessAddrs;
-    uint[] private guesses;
+    mapping (uint256 => address) private guessAddrs;
+    uint256[] private guesses;
 
     struct Rules {
-        uint MIN_GUESS;
-        uint MAX_GUESS;
+        uint256 MIN_GUESS;
+        uint256 MAX_GUESS;
     }
 
     Rules public rules;
 
     // Debug
-    uint public testLowest = 0;
+    uint256 public testLowest = 0;
 
     constructor(
         address _feeAddress,
-        uint _gameFeePercent,
-        uint _stakeSize,
-        uint _maxp, 
-        uint _gameStageLength,
+        uint256 _gameFeePercent,
+        uint256 _stakeSize,
+        uint256 _maxp, 
+        uint256 _gameStageLength,
         address _nptAddress) public Game(_feeAddress, _gameFeePercent, _stakeSize, _maxp, _gameStageLength, _nptAddress) {
         rules.MIN_GUESS = 0;
-        rules.MAX_GUESS = ~uint256(0) - 1;
+        rules.MAX_GUESS = (~uint256(0)).sub(1);
     }
 
     function checkGuess(string guess) private {
-        uint guess_num = stringToUint(guess);
+        uint256 guess_num = stringToUint(guess);
         require(guess_num >= rules.MIN_GUESS && guess_num <= rules.MAX_GUESS);
     }
 
     function findWinners() private {
 
-        for(uint i = 0; i < state.currNumberReveals; i++){
-            uint tmp = stringToUint(gameData[gameDataKeys[i]]);
+        for(uint256 i = 0; i < state.currNumberReveals; i++){
+            uint256 tmp = stringToUint(gameData[gameDataKeys[i]]);
 
             //If guess is unique input guesser address to mapping
             if(guessAddrs[tmp] == 0){
@@ -55,12 +56,12 @@ contract LowestUniqueNum is Game {
             }
         }
 
-        uint lowest_unique_guess = rules.MAX_GUESS + 1;
+        uint256 lowest_unique_guess = rules.MAX_GUESS.add(1);
         //Declared as array for interface purposes
         address[] memory winner = new address[](1);
 
-        for(uint j = 0; j < guesses.length; j++){
-            uint cur_guess = guesses[j];
+        for(uint256 j = 0; j < guesses.length; j++){
+            uint256 cur_guess = guesses[j];
 
             //If guess is unique
             if(guessAddrs[cur_guess] != NULL_ADDR){
@@ -79,11 +80,11 @@ contract LowestUniqueNum is Game {
         delete guesses;
 
         // Lets pay ourselves some money
-        uint gamefee = (address(this).balance/100) * config.GAME_FEE_PERCENT;
+        uint256 gamefee = (address(this).balance.mul(config.GAME_FEE_PERCENT)).div(100);
         config.FEE_ADDRESS.transfer(gamefee);
 
         // Give the rest to winner
-        uint prize = address(this).balance;
+        uint256 prize = address(this).balance;
         performPayout(winner, 1, prize);
 
 
