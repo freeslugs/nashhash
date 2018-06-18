@@ -9,8 +9,6 @@ import (
 	"math/big"
 	"sync"
 
-	"github.com/ethereum/go-ethereum"
-
 	"github.com/ethereum/go-ethereum/accounts/abi/bind"
 	"github.com/ethereum/go-ethereum/core/types"
 	"github.com/ethereum/go-ethereum/crypto"
@@ -27,6 +25,7 @@ type BotDispatcher struct {
 	bots        []*bind.TransactOpts // slice of bots that are used to bet
 	botKeys     []*ecdsa.PrivateKey
 	sugarBot    *bind.TransactOpts // address that sponsors the party
+	sugarBotKey *ecdsa.PrivateKey
 
 	refilldead chan bool
 }
@@ -121,26 +120,27 @@ func (bd *BotDispatcher) refill() {
 				log.Printf("ERROR BotDispatcher %s: failed to get bot balance %s\n", bd.contractAddress, err.Error())
 			}
 
-			// If the balance is less than a certain minimum, we refu=ill
+			// If the balance is less than a certain minimum, we refiill
+			// Not a one step thing....
 			if money.Cmp(&limit) < 0 {
 
+				// We need to ask the client about currect gas price
 				gasPrice, err := conn.SuggestGasPrice(context.Background())
 				if err != nil {
 					log.Printf("ERROR BotDispatcher %s: gas price estimation failed\n", bd.contractAddress)
 					continue
 				}
 
-				gasAmount, err := conn.EstimateGas(context.Background(), &ethereum.CallMsg{})
-
+				// This is the transaction to move money
 				tx := types.NewTransaction(
 					nonce,
 					bd.bots[i].From,
 					&refillAmount,
 					21000, gasPrice, nil)
 
-				signature, _ := crypto.Sign(tx.Hash().Bytes(), bd.botKeys[i])
+				signature, _ := crypto.Sign(tx.Hash().Bytes(), bd.sugarBotKey)
 				signedtx, _ := tx.WithSignature(types.NewEIP155Signer(nil), signature)
-				conn.SendTransaction(context.Background(), tx)
+				conn.SendTransaction(context.Background(), signedtx)
 			}
 
 		}
