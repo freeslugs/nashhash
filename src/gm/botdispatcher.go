@@ -94,9 +94,9 @@ func (bd *BotDispatcher) Dispatch(howMany int) error {
 func (bd *BotDispatcher) refill() {
 
 	var limit big.Int
-	limit.Mul(bd.stakeSize, big.NewInt(5))
+	limit.Mul(bd.stakeSize, big.NewInt(MinimumBalanceInStake))
 	var refillAmount big.Int
-	refillAmount.Mul(&limit, big.NewInt(3))
+	refillAmount.Mul(bd.stakeSize, big.NewInt(RefillAmountInStake))
 
 	for i := 0; i < bd.botPoolSize; i = (i + 1) % bd.botPoolSize {
 
