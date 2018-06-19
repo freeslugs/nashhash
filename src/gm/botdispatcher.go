@@ -1,13 +1,16 @@
 package gm
 
 import (
-	"bufio"
 	"context"
 	"crypto/ecdsa"
 	"crypto/rand"
+	"errors"
+	"strconv"
+
 	"fmt"
 	"log"
 	"math/big"
+	gorand "math/rand"
 	"os"
 	"sync"
 	"time"
@@ -23,12 +26,13 @@ type BotDispatcher struct {
 	stakeSize       *big.Int // The stake that bot needs to commit
 	contractAddress string   // The address of the party
 
-	botPoolSize int                  // how many bots we have at the party
-	bdLock      sync.Mutex           // probaly unnecessary
-	bots        []*bind.TransactOpts // slice of bots that are used to bet
-	botKeys     []*ecdsa.PrivateKey
-	sugarBot    *bind.TransactOpts // address that sponsors the party
-	sugarBotKey *ecdsa.PrivateKey
+	botPoolSize     int                  // how many bots we have at the party
+	bdLock          sync.Mutex           // probaly unnecessary
+	bots            []*bind.TransactOpts // slice of bots that are used to bet
+	botKeys         []*ecdsa.PrivateKey
+	sugarBot        *bind.TransactOpts // address that sponsors the party
+	sugarBotKey     *ecdsa.PrivateKey
+	sugarBotKeyLock *sync.Mutex
 
 	refilldead chan bool
 }
@@ -36,12 +40,13 @@ type BotDispatcher struct {
 // Init initializes the dispatcher by creating the bot addresses and
 // providing initial financing.
 func (bd *BotDispatcher) Init(botPoolSize int, contractAddress string, sugarBot *bind.TransactOpts,
-	sugarBotKey *ecdsa.PrivateKey) error {
+	sugarBotKey *ecdsa.PrivateKey, sugarBotKeyLock *sync.Mutex) error {
 
 	bd.botPoolSize = botPoolSize
 	bd.contractAddress = contractAddress
 	bd.sugarBot = sugarBot
 	bd.sugarBotKey = sugarBotKey
+	bd.sugarBotKeyLock = sugarBotKeyLock
 	bd.refilldead = make(chan bool)
 
 	// Create an IPC based RPC connection to a remote node
@@ -85,16 +90,16 @@ func (bd *BotDispatcher) Init(botPoolSize int, contractAddress string, sugarBot 
 
 	}
 
-	f, err := os.OpenFile(BotKeysFile, os.O_APPEND|os.O_WRONLY|os.O_CREATE, 0600)
+	f, err := os.OpenFile(BotKeysFile, os.O_APPEND|os.O_WRONLY, 0600)
 	if err != nil {
 		return err
 	}
 	defer f.Close()
-	w := bufio.NewWriter(f)
 
 	// Before we move any money into the bots, we should first record the keys
 	for _, sk := range bd.botKeys {
-		fmt.Fprintf(w, "%x\n", crypto.FromECDSA(sk))
+		skstr := fmt.Sprintf("%x\n", crypto.FromECDSA(sk))
+		f.WriteString(skstr)
 	}
 
 	// Fill up the wallet adresses
@@ -120,10 +125,99 @@ func (bd *BotDispatcher) Kill() error {
 	return nil
 }
 
+// Guess stores the guess and the secret
+type guess struct {
+	guessstr  string
+	secretstr string
+}
+
 // Dispatch sends the bots in. If how many is negative, we let the dispatcher
 // decide how many bots to send. Dispatch is usually executed as a go routine, as
 // it might take some time.
 func (bd *BotDispatcher) Dispatch(howMany int) error {
+
+	// We want to make sure
+	if howMany > bd.botPoolSize {
+		log.Printf("WARNING BotDispatcher %s: bot pool not big enough\n", bd.contractAddress)
+		howMany = bd.botPoolSize
+	}
+
+	// Create an IPC based RPC connection to a remote node
+	conn, err := ethclient.Dial(EthClientPath)
+	if err != nil {
+		return err
+	}
+	defer conn.Close()
+
+	// Instantiate the contract and display its name
+	game, err := NewGame(common.HexToAddress(bd.contractAddress), conn)
+	if err != nil {
+		return err
+	}
+
+	s1 := gorand.NewSource(time.Now().UnixNano())
+	r1 := gorand.New(s1)
+
+	// Step 1: Commit all the guesses
+	var guesses []guess
+	for i := 0; i < howMany; i++ {
+
+		// Get our guess and secret, and get the hash.
+		guessstr := strconv.Itoa(r1.Intn(60))
+		secretstr := strconv.Itoa(r1.Intn(100000))
+		guess := []byte(guessstr)
+		secret := []byte(secretstr)
+		h := crypto.Keccak256(guess, secret)
+		var hash [32]byte
+		copy(hash[:], h[:32])
+
+		// Prep the auth and commit
+		bd.bots[i].Value = bd.stakeSize
+		tx, txerr := game.Commit(bd.bots[i], hash)
+		if txerr != nil {
+			log.Printf(txerr.Error())
+		} else {
+			log.Printf("bot commit succesful 0x%x\n", tx.Hash())
+		}
+		bd.bots[i].Value = nil
+
+		guesses[i].guessstr = guessstr
+		guesses[i].secretstr = secretstr
+	}
+
+	// Step 2: Wait for contract to be in reveal state
+	inCommit := true
+	for inCommit {
+		state, err := game.GetGameStateInfo(nil)
+		if err != nil {
+			return err
+		}
+
+		switch s := state.State.Int64(); s {
+		case GameCommitState:
+			time.Sleep(2 * time.Second)
+			continue
+		case GameRevealState:
+			inCommit = false
+		default:
+			return errors.New("bad contract state")
+		}
+	}
+
+	// Step 3: Reveal all the guesses
+	for i := 0; i < howMany; i++ {
+
+		guessstr := guesses[i].guessstr
+		secretstr := guesses[i].secretstr
+
+		tx, txerr := game.Reveal(bd.bots[i], guessstr, secretstr)
+		if txerr != nil {
+			return txerr
+		}
+		log.Printf("bot reveal succesful 0x%x\n", tx.Hash())
+
+	}
+
 	return nil
 }
 
@@ -165,13 +259,16 @@ func (bd *BotDispatcher) refill() {
 			// Not a one step thing....
 			if money.Cmp(&limit) < 0 {
 
-				err := sendEth(
+				err := sendEthSafe(
 					bd.sugarBotKey,
 					bd.bots[i].From,
-					&refillAmount)
+					&refillAmount,
+					bd.sugarBotKeyLock)
 
 				if err != nil {
-					log.Fatalf("sendEth failed %s\n", err.Error())
+					log.Printf("sendEth failed %s\n", err.Error())
+					conn.Close()
+					continue
 				}
 
 				log.Printf("INFO BotDispatcher %s: succesful refill of %s\n", bd.contractAddress, bd.bots[i].From.Hex())

@@ -21,7 +21,7 @@ const (
 	ZeroStageLengthContract = "0xa5bf7aee277b4a035ccb7c7f38d1deebffdb025a"
 	OwnerHexKey             = "76a23cff887b294bb60ccde7ad1eb800f0f6ede70d33b154a53eadb20681a4e3"
 	OwnerAddr               = "0x537CA571AEe8116575E8d7a79740c70f685EC856"
-	StakeSize               = 100000000000000000 // 0.01 ETH
+	StakeSize               = 10000000000000000 // 0.01 ETH
 )
 
 func assertEqual(t *testing.T, a interface{}, b interface{}, message string) {
@@ -483,11 +483,11 @@ func TestEthereumBotRefill(t *testing.T) {
 
 	clerk.ConnectGame(GameContract)
 
-	time.Sleep(1 * time.Minute)
+	time.Sleep(60 * time.Second)
 
 	gm.Kill()
 
-	time.Sleep(1 * time.Minute)
+	time.Sleep(20 * time.Second)
 
 }
 
@@ -609,6 +609,8 @@ func TestEthereumGM(t *testing.T) {
 	// Connect the game, start the operator
 	clerk.ConnectGame(GameContract)
 
+	time.Sleep(60 * time.Second)
+
 	// Make a commit
 	guess := []byte("10")
 	secret := []byte("3")
@@ -619,7 +621,7 @@ func TestEthereumGM(t *testing.T) {
 	auth.Value = big.NewInt(StakeSize)
 	tx, txerr := game.Commit(auth, hash)
 	if txerr != nil {
-		log.Fatal(txerr.Error())
+		log.Fatalf("commit failed: %s", txerr.Error())
 	} else {
 		log.Printf("commit succesful 0x%x\n", tx.Hash())
 	}

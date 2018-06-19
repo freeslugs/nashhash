@@ -43,10 +43,12 @@ func (gop *GameOperator) Init(addr string, gm *GM) {
 	gop.gm = gm
 
 	gop.bd = &BotDispatcher{}
-	err := gop.bd.Init(5, gop.contractAddress, gm.auth, gm.key)
+	err := gop.bd.Init(5, gop.contractAddress, gm.auth, gm.key, &gm.authLock)
 	if err != nil {
 		log.Printf("ERROR GameOperator %s: init failed %s\n", gop.contractAddress, err.Error())
 	}
+
+	//time.Sleep(10 * time.Second)
 
 }
 
@@ -144,6 +146,7 @@ func (gop *GameOperator) operate() {
 
 			if header.Number.Int64() > deadline {
 				log.Printf("INFO GameOperator %s: adding bots\n", gop.contractAddress)
+				//go log.Println(gop.bd.Dispatch(3))
 			} else {
 				log.Printf("INFO GameOperator %s: nothig to be done yet\n", gop.contractAddress)
 			}

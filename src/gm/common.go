@@ -6,6 +6,7 @@ import (
 	"log"
 	"math/big"
 	"net/rpc"
+	"sync"
 
 	"github.com/ethereum/go-ethereum/common"
 	"github.com/ethereum/go-ethereum/core/types"
@@ -23,8 +24,8 @@ const (
 
 	// BotDispatcher stuff
 	NetworkID             = 4
-	MinimumBalanceInStake = 5
-	RefillAmountInStake   = 20
+	MinimumBalanceInStake = 1
+	RefillAmountInStake   = 5
 	BotKeysFile           = "keys.txt"
 )
 
@@ -73,11 +74,28 @@ func harvestAccounts(keys []*ecdsa.PrivateKey, ownerAddr common.Address) error {
 	for _, privk := range keys {
 
 		err := sendEth(privk, ownerAddr, nil)
-		if err != nil {
-			return err
+		if err == nil {
+			continue
+		}
+
+		// If we fail for some reason,
+		for attempt := 0; attempt < 5; attempt++ {
+			log.Println("WARNING harvestAccounts: retrying the harvest")
+			err := sendEth(privk, ownerAddr, nil)
+			if err == nil {
+				break
+			}
 		}
 	}
 	return nil
+}
+
+func sendEthSafe(key *ecdsa.PrivateKey, toAddr common.Address, value *big.Int, lock *sync.Mutex) error {
+
+	lock.Lock()
+	defer lock.Unlock()
+	return sendEth(key, toAddr, value)
+
 }
 
 func sendEth(key *ecdsa.PrivateKey, toAddr common.Address, value *big.Int) error {
@@ -107,7 +125,7 @@ func sendEth(key *ecdsa.PrivateKey, toAddr common.Address, value *big.Int) error
 		value = big.NewInt(0)
 		tax := big.NewInt(0)
 		tax.Mul(gasPrice, big.NewInt(21000))
-		money, err := conn.BalanceAt(context.Background(), crypto.PubkeyToAddress(key.PublicKey), nil)
+		money, err := conn.PendingBalanceAt(context.Background(), crypto.PubkeyToAddress(key.PublicKey))
 		if err != nil {
 			return err
 		}

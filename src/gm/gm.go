@@ -22,8 +22,10 @@ type GM struct {
 	gmLock        sync.Mutex
 
 	// Ethereum stuff
-	auth *bind.TransactOpts
-	key  *ecdsa.PrivateKey
+	auth     *bind.TransactOpts
+	authLock sync.Mutex
+
+	key *ecdsa.PrivateKey
 
 	// debug mode
 	debug bool
@@ -181,7 +183,7 @@ func (gm *GM) Kill() {
 	for _, v := range gm.operatedGames {
 		err := v.Stop()
 		if err != nil {
-			log.Printf("ERROR GM: %s\n", err.Error())
+			log.Printf("ERROR GM.Kill(): %s\n", err.Error())
 		}
 	}
 
