@@ -37,8 +37,7 @@ contract Game is Pausable, GameHelper {
         uint currNumberReveals;
         uint commitStageStartBlock;
         uint revealStageStartBlock;
-        uint round; // not implemented
-
+        uint round;
     }
 
     struct Config {
@@ -96,7 +95,7 @@ contract Game is Pausable, GameHelper {
         state.currNumberReveals = 0;
         state.commitStageStartBlock = ~uint(0) - config.GAME_STAGE_LENGTH;
         state.revealStageStartBlock = ~uint(0) - config.GAME_STAGE_LENGTH;
-
+        state.round = 0;
 
         info.lastPrize = 0;
 
@@ -108,6 +107,10 @@ contract Game is Pausable, GameHelper {
 
 
 
+    }
+
+    function getRound() public view returns(uint) {
+        return state.round;
     }
 
     // Contrcact public API
@@ -296,6 +299,8 @@ contract Game is Pausable, GameHelper {
             delete info.lastWinners[i];
         }
         info.lastWinnersLength = 0;
+
+        state.round = 0;
     }
 
 
@@ -355,6 +360,7 @@ contract Game is Pausable, GameHelper {
         // Set state
         state.gameState = GameState.COMMIT_STATE;
         state.gameStateDebug = 0;
+        state.round++;
 
         // Cleanup the commits
         uint i;

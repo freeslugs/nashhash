@@ -129,6 +129,8 @@ func (gop *GameOperator) operate() {
 		log.Printf("ERROR GameOperator %s: failed to retrieve game state: %v", gop.contractAddress, err)
 	}
 
+	log.Printf("game state %d\n", state.State.Int64())
+
 	//Initiate appropriate transitions
 	switch s := state.State.Int64(); s {
 	case GameCommitState:
@@ -142,11 +144,19 @@ func (gop *GameOperator) operate() {
 		// We need to make sure that CommitStageStart block was set this round
 		if state.CommitStageStartBlock.IsInt64() {
 
-			deadline := state.CommitStageStartBlock.Int64() + ((state.StageLength.Int64() * 1) / 2)
+			botDeadline := state.CommitStageStartBlock.Int64() + ((state.StageLength.Int64() * 1) / 2)
+			transitionDeadline := state.CommitStageStartBlock.Int64() + state.StageLength.Int64()
 
-			if header.Number.Int64() > deadline {
+			if header.Number.Int64() > botDeadline && header.Number.Int64() <= transitionDeadline {
 				log.Printf("INFO GameOperator %s: adding bots\n", gop.contractAddress)
-				//go log.Println(gop.bd.Dispatch(3))
+				go gop.bd.Dispatch(3)
+			} else if header.Number.Int64() > transitionDeadline {
+				tx, txerr := game.ForceToRevealState(auth)
+				if txerr != nil {
+					log.Printf("ERROR GameOperator %s: failed to force game into reveal: %v", gop.contractAddress, txerr)
+				} else {
+					log.Printf("INFO GameOperator %s: succesful ForceToReveal 0x%x\n", gop.contractAddress, tx.Hash())
+				}
 			} else {
 				log.Printf("INFO GameOperator %s: nothig to be done yet\n", gop.contractAddress)
 			}
@@ -154,13 +164,6 @@ func (gop *GameOperator) operate() {
 		} else {
 			log.Printf("INFO GameOperator %s: nothing to be done\n", gop.contractAddress)
 			return
-		}
-
-		tx, txerr := game.ForceToRevealState(auth)
-		if txerr != nil {
-			log.Printf("ERROR GameOperator %s: failed to force game into reveal: %v", gop.contractAddress, txerr)
-		} else {
-			log.Printf("INFO GameOperator %s: succesful ForceToReveal 0x%x\n", gop.contractAddress, tx.Hash())
 		}
 
 	case GameRevealState:
@@ -183,8 +186,6 @@ func (gop *GameOperator) operate() {
 		log.Printf("WARNING GameOperator %s: unknown operation state", gop.contractAddress)
 
 	}
-
-	log.Printf("INFO GameOperator: game state %d\n", state)
 
 }
 

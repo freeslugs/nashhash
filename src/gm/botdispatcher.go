@@ -34,6 +34,9 @@ type BotDispatcher struct {
 	sugarBotKey     *ecdsa.PrivateKey
 	sugarBotKeyLock *sync.Mutex
 
+	// This is the last round that bots participated in.
+	round int64
+
 	refilldead chan bool
 }
 
@@ -41,6 +44,8 @@ type BotDispatcher struct {
 // providing initial financing.
 func (bd *BotDispatcher) Init(botPoolSize int, contractAddress string, sugarBot *bind.TransactOpts,
 	sugarBotKey *ecdsa.PrivateKey, sugarBotKeyLock *sync.Mutex) error {
+
+	bd.round = -1
 
 	bd.botPoolSize = botPoolSize
 	bd.contractAddress = contractAddress
@@ -126,9 +131,9 @@ func (bd *BotDispatcher) Kill() error {
 }
 
 // Guess stores the guess and the secret
-type guess struct {
-	guessstr  string
-	secretstr string
+type CRData struct {
+	Guess  string
+	Secret string
 }
 
 // Dispatch sends the bots in. If how many is negative, we let the dispatcher
@@ -155,11 +160,24 @@ func (bd *BotDispatcher) Dispatch(howMany int) error {
 		return err
 	}
 
+	round, err := game.GetRound(nil)
+	if err != nil {
+		return err
+	}
+
+	// We can only play if the last played round is strictly less then the current
+	// game round
+	if bd.round >= round.Int64() {
+		return nil
+	}
+
+	bd.round = round.Int64()
+
 	s1 := gorand.NewSource(time.Now().UnixNano())
 	r1 := gorand.New(s1)
 
 	// Step 1: Commit all the guesses
-	var guesses []guess
+	crdata := make([]CRData, howMany)
 	for i := 0; i < howMany; i++ {
 
 		// Get our guess and secret, and get the hash.
@@ -181,8 +199,10 @@ func (bd *BotDispatcher) Dispatch(howMany int) error {
 		}
 		bd.bots[i].Value = nil
 
-		guesses[i].guessstr = guessstr
-		guesses[i].secretstr = secretstr
+		crdata[i].Guess = guessstr
+		crdata[i].Secret = secretstr
+
+		log.Printf("INFO BotDispatcher.Dispatch(): succesful bot commit %d\n", i)
 	}
 
 	// Step 2: Wait for contract to be in reveal state
@@ -207,8 +227,8 @@ func (bd *BotDispatcher) Dispatch(howMany int) error {
 	// Step 3: Reveal all the guesses
 	for i := 0; i < howMany; i++ {
 
-		guessstr := guesses[i].guessstr
-		secretstr := guesses[i].secretstr
+		guessstr := crdata[i].Guess
+		secretstr := crdata[i].Secret
 
 		tx, txerr := game.Reveal(bd.bots[i], guessstr, secretstr)
 		if txerr != nil {

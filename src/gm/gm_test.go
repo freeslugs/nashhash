@@ -17,8 +17,8 @@ import (
 )
 
 const (
-	GameContract            = "0x6ff5655c93780ce620dbf35c5cd9c506299d45a9"
-	ZeroStageLengthContract = "0xa5bf7aee277b4a035ccb7c7f38d1deebffdb025a"
+	GameContract            = "0x8bcd426baa7a24e590a9cc65de7a273257163c35"
+	ZeroStageLengthContract = "0xea6c500ce063436e444a4dc7acdd77720bbfe70e"
 	OwnerHexKey             = "76a23cff887b294bb60ccde7ad1eb800f0f6ede70d33b154a53eadb20681a4e3"
 	OwnerAddr               = "0x537CA571AEe8116575E8d7a79740c70f685EC856"
 	StakeSize               = 10000000000000000 // 0.01 ETH
@@ -626,16 +626,20 @@ func TestEthereumGM(t *testing.T) {
 		log.Printf("commit succesful 0x%x\n", tx.Hash())
 	}
 	auth.Value = nil
-	time.Sleep(90 * time.Second)
+	time.Sleep(120 * time.Second)
 
 	// Reveal the commit
-	tx, txerr = game.Reveal(auth, "10", "3")
-	if txerr != nil {
-		log.Fatal(txerr.Error())
-	} else {
-		log.Printf("reveal succesful 0x%x\n", tx.Hash())
+	for {
+		tx, txerr = game.Reveal(auth, "10", "3")
+		if txerr != nil {
+			log.Printf("reveal failed %s\n", txerr.Error())
+		} else {
+			break
+			log.Printf("reveal succesful 0x%x\n", tx.Hash())
+		}
+		time.Sleep(10 * time.Second)
 	}
 
-	time.Sleep(120 * time.Second)
+	time.Sleep(3 * time.Minute)
 
 }
