@@ -16,6 +16,9 @@ type GameOperator struct {
 	controlChannel  chan int
 	playing         bool
 
+	// Bot Dispatcher to run bots
+	bd *BotDispatcher
+
 	// GM controlling us
 	gm *GM
 }
@@ -38,6 +41,13 @@ func (gop *GameOperator) Init(addr string, gm *GM) {
 	gop.controlChannel = make(chan int)
 	gop.playing = false
 	gop.gm = gm
+
+	gop.bd = &BotDispatcher{}
+	err := gop.bd.Init(5, gop.contractAddress, gm.auth, gm.key)
+	if err != nil {
+		log.Printf("ERROR GameOperator %s: init failed %s\n", gop.contractAddress, err.Error())
+	}
+
 }
 
 // Play the game at the contract address
@@ -96,6 +106,8 @@ const (
 // TODO: Not open a new connection every time
 func (gop *GameOperator) operate() {
 
+	log.Println("operating...")
+
 	defer time.Sleep(15 * time.Second)
 
 	// Create an IPC based RPC connection to a remote node
@@ -103,6 +115,7 @@ func (gop *GameOperator) operate() {
 	if err != nil {
 		log.Printf("ERROR GameOperator %s: failed to connect to the Ethereum client: %v", gop.contractAddress, err)
 	}
+	defer conn.Close()
 	// Instantiate the contract and display its name
 	game, err := NewGame(common.HexToAddress(gop.contractAddress), conn)
 	if err != nil {
@@ -183,5 +196,11 @@ func (gop *GameOperator) Stop() error {
 	}
 	gop.controlChannel <- DisconnectOperator
 	gop.playing = false
+
+	// Kill the dispatcher
+	err := gop.bd.Kill()
+	if err != nil {
+		return err
+	}
 	return nil
 }

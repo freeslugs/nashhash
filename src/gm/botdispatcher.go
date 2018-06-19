@@ -3,14 +3,15 @@ package gm
 import (
 	"context"
 	"crypto/ecdsa"
-	"crypto/elliptic"
 	"crypto/rand"
 	"log"
 	"math/big"
 	"sync"
+	"time"
 
 	"github.com/ethereum/go-ethereum/accounts/abi/bind"
-	"github.com/ethereum/go-ethereum/core/types"
+	"github.com/ethereum/go-ethereum/common"
+	"github.com/ethereum/go-ethereum/crypto"
 	"github.com/ethereum/go-ethereum/ethclient"
 )
 
@@ -31,15 +32,42 @@ type BotDispatcher struct {
 
 // Init initializes the dispatcher by creating the bot addresses and
 // providing initial financing.
-func (bd *BotDispatcher) Init(botPoolSize int, contractAddress string, sugarBot *bind.TransactOpts) error {
+func (bd *BotDispatcher) Init(botPoolSize int, contractAddress string, sugarBot *bind.TransactOpts,
+	sugarBotKey *ecdsa.PrivateKey) error {
 
 	bd.botPoolSize = botPoolSize
 	bd.contractAddress = contractAddress
 	bd.sugarBot = sugarBot
+	bd.sugarBotKey = sugarBotKey
+	bd.refilldead = make(chan bool)
+
+	// Create an IPC based RPC connection to a remote node
+	conn, err := ethclient.Dial(EthClientPath)
+	if err != nil {
+		return err
+	}
+	defer conn.Close()
+
+	// Instantiate the contract and display its name
+	game, err := NewGame(common.HexToAddress(bd.contractAddress), conn)
+	if err != nil {
+		return err
+	}
+
+	stake, err := game.GetStakeSize(nil)
+	if err != nil {
+		return err
+	}
+
+	bd.stakeSize = stake
+
+	log.Println("Initing the dispatcher")
 
 	// Generate the private keys
-	pubkeyCurve := elliptic.P256()
+	pubkeyCurve := crypto.S256()
 	for i := 0; i < bd.botPoolSize; i++ {
+
+		log.Println("creating bot")
 
 		// Generate a private key
 		privk, err := ecdsa.GenerateKey(pubkeyCurve, rand.Reader)
@@ -60,7 +88,7 @@ func (bd *BotDispatcher) Init(botPoolSize int, contractAddress string, sugarBot 
 
 	// Before we move any money iinto the bots, we should first record the keys
 	for _, sk := range bd.botKeys {
-		log.Println(sk)
+		log.Printf("KEY %x\n", crypto.FromECDSA(sk))
 	}
 
 	// Fill up the wallet adresses
@@ -77,6 +105,10 @@ func (bd *BotDispatcher) Kill() error {
 	bd.refilldead <- true
 
 	// Route the remaining money back to the sponsor wallet
+	err := harvestAccounts(bd.botKeys, crypto.PubkeyToAddress(bd.sugarBotKey.PublicKey))
+	if err != nil {
+		return err
+	}
 
 	log.Printf("INFO BotDispatcher %s: kill succesful\n", bd.contractAddress)
 	return nil
@@ -93,10 +125,15 @@ func (bd *BotDispatcher) Dispatch(howMany int) error {
 // that is launched from Init() and is killed in Kill(). Runs in a separate go routine.
 func (bd *BotDispatcher) refill() {
 
+	log.Println("refill started")
 	var limit big.Int
 	limit.Mul(bd.stakeSize, big.NewInt(MinimumBalanceInStake))
 	var refillAmount big.Int
 	refillAmount.Mul(bd.stakeSize, big.NewInt(RefillAmountInStake))
+
+	log.Println("amounts computed")
+	log.Println(limit)
+	log.Println(refillAmount)
 
 	for i := 0; i < bd.botPoolSize; i = (i + 1) % bd.botPoolSize {
 
@@ -109,60 +146,44 @@ func (bd *BotDispatcher) refill() {
 		// Otherwise, we refill the address
 		default:
 
+			log.Println("refilling a bot....")
+
 			// Get the balance of one of the bots
 			conn, err := ethclient.Dial(EthClientPath)
 			if err != nil {
 				log.Printf("Failed to connect to the Ethereum client: %v", err)
 				continue
 			}
-			money, err := conn.BalanceAt(context.Background(), bd.bots[i].From, nil)
+			money, err := conn.PendingBalanceAt(context.Background(), bd.bots[i].From)
 			if err != nil {
 				log.Printf("ERROR BotDispatcher %s: failed to get bot balance %s\n", bd.contractAddress, err.Error())
+				conn.Close()
+				continue
 			}
+
+			log.Println(money)
 
 			// If the balance is less than a certain minimum, we refiill
 			// Not a one step thing....
 			if money.Cmp(&limit) < 0 {
 
-				// We need to ask the client about currect gas price
-				gasPrice, err := conn.SuggestGasPrice(context.Background())
-				if err != nil {
-					log.Printf("ERROR BotDispatcher %s: gas price estimation failed %s\n", bd.contractAddress, err.Error())
-					continue
-				}
-
-				// We need to find out the nonce associated with the address
-				nonce, err := conn.NonceAt(context.Background(), bd.bots[i].From, nil)
-				if err != nil {
-					log.Printf("ERROR BotDispatcher %s: nonce discovery failed %s\n", bd.contractAddress, err.Error())
-					continue
-				}
-
-				// This is the transaction to move money
-				tx := types.NewTransaction(
-					nonce,
+				log.Printf("refilling bot %s\n", bd.bots[i].From.Hex())
+				err := sendEth(
+					bd.sugarBotKey,
 					bd.bots[i].From,
-					&refillAmount,
-					21000,
-					gasPrice,
-					nil)
+					&refillAmount)
 
-				// We sign the transaction with the sugarBotKey
-				signtx, err := types.SignTx(tx, types.NewEIP155Signer(big.NewInt(NetworkID)), bd.sugarBotKey)
 				if err != nil {
-					log.Printf("ERROR BotDispatcher %s: failed to sign tx %s\n", bd.contractAddress, err.Error())
-					continue
+					log.Fatalf("sendEth failed %s\n", err.Error())
 				}
 
-				// Send the transaction into the client
-				err = conn.SendTransaction(context.Background(), signtx)
-				if err != nil {
-					log.Fatalf("tx failed %s\n", err.Error())
-					continue
-				}
-				log.Printf("INFO BotDispatcher %s: succesful refill of %s\n", bd.contractAddress, bd.bots[i].From)
+				log.Printf("INFO BotDispatcher %s: succesful refill of %s\n", bd.contractAddress, bd.bots[i].From.Hex())
+
 			}
 
+			conn.Close()
+			time.Sleep(1 * time.Second)
 		}
+
 	}
 }

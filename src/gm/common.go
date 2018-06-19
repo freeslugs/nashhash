@@ -66,21 +66,15 @@ func call(c *rpc.Client, rpcname string,
 	return err
 }
 
-func harvestBalance(keys []*ecdsa.PrivateKey, ownerAddr common.Address) error {
-
-	// Create an IPC based RPC connection to a remote node
-	conn, err := ethclient.Dial(EthClientPath)
-	if err != nil {
-		return err
-	}
+// Helper function that harvests balances
+func harvestAccounts(keys []*ecdsa.PrivateKey, ownerAddr common.Address) error {
 
 	for _, privk := range keys {
-		money, err := conn.BalanceAt(context.Background(), crypto.PubkeyToAddress(privk.PublicKey), nil)
+
+		err := sendEth(privk, ownerAddr, nil)
 		if err != nil {
 			return err
 		}
-
-		err = sendEth(privk, ownerAddr, money)
 	}
 	return nil
 }
@@ -92,6 +86,7 @@ func sendEth(key *ecdsa.PrivateKey, toAddr common.Address, value *big.Int) error
 	if err != nil {
 		return err
 	}
+	defer conn.Close()
 
 	// We need to ask the client about currect gas price
 	gasPrice, err := conn.SuggestGasPrice(context.Background())
@@ -100,10 +95,12 @@ func sendEth(key *ecdsa.PrivateKey, toAddr common.Address, value *big.Int) error
 	}
 
 	// We need to find out the nonce associated with the address
-	nonce, err := conn.NonceAt(context.Background(), crypto.PubkeyToAddress(key.PublicKey), nil)
+	nonce, err := conn.PendingNonceAt(context.Background(), crypto.PubkeyToAddress(key.PublicKey))
 	if err != nil {
 		return err
 	}
+
+	log.Println(nonce)
 
 	// If the value is nil, we want to transfer the whole balance.
 	if value == nil {

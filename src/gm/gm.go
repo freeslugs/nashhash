@@ -2,6 +2,7 @@
 package gm
 
 import (
+	"crypto/ecdsa"
 	"errors"
 	"log"
 	"net"
@@ -22,6 +23,7 @@ type GM struct {
 
 	// Ethereum stuff
 	auth *bind.TransactOpts
+	key  *ecdsa.PrivateKey
 
 	// debug mode
 	debug bool
@@ -54,6 +56,8 @@ func (gm *GM) Init(ipAddr string, port int, hexkey string, debug bool) error {
 		if gm.auth == nil {
 			log.Fatalf("GM: failed to create authorized transactor: %v", err)
 		}
+
+		gm.key = privk
 	}
 
 	gm.operatedGames = make(map[string]*GameOperator)
@@ -175,7 +179,10 @@ func (gm *GM) Kill() {
 	defer gm.gmLock.Unlock()
 
 	for _, v := range gm.operatedGames {
-		v.Stop()
+		err := v.Stop()
+		if err != nil {
+			log.Printf("ERROR GM: %s\n", err.Error())
+		}
 	}
 
 	log.Printf("INFO GM: all game operators stopped\n")

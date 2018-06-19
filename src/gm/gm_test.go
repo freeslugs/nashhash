@@ -2,6 +2,7 @@ package gm
 
 import (
 	"context"
+	"crypto/ecdsa"
 	"fmt"
 	"log"
 	"math/big"
@@ -19,6 +20,7 @@ const (
 	GameContract            = "0x6ff5655c93780ce620dbf35c5cd9c506299d45a9"
 	ZeroStageLengthContract = "0xa5bf7aee277b4a035ccb7c7f38d1deebffdb025a"
 	OwnerHexKey             = "76a23cff887b294bb60ccde7ad1eb800f0f6ede70d33b154a53eadb20681a4e3"
+	OwnerAddr               = "0x537CA571AEe8116575E8d7a79740c70f685EC856"
 	StakeSize               = 100000000000000000 // 0.01 ETH
 )
 
@@ -445,11 +447,47 @@ func TestEthereumSendETH(t *testing.T) {
 	err := sendEth(
 		key,
 		common.HexToAddress("0x537CA571AEe8116575E8d7a79740c70f685EC856"),
-		nil)
+		big.NewInt(StakeSize))
 
 	if err != nil {
 		log.Fatalf("sendEth failed %s\n", err.Error())
 	}
+}
+
+func TestEthereumHarvest(t *testing.T) {
+
+	var keys []*ecdsa.PrivateKey
+	key, _ := crypto.HexToECDSA(OwnerHexKey)
+
+	keys = append(keys, key)
+
+	err := harvestAccounts(keys, common.HexToAddress(OwnerAddr))
+	if err != nil {
+		log.Fatalf("harvester failed")
+	}
+
+}
+
+func TestEthereumBotRefill(t *testing.T) {
+
+	var gm GM
+	gm.Init("", 11112, OwnerHexKey, false)
+	//defer gm.Kill()
+	gmAddr := ":" + strconv.Itoa(11112)
+
+	var clerk Clerk
+	clerk.Init(gmAddr)
+	defer clerk.Kill()
+
+	time.Sleep(5 * time.Second)
+
+	clerk.ConnectGame(GameContract)
+
+	time.Sleep(3 * time.Minute)
+
+	gm.Kill()
+
+	time.Sleep(3 * time.Minute)
 
 }
 
