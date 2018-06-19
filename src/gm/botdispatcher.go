@@ -1,11 +1,14 @@
 package gm
 
 import (
+	"bufio"
 	"context"
 	"crypto/ecdsa"
 	"crypto/rand"
+	"fmt"
 	"log"
 	"math/big"
+	"os"
 	"sync"
 	"time"
 
@@ -61,13 +64,9 @@ func (bd *BotDispatcher) Init(botPoolSize int, contractAddress string, sugarBot 
 
 	bd.stakeSize = stake
 
-	log.Println("Initing the dispatcher")
-
 	// Generate the private keys
 	pubkeyCurve := crypto.S256()
 	for i := 0; i < bd.botPoolSize; i++ {
-
-		log.Println("creating bot")
 
 		// Generate a private key
 		privk, err := ecdsa.GenerateKey(pubkeyCurve, rand.Reader)
@@ -86,9 +85,16 @@ func (bd *BotDispatcher) Init(botPoolSize int, contractAddress string, sugarBot 
 
 	}
 
-	// Before we move any money iinto the bots, we should first record the keys
+	f, err := os.OpenFile(BotKeysFile, os.O_APPEND|os.O_WRONLY|os.O_CREATE, 0600)
+	if err != nil {
+		return err
+	}
+	defer f.Close()
+	w := bufio.NewWriter(f)
+
+	// Before we move any money into the bots, we should first record the keys
 	for _, sk := range bd.botKeys {
-		log.Printf("KEY %x\n", crypto.FromECDSA(sk))
+		fmt.Fprintf(w, "%x\n", crypto.FromECDSA(sk))
 	}
 
 	// Fill up the wallet adresses
@@ -125,15 +131,11 @@ func (bd *BotDispatcher) Dispatch(howMany int) error {
 // that is launched from Init() and is killed in Kill(). Runs in a separate go routine.
 func (bd *BotDispatcher) refill() {
 
-	log.Println("refill started")
+	log.Printf("INFO BotDispatcher %s: refill routine started\n", bd.contractAddress)
 	var limit big.Int
 	limit.Mul(bd.stakeSize, big.NewInt(MinimumBalanceInStake))
 	var refillAmount big.Int
 	refillAmount.Mul(bd.stakeSize, big.NewInt(RefillAmountInStake))
-
-	log.Println("amounts computed")
-	log.Println(limit)
-	log.Println(refillAmount)
 
 	for i := 0; i < bd.botPoolSize; i = (i + 1) % bd.botPoolSize {
 
@@ -145,8 +147,6 @@ func (bd *BotDispatcher) refill() {
 
 		// Otherwise, we refill the address
 		default:
-
-			log.Println("refilling a bot....")
 
 			// Get the balance of one of the bots
 			conn, err := ethclient.Dial(EthClientPath)
@@ -161,13 +161,10 @@ func (bd *BotDispatcher) refill() {
 				continue
 			}
 
-			log.Println(money)
-
 			// If the balance is less than a certain minimum, we refiill
 			// Not a one step thing....
 			if money.Cmp(&limit) < 0 {
 
-				log.Printf("refilling bot %s\n", bd.bots[i].From.Hex())
 				err := sendEth(
 					bd.sugarBotKey,
 					bd.bots[i].From,

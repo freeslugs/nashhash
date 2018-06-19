@@ -483,11 +483,11 @@ func TestEthereumBotRefill(t *testing.T) {
 
 	clerk.ConnectGame(GameContract)
 
-	time.Sleep(3 * time.Minute)
+	time.Sleep(1 * time.Minute)
 
 	gm.Kill()
 
-	time.Sleep(3 * time.Minute)
+	time.Sleep(1 * time.Minute)
 
 }
 

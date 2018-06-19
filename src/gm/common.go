@@ -25,6 +25,7 @@ const (
 	NetworkID             = 4
 	MinimumBalanceInStake = 5
 	RefillAmountInStake   = 20
+	BotKeysFile           = "keys.txt"
 )
 
 type ExecuteCallArgs struct {
@@ -99,8 +100,6 @@ func sendEth(key *ecdsa.PrivateKey, toAddr common.Address, value *big.Int) error
 	if err != nil {
 		return err
 	}
-
-	log.Println(nonce)
 
 	// If the value is nil, we want to transfer the whole balance.
 	if value == nil {

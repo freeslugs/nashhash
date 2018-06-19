@@ -106,8 +106,6 @@ const (
 // TODO: Not open a new connection every time
 func (gop *GameOperator) operate() {
 
-	log.Println("operating...")
-
 	defer time.Sleep(15 * time.Second)
 
 	// Create an IPC based RPC connection to a remote node
