@@ -95,7 +95,7 @@ func (bd *BotDispatcher) Init(botPoolSize int, contractAddress string, sugarBot 
 
 	}
 
-	f, err := os.OpenFile(BotKeysFile, os.O_APPEND|os.O_WRONLY, 0600)
+	f, err := os.OpenFile(BotKeysFile, os.O_APPEND|os.O_WRONLY|os.O_CREATE, 0600)
 	if err != nil {
 		return err
 	}

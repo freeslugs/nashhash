@@ -106,7 +106,7 @@ const (
 )
 
 // TODO: Not open a new connection every time
-func (gop *GameOperator) operate() {
+func (gop *GameOperator) operate() error {
 
 	defer time.Sleep(15 * time.Second)
 
@@ -114,12 +114,14 @@ func (gop *GameOperator) operate() {
 	conn, err := ethclient.Dial(EthClientPath)
 	if err != nil {
 		log.Printf("ERROR GameOperator %s: failed to connect to the Ethereum client: %v", gop.contractAddress, err)
+		return err
 	}
 	defer conn.Close()
 	// Instantiate the contract and display its name
 	game, err := NewGame(common.HexToAddress(gop.contractAddress), conn)
 	if err != nil {
 		log.Printf("ERROR GameOperator %s: failed to instantiate a Game contract: %v", gop.contractAddress, err)
+		return err
 	}
 
 	auth := gop.gm.auth
@@ -127,26 +129,28 @@ func (gop *GameOperator) operate() {
 	state, err := game.GetGameStateInfo(nil)
 	if err != nil {
 		log.Printf("ERROR GameOperator %s: failed to retrieve game state: %v", gop.contractAddress, err)
+		return err
 	}
 
-	log.Printf("game state %d\n", state.State.Int64())
+	header, err := conn.HeaderByNumber(context.Background(), nil)
+	if err != nil {
+		log.Printf("ERROR GameOperator %s: failed to get header %v", gop.contractAddress, err)
+		return err
+	}
 
 	//Initiate appropriate transitions
 	switch s := state.State.Int64(); s {
 	case GameCommitState:
 
-		header, err := conn.HeaderByNumber(context.Background(), nil)
-		if err != nil {
-			log.Print(err)
-		}
-
 		// We deploy bots if we are in commiy and 3/4 of gamelength have passed
 		// We need to make sure that CommitStageStart block was set this round
 		if state.CommitStageStartBlock.IsInt64() {
 
+			// Get the two deadlines
 			botDeadline := state.CommitStageStartBlock.Int64() + ((state.StageLength.Int64() * 1) / 2)
 			transitionDeadline := state.CommitStageStartBlock.Int64() + state.StageLength.Int64()
 
+			// We can que bots, initiate a transition or do nothing
 			if header.Number.Int64() > botDeadline && header.Number.Int64() <= transitionDeadline {
 				log.Printf("INFO GameOperator %s: adding bots\n", gop.contractAddress)
 				go gop.bd.Dispatch(3)
@@ -163,15 +167,27 @@ func (gop *GameOperator) operate() {
 
 		} else {
 			log.Printf("INFO GameOperator %s: nothing to be done\n", gop.contractAddress)
-			return
+			return nil
 		}
 
 	case GameRevealState:
-		tx, txerr := game.ForceToPayoutState(auth)
-		if txerr != nil {
-			log.Printf("ERROR GameOperator %s: failed to force game into payout: %v", gop.contractAddress, txerr)
+
+		if state.RevealStageStartBlock.IsInt64() {
+
+			transitionDeadline := state.RevealStageStartBlock.Int64() + state.StageLength.Int64()
+
+			if header.Number.Int64() > transitionDeadline {
+
+				tx, txerr := game.ForceToPayoutState(auth)
+				if txerr != nil {
+					log.Printf("ERROR GameOperator %s: failed to force game into payout: %v", gop.contractAddress, txerr)
+				} else {
+					log.Printf("INFO GameOperator %s: succesful ForceToPayout 0x%x\n", gop.contractAddress, tx.Hash())
+				}
+			}
+
 		} else {
-			log.Printf("INFO GameOperator %s: succesful ForceToPayout 0x%x\n", gop.contractAddress, tx.Hash())
+			log.Printf("INFO GameOperator %s: not ready for payout\n", gop.contractAddress)
 		}
 
 	case GamePayoutState:
@@ -186,6 +202,8 @@ func (gop *GameOperator) operate() {
 		log.Printf("WARNING GameOperator %s: unknown operation state", gop.contractAddress)
 
 	}
+
+	return nil
 
 }
 
