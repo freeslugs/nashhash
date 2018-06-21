@@ -6,6 +6,9 @@ import styled from 'styled-components';
 import API from './api/Game.js'
 import srs from 'secure-random-string'
 
+import GameABI from './contracts/Game.json'
+
+const contract = require('truffle-contract');
 var Web3Utils = require('web3-utils');
 
 const Wrapper = styled(Segment)`
@@ -32,17 +35,45 @@ class CommitForm extends Component<props> {
   }
 
   loading() {
-    const { web3, accounts, game } = this.props;
-    return !(web3 && accounts && accounts.length > 0 && game)
+    const { web3, accounts, gameregistry, gameaddresses } = this.props;
+    return !(web3 && accounts && accounts.length > 0 && gameaddresses.length > 0)
   }
 
   commit = async () => {
     const web3 = this.props.web3;
     const account = this.props.accounts[0];
-    const game = this.props.game;
+    //const game = this.props.game;
+    let game
+
+    const gameaddresses = this.props.gameaddresses;
+    const gametype = this.props.gametype;
+    const stake = this.props.stake;
+
+    if(gametype=="TwoThirds"){
+      if(stake==0.01){
+        game = contract(GameABI, gameaddresses[2]);
+      }
+      else if(stake==0.1){
+        game = contract(GameABI, gameaddresses[1]);
+      }
+      else if(stake==1){
+        game = contract(GameABI, gameaddresses[0]);
+      }
+    } else if(gametype=="LowestUnique")
+    {
+      if(stake==0.01){
+        game = contract(GameABI, gameaddresses[5]);
+      }
+      else if(stake==0.1){
+        game = contract(GameABI, gameaddresses[4]);
+      }
+      else if(stake==1){
+        game = contract(GameABI, gameaddresses[3]);
+      }      
+    }
     
     const api = new API(web3.utils, () => {}, game);
-    
+
     const hashKey = /*this.props.hashKey || */ srs({length: 50});
     this.props.setParentState({ hashKey })
 

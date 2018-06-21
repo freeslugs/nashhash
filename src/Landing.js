@@ -78,14 +78,6 @@ const Landing = () => <div>
         </Card.Content>
       </Card>
 
-      <Card color='purple' as={Link} to="/games/chicken">
-        <Card.Content>
-          <Card.Header>Chicken</Card.Header>
-          <Card.Meta>2 player game</Card.Meta>
-          <Card.Description>Two players and a countdown timer: whoever clicks stop first, loses.</Card.Description>
-        </Card.Content>
-      </Card>
-
       <MoreComingSoon color='red' className="invalid">
         <Card.Content>
           <Card.Header>More coming soon</Card.Header>

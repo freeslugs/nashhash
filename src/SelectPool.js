@@ -47,9 +47,27 @@ const Games = styled.div`
   }
 `;
 
-const SelectPool = ({ setParentState, history }) => <Wrapper>
-  <Header as='h1'>2/3 Average</Header>      
-  <Header as='h2'>Select a number between 0-100 with the intention of guessing 2/3 of the average guess.</Header>      
+function gametitle(gtyp) {
+  if(gtyp == "TwoThirds"){
+    return "2/3 Average"
+  }
+  else if(gtyp == "LowestUnique"){
+    return "Lowest Unique Number"
+  }
+}
+
+function gameinfo(gtyp) {
+  if(gtyp == "TwoThirds"){
+    return "Select a number between 0-100 with the intention of guessing 2/3 of the average guess."
+  }
+  else if(gtyp == "LowestUnique"){
+    return "Select the lowest number (0 or greater) that no one else has picked."
+  }
+}
+
+const SelectPool = ({setParentState, gameType, history}) => <Wrapper>
+  <Header as='h1'>{gametitle(gameType)}</Header>      
+  <Header as='h2'>{gameinfo(gameType)}</Header>      
 
   <Step.Group unstackable>
     <Step>

@@ -12,7 +12,9 @@ import PayoutPage from './PayoutPage'
 type props = {};
 
 class Game extends Component<props> {
+
   state = {
+    gametype: this.props.GameType,
     state: null, // COMMIT, COMMITTED, REVEAL, REVEALED, PAYOUT
     stake: null, // 1, 0.1, 0.001
     guess: null,
@@ -59,15 +61,24 @@ class Game extends Component<props> {
     return (
       <div>
         <Route exact path="/games/two-thirds/" render={(props) => ( 
-          <SelectPool setParentState={this.setParentState} {...props} {...this.state} /> 
+          <SelectPool setParentState={this.setParentState} gameType={this.state.gametype} {...props} {...this.state} /> 
         )} />
         <Route exact path="/games/two-thirds/commit" render={(props) => ( 
           <CommitForm setParentState={this.setParentState} {...this.props} {...this.state} /> 
         )} />
-        <Route exact path="/games/two-thirds/committed" render={(props) => ( <Committed setParentState={this.setParentState} {...props} {...this.props} {...this.state} /> )} />
+        <Route exact path="/games/two-thirds/committed" render={(props) => ( <Committed setParentState={this.setParentState} GameType={this.state.gametype} {...props} {...this.props} {...this.state} /> )} />
         <Route exact path="/games/two-thirds/reveal" render={(props) => ( <RevealForm {...this.props} {...this.state} /> )} />
         <Route exact path="/games/two-thirds/revealed" render={(props) => ( <Revealed setParentState={this.setParentState} {...props} {...this.props} {...this.state} /> )} />
         <Route exact path="/games/two-thirds/payout" render={(props) => ( <PayoutPage {...this.props} {...this.state} /> )} />
+
+        <Route exact path="/games/lowest-unique/" render={(props) => ( 
+          <SelectPool setParentState={this.setParentState} gameType={this.state.gametype} {...props} {...this.state} /> 
+        )} />
+        <Route exact path="/games/lowest-unique/commit" render={(props) => ( 
+          <CommitForm setParentState={this.setParentState} {...this.props} {...this.state} /> 
+        )} />
+
+
       </div>
     )
   }

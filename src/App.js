@@ -16,8 +16,10 @@ import API from './api/Game.js'
 
 var Web3Utils = require('web3-utils');
 
-const GameContract = require('./contracts/Game.json');
+const GameABI = require('./contracts/Game.json');
+const GameRegistryABI = require('./contracts/GameRegistry.json')
 const contract = require('truffle-contract');
+console.log("YELLOW");
 
 const Logo = styled(Menu.Item)`
   font-family: 'Lobster Two', cursive;
@@ -40,7 +42,8 @@ class App extends Component<props> {
   state = {
     web3: null,
     accounts: null,
-    game: null
+    gameregistry: null,
+    gameaddresses: null
   }
 
   async componentDidMount() { 
@@ -48,15 +51,18 @@ class App extends Component<props> {
     const web3 = results.web3;
     this.setState({ web3 })
 
-    const Game = contract(GameContract)
-    Game.setProvider(web3.currentProvider)
+    //const Game = contract(GameABI)
+    //Game.setProvider(web3.currentProvider)
+
+    const GameRegistryContract = contract(GameRegistryABI)
+    GameRegistryContract.setProvider(web3.currentProvider)
 
     const accounts = await new Promise(function(resolve, reject) {
       web3.eth.getAccounts( function (err, accounts) { resolve(accounts) })
     });
     this.setState({ accounts: accounts });
 
-    let instance
+    let instance, addresses
     const network = await web3.eth.net.getNetworkType();
 
     if(accounts.length == 0) {
@@ -71,8 +77,9 @@ class App extends Component<props> {
       return false
     }
     if(network === "private") { // localhost:9545
-      // instance = await Game.deployed();  
-      instance = Game.at("0x51815cebef59b88dafd1a5f24095eee1236ffcdd") 
+      //instance = await Game.deployed(); 
+      instance = await GameRegistryContract.deployed(); 
+      addresses = await instance.getGameAdresses();
       toast('Configured with local network. Success!', {
         position: "top-right",
         autoClose: true,
@@ -82,7 +89,8 @@ class App extends Component<props> {
         draggablePercent: 0
       })
     } else if(network === "rinkeby") {
-      instance = Game.at("0xec9a2508a775d34d49625a860829f5733fbd4bc6") 
+      //instance = Game.at("0xec9a2508a775d34d49625a860829f5733fbd4bc6") 
+      instance = await GameRegistryContract.deployed();
       toast('Configured with Rinkeby network. Success!', {
         position: "top-right",
         autoClose: true,
@@ -102,12 +110,13 @@ class App extends Component<props> {
       })
       return false;
     }
-  
-    this.setState({ game: instance });
+    this.setState({ gameregistry: instance, gameaddresses: addresses});
   }
 
+  //Fix this later
+  /*
   resetGame = async () =>  {
-    const { web3, game, accounts } = this.state;
+    const { web3, accounts, game } = this.state;
     const api = new API(web3.utils, () => {}, game);
     console.log(api)
     try {
@@ -118,6 +127,7 @@ class App extends Component<props> {
       console.log(e)
     }
   }
+  */
 
   render() {
     return (
@@ -135,7 +145,8 @@ class App extends Component<props> {
             </Menu>
         
             <Route exact path="/" render={(props) => ( <Landing {...props} {...this.state} /> )} />
-            <Route path="/games/two-thirds" render={(props) => ( <Game {...props} {...this.state} /> )} />
+            <Route path="/games/two-thirds" render={(props) => ( <Game GameType={"TwoThirds"} {...props} {...this.state} /> )} />
+            <Route path="/games/lowest-unique" render={(props) => ( <Game GameType={"LowestUnique"} {...props} {...this.state} /> )} />
           </Container>
         </FullPage>
       </Router>
