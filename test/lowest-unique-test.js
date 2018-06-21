@@ -7,23 +7,28 @@ const MAX_PLAYERS = 10;
 const HASHNASH_ADDRESS = 0x2540099e9ed04aF369d557a40da2D8f9c2ab928D;
 const GAME_STAGE_LENGTH = 0;
 const GAME_FEE_PERCENT = 5;
-const NPT_ADDRESS = 0x345ca3e014aaf5dca488057592ee47305d9b3e10;
 
 var Game = artifacts.require("./LowestUniqueNum.sol");
+var NPT = artifacts.require("./NPT.sol");
 
 let api, helper
 
 contract("Lowest Unique Game", function([owner, donor]){
 
-    let accounts, game
+    let accounts, game, npt
 
     beforeEach('setup contract for each test', async () => {
+        npt = await NPT.new();
+
         game = await Game.new(HASHNASH_ADDRESS,
             GAME_FEE_PERCENT,
             FIXED_BET,
             MAX_PLAYERS,
             GAME_STAGE_LENGTH,
-            NPT_ADDRESS);
+            npt.address);
+
+        //Give game minting permission
+        npt.addMinter(game.address);
 
         api = new API(web3, assert, game);
         helper = new Helper(web3, assert, game, api);
@@ -49,6 +54,37 @@ contract("Lowest Unique Game", function([owner, donor]){
         assert.equal(curr_number_bets, 1, "Number of bets did not increment");
         assert.equal(guess_commit, hash, "Hashes do not match");
     })
+
+
+    it("Nashpoints correctly transferred for single commit", async () => {
+        
+        const hash = api.hashGuess("66", "3");
+        await api.commitGuess(donor, "66", "3");
+
+        /*
+        var nptMintEvent = npt.Mint();
+        console.log("to\t\tamount");
+        nptMintEvent.watch(function(error, result){
+            console.log(result.args._to + "\t" + 
+            result.args._amount + "\t");
+        });
+
+        var nptTransferEvent = npt.Transfer();
+        console.log("address\t\tfrom\t\tto\t\tamount");
+        nptTransferEvent.watch(function(error, result){
+            console.log(result.address + "\t" + result.args._from + "\t" + result.args._to + "\t" + 
+            result.args._amount / 1e16 + "\t");
+        });
+        */
+
+        const total_nashpoints = await npt.totalSupply();
+
+        const nashpoints_awarded = await npt.balanceOf(donor);
+
+        assert.equal(total_nashpoints.toNumber(), 10, "Incorrect number of Nashpoints minted");
+        assert.equal(nashpoints_awarded.toNumber(), 10, "Incorrect number of Nashpoints awarded");
+    })
+
 
     it("Single commit and single reveal", async () => {
        
