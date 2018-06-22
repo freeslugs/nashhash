@@ -48,8 +48,6 @@ class CommitForm extends Component<props> {
     const gametype = this.props.gametype;
     const stake = this.props.stake;
 
-    console.log(web3)
-
     const registryAPI = new GameRegistryAPI(web3, gameaddresses);
 
     const game = await registryAPI.configureGame(gametype, stake);

@@ -12,8 +12,6 @@ class GameRegistryAPI {
 	async configureGame(game_typ, stake) {
 		let game
 
-		console.log(this.web3);
-
 		const GameContract = contract(GameABI);
 	    GameContract.setProvider(this.web3.currentProvider);
 
