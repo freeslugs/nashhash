@@ -19,7 +19,6 @@ var Web3Utils = require('web3-utils');
 const GameABI = require('./contracts/Game.json');
 const GameRegistryABI = require('./contracts/GameRegistry.json')
 const contract = require('truffle-contract');
-console.log("YELLOW");
 
 const Logo = styled(Menu.Item)`
   font-family: 'Lobster Two', cursive;

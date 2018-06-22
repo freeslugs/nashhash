@@ -4,6 +4,7 @@ import { Route, Link } from "react-router-dom";
 import { Segment, Button, Checkbox, Header, Form } from 'semantic-ui-react'
 import styled from 'styled-components';
 import API from './api/Game.js'
+import GameRegistryAPI from './api/GameRegistryAPI.js'
 import srs from 'secure-random-string'
 
 import GameABI from './contracts/Game.json'
@@ -43,40 +44,17 @@ class CommitForm extends Component<props> {
   commit = async () => {
     const web3 = this.props.web3;
     const account = this.props.accounts[0];
-    //const game = this.props.game;
-    let game
-
     const gameaddresses = this.props.gameaddresses;
     const gametype = this.props.gametype;
     const stake = this.props.stake;
 
-    const GameContract = contract(GameABI);
-    GameContract.setProvider(web3.currentProvider);
+    console.log(web3)
 
-    if(gametype=="TwoThirds"){
-      if(stake==0.01){
-        game = await GameContract.at(gameaddresses[2]);
-      }
-      else if(stake==0.1){
-        game = await GameContract.at(gameaddresses[1]);
-      }
-      else if(stake==1){
-        game = await GameContract.at(gameaddresses[0]);
-      }
-    } else if(gametype=="LowestUnique")
-    {
-      if(stake==0.01){
-        game = await GameContract.at(gameaddresses[5]);
-      }
-      else if(stake==0.1){
-        game = await GameContract.at(gameaddresses[4]);
-      }
-      else if(stake==1){
-        game = await GameContract.at(gameaddresses[3]);
-      }      
-    }
+    const registryAPI = new GameRegistryAPI(web3, gameaddresses);
 
-    const api = new API(web3.utils, () => {}, game);
+    const game = await registryAPI.configureGame(gametype, stake);
+
+    const gameAPI = new API(web3.utils, () => {}, game);
 
     const hashKey = /*this.props.hashKey || */ srs({length: 50});
     this.props.setParentState({ hashKey })
@@ -90,14 +68,19 @@ class CommitForm extends Component<props> {
 
     this.setState({loading: true})
     try {
-      await api.commitGuess(account, guess, hashKey);
+      await gameAPI.commitGuess(account, guess, hashKey);
     } catch(e) {
       console.log(`error: ${e}`)
     }
 
     this.setState({loading: false})
     this.props.setParentState({ guess: guess, state: "COMMITTED" })
-    this.props.history.push('/games/two-thirds/committed')
+
+    if(gametype == "TwoThirds"){
+      this.props.history.push('/games/two-thirds/committed')
+    }
+    else if(gametype == "LowestUnique")
+      this.props.history.push('/games/lowest-unique/committed')
   }
 
   render() {
