@@ -47,6 +47,18 @@ Game theory games on the blockchain
 4. `migrate --reset`
 5. `test`
 
+
+## DEVELOPMENT REQUIREMENTS
+
+Dear n000bs,
+
+1. Don't push broken code to master
+  1. If you feel the need to push, just throw it up on a new branch and PR it later 
+2. Indent your fucking code. Like, seriously. 
+3. See #2 
+4. Use useful commits messages. looking at your @talaltoukan and these guys: [e551cc33b4b985d07b3133ec652a5f2c47953598](https://github.com/freeslugs/nashhash/commit/e551cc33b4b985d07b3133ec652a5f2c47953598) and [51f7d02284d230284fc82b42959d133d3094d6f0](https://github.com/freeslugs/nashhash/commit/51f7d02284d230284fc82b42959d133d3094d6f0)
+
+
 ## Common errors
 
 ### `INVALID ADDRESS`
@@ -165,17 +177,3 @@ If we now want to disconnect the game, here is how we do it:
 We can also connect all games in a file:
 
     gmclerk> connect -f <filename>
-
-
-## DEVELOPMENT REQUIREMENTS
-
-### Gilad's comedy routine
-
-Dear n000bs,
-
-1. Don't push broken code to master
-  1. If you feel the need to push, just throw it up on a new branch and PR it later 
-2. Indent your fucking code. Like, seriously. 
-3. See #2 
-
-
