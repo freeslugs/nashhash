@@ -6,7 +6,7 @@ import getWeb3 from './utils/getWeb3';
 import Landing from './Landing'
 import Game from './Game'
 
-import { Button, Container, Header, Menu, Card } from 'semantic-ui-react'
+import { Button, Container, Header, Menu, Card, Divider, Icon } from 'semantic-ui-react'
 import styled from 'styled-components';
 
 import { ToastContainer, toast } from 'react-toastify';
@@ -146,6 +146,21 @@ class App extends Component<props> {
             <Route exact path="/" render={(props) => ( <Landing {...props} {...this.state} /> )} />
             <Route path="/games/two-thirds" render={(props) => ( <Game GameType={"TwoThirds"} {...props} {...this.state} /> )} />
             <Route path="/games/lowest-unique" render={(props) => ( <Game GameType={"LowestUnique"} {...props} {...this.state} /> )} />
+
+            <Divider section />
+            <div>
+              <p>Nash Hash</p>
+              <div onClick={() => window.open("http://google.com", "_new") }>  
+                <Icon link size='large' name='telegram plane'  />
+              </div>
+              <div onClick={() => window.open("http://google.com", "_new") }>  
+                <Icon link size='large' name='twitter'  />
+              </div>
+              <div onClick={() => window.open("http://google.com", "_new") }>  
+                <Icon link size='large' name='mail'  />
+              </div>
+
+            </div>
           </Container>
         </FullPage>
       </Router>
