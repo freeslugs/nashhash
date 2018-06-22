@@ -37,6 +37,7 @@ class CommitForm extends Component<props> {
   loading() {
     const { web3, accounts, gameregistry, gameaddresses } = this.props;
     return !(web3 && accounts && accounts.length > 0 && gameaddresses.length > 0)
+    //Add statement to reroute if gameaddresses is null
   }
 
   commit = async () => {
@@ -49,45 +50,51 @@ class CommitForm extends Component<props> {
     const gametype = this.props.gametype;
     const stake = this.props.stake;
 
+    const GameContract = contract(GameABI);
+    GameContract.setProvider(web3.currentProvider);
+
     if(gametype=="TwoThirds"){
       if(stake==0.01){
-        game = contract(GameABI, gameaddresses[2]);
+        game = await GameContract.at(gameaddresses[2]);
       }
       else if(stake==0.1){
-        game = contract(GameABI, gameaddresses[1]);
+        game = await GameContract.at(gameaddresses[1]);
       }
       else if(stake==1){
-        game = contract(GameABI, gameaddresses[0]);
+        game = await GameContract.at(gameaddresses[0]);
       }
     } else if(gametype=="LowestUnique")
     {
       if(stake==0.01){
-        game = contract(GameABI, gameaddresses[5]);
+        game = await GameContract.at(gameaddresses[5]);
       }
       else if(stake==0.1){
-        game = contract(GameABI, gameaddresses[4]);
+        game = await GameContract.at(gameaddresses[4]);
       }
       else if(stake==1){
-        game = contract(GameABI, gameaddresses[3]);
+        game = await GameContract.at(gameaddresses[3]);
       }      
     }
-    
+
     const api = new API(web3.utils, () => {}, game);
 
     const hashKey = /*this.props.hashKey || */ srs({length: 50});
     this.props.setParentState({ hashKey })
 
     const guess = this.state.guess
+
     if(guess == null || guess.length == 0) {
       console.log('no guess!')
       return false;
     }
+
     this.setState({loading: true})
     try {
       await api.commitGuess(account, guess, hashKey);
     } catch(e) {
       console.log(`error: ${e}`)
     }
+
     this.setState({loading: false})
     this.props.setParentState({ guess: guess, state: "COMMITTED" })
     this.props.history.push('/games/two-thirds/committed')
