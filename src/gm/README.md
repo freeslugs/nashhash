@@ -12,6 +12,12 @@ You want to set it up to some/path/nashhash/src
         go generate
 5. In a separate terminal window, starth geth on rinkeby. It might take sometime to sync.
         geth --rinkeby
+
+You will then need to find the location of the geth.ipc. On my machine, this is the location:
+        "/Users/me/Library/Ethereum/rinkeby/geth.ipc"
+Once you have your geth.ipc path, you need to go into gm/commmon.go and set the constatn EthClientPath to that path.
+        EthClientPath = "/Users/me/Library/Ethereum/rinkeby/geth.ipc"
+
 5. Run tests
         go test -v
 
