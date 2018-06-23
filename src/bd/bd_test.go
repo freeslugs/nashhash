@@ -69,3 +69,15 @@ func TestFindBalance(t *testing.T) {
 	assertEqual(t, bd.findRightBalance(0.7), 0.8, "wrong balance 5")
 
 }
+
+func TestBotQInit(t *testing.T) {
+
+	var bq BotQ
+	botn := uint(10)
+	amount := 0.001
+	bq.Init(amount, botn)
+
+	assertEqual(t, len(bq.refill), int(botn), "incoorect initialization")
+	assertEqual(t, bq.guaranteedBalance, amount, "incorrect guarantee")
+
+}

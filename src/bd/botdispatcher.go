@@ -31,28 +31,6 @@ type BotDispatcher struct {
 	port int
 }
 
-// BotQ maintains the bots in three different queues: available, busy and refill
-type BotQ struct {
-
-	// Lock for consistency
-	qLock sync.Mutex
-
-	// The bot ques
-	available []*Bot
-	//busy      []*Bot
-	refill []*Bot
-}
-
-// Bot is an interface to a bot. A bot must be able to do bot stuff
-type Bot interface {
-	// Balance must return the "balance" of the bot. This is also known as
-	// available ETH, thus allowing higher flexibility in the implementation
-	Balance() float32
-
-	// DoBotStuff
-	DoBotStuff() error
-}
-
 // Dispatch asks the bot dispatcher to dispatch args.Number bots to do Bot.BotStuff at address
 // args.ContractAddress. If the DoBotStuff involves payable functions, you need to provide the
 // balance the bots are expected to have in args.BotAllowance
@@ -65,6 +43,14 @@ func (bd *BotDispatcher) Dispatch(args DispatchArgs, res *DispatchReply) error {
 			args.RequiredBalance)
 		return e
 	}
+	botq := bd.queues[bal]
+
+	e := botq.Dispatch(args.Number, args.ContractAddress)
+	if e != nil {
+		return e
+	}
+
+	// Step 2: Now that we have the correct BotQ we shall ask it to dispatch the bots
 
 	log.Printf("INFO BotDispatcher.Dispatch: dispatching %d bots to %s, balance >= %f\n",
 		args.Number, args.ContractAddress, args.RequiredBalance)
@@ -87,7 +73,11 @@ func (bd *BotDispatcher) Init(ipAddr string, port int, hexkey string) error {
 
 	bd.queues = make(map[float64]*BotQ)
 
+	// <=============================================>
+	// <=============================================>
+	// <============= RPC RPC RPC ===================>
 	// RPC RELATED STUFF BELOW
+
 	// Register our baby with net/rpc
 	bd.port = port
 
@@ -100,7 +90,6 @@ func (bd *BotDispatcher) Init(ipAddr string, port int, hexkey string) error {
 		log.Fatal("listen error: ", e)
 	}
 	bd.l = l
-
 	// Go routine that accepts and serves new procedure calls
 	go func() {
 		for bd.dead == false {
@@ -164,4 +153,24 @@ func (bd *BotDispatcher) findRightBalance(balanceNeeded float64) float64 {
 	}
 
 	return lowestRightKey
+}
+
+func (bd *BotDispatcher) initBotQsDefault() error {
+
+	amounts := [...]float64{0.01, 0.1}
+	defaultBotNumber := uint(10)
+
+	for _, amount := range amounts {
+
+		// Create the BotQ
+		botq := &BotQ{}
+		e := botq.Init(amount, defaultBotNumber)
+		if e != nil {
+			return e
+		}
+		bd.queues[amount] = botq
+
+	}
+
+	return nil
 }
