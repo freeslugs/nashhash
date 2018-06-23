@@ -46,12 +46,23 @@ type Bot interface {
 	DoBotStuff() error
 }
 
+// Dispatch asks the bot dispatcher to dispatch args.Number bots to do Bot.BotStuff at address
+// args.ContractAddress. If the DoBotStuff involves payable functions, you need to provide the
+// balance the bots are expected to have in args.BotAllowance
+func (bd *BotDispatcher) Dispatch(args DispatchArgs, res *DispatchReply) error {
+
+	log.Printf("INFO BotDispatcher.Dispatch: dispatching %d bots to %s, allowance %f\n",
+		args.Number, args.ContractAddress, args.BotAllowance)
+
+	return nil
+}
+
 // Init initializes the BotDispatcher on ipAddr:port.
 // hexkey is the key to unlock the funding wallet
 func (bd *BotDispatcher) Init(ipAddr string, port int, hexkey string) error {
 
 	bd.bdLock.Lock()
-	defer bd.bdLock.Lock()
+	defer bd.bdLock.Unlock()
 
 	// Convert the string into a ecdsa privkey
 	privk, err := ethcrypto.HexToECDSA(hexkey)
@@ -86,6 +97,7 @@ func (bd *BotDispatcher) Init(ipAddr string, port int, hexkey string) error {
 		for bd.dead == false {
 			conn, err := bd.l.Accept()
 			if err == nil && bd.dead == false {
+				log.Println("serving connection")
 				go rpcs.ServeConn(conn)
 			} else if err == nil {
 				conn.Close()
@@ -96,7 +108,7 @@ func (bd *BotDispatcher) Init(ipAddr string, port int, hexkey string) error {
 			}
 		}
 	}()
-	log.Printf("INFO GM: Initialization succesful.\n")
+	log.Printf("INFO BotDispatcher: Initialization succesful.\n")
 
 	return nil
 }
@@ -105,7 +117,9 @@ func (bd *BotDispatcher) Init(ipAddr string, port int, hexkey string) error {
 func (bd *BotDispatcher) Kill() {
 
 	bd.bdLock.Lock()
-	defer bd.bdLock.Lock()
+	defer bd.bdLock.Unlock()
+
+	// Terminate the refill routine
 
 	bd.dead = true
 	bd.l.Close()

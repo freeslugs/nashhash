@@ -19,6 +19,7 @@ Once you have your geth.ipc path, you need to go into gm/commmon.go and set the 
         EthClientPath = "/Users/me/Library/Ethereum/rinkeby/geth.ipc"
 
 5. Run tests
+        go generate
         go test -v
 
 
