@@ -12,7 +12,7 @@ type DispatchArgs struct {
 
 	// Bot allowance is the balance that the bot has to have to be able
 	// to perfoma DoBotStuff
-	BotAllowance float32
+	RequiredBalance float64
 
 	// Number is the number of bots that needs to be dispatched
 	Number uint

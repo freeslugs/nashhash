@@ -2,7 +2,9 @@ package bd
 
 import (
 	"crypto/ecdsa"
+	"fmt"
 	"log"
+	"math"
 	"net"
 	"net/rpc"
 	"strconv"
@@ -15,10 +17,10 @@ import (
 type BotDispatcher struct {
 
 	// For adding new stakes
-	bdLock sync.Mutex
+	bdLock sync.Mutex // might have to change this r/w lock
 
-	// A map from stakes to BotQueues
-	queues map[float32]*BotQueues
+	// A map from guaranteed balance and the different BotQ
+	queues map[float64]*BotQ
 
 	// Refilling key
 	refillKey *ecdsa.PrivateKey
@@ -29,8 +31,8 @@ type BotDispatcher struct {
 	port int
 }
 
-// BotQueues maintains the bots in three different queues: available, busy and refill
-type BotQueues struct {
+// BotQ maintains the bots in three different queues: available, busy and refill
+type BotQ struct {
 
 	// Lock for consistency
 	qLock sync.Mutex
@@ -43,6 +45,11 @@ type BotQueues struct {
 
 // Bot is an interface to a bot. A bot must be able to do bot stuff
 type Bot interface {
+	// Balance must return the "balance" of the bot. This is also known as
+	// available ETH, thus allowing higher flexibility in the implementation
+	Balance() float32
+
+	// DoBotStuff
 	DoBotStuff() error
 }
 
@@ -51,9 +58,16 @@ type Bot interface {
 // balance the bots are expected to have in args.BotAllowance
 func (bd *BotDispatcher) Dispatch(args DispatchArgs, res *DispatchReply) error {
 
-	log.Printf("INFO BotDispatcher.Dispatch: dispatching %d bots to %s, allowance %f\n",
-		args.Number, args.ContractAddress, args.BotAllowance)
+	// Step 1: Find the appropriate BotQ. If we cannot gurantee this particular balance, retur
+	bal := bd.findRightBalance(args.RequiredBalance)
+	if bal == 0 {
+		e := fmt.Errorf("required balance of %f ETH cannot be guaranteed",
+			args.RequiredBalance)
+		return e
+	}
 
+	log.Printf("INFO BotDispatcher.Dispatch: dispatching %d bots to %s, balance >= %f\n",
+		args.Number, args.ContractAddress, args.RequiredBalance)
 	return nil
 }
 
@@ -71,12 +85,7 @@ func (bd *BotDispatcher) Init(ipAddr string, port int, hexkey string) error {
 	}
 	bd.refillKey = privk
 
-	// gm.auth = bind.NewKeyedTransactor(privk)
-	// if gm.auth == nil {
-	// 	log.Fatalf("GM: failed to create authorized transactor: %v", err)
-	// }
-
-	bd.queues = make(map[float32]*BotQueues)
+	bd.queues = make(map[float64]*BotQ)
 
 	// RPC RELATED STUFF BELOW
 	// Register our baby with net/rpc
@@ -120,10 +129,39 @@ func (bd *BotDispatcher) Kill() {
 	defer bd.bdLock.Unlock()
 
 	// Terminate the refill routine
-
 	bd.dead = true
 	bd.l.Close()
 
 	log.Printf("INFO BotDispatcher: dead\n")
 
+}
+
+// helpers
+//
+
+// findRightalance will return the lowest supported guaranteed balance that is
+// less than needed balance
+func (bd *BotDispatcher) findRightBalance(balanceNeeded float64) float64 {
+
+	lowestRightKey := math.MaxFloat64
+
+	// We need to find a smallest key that is more than the balanceNeeded
+	for k := range bd.queues {
+
+		// If the key is smaller, that key does not work for us
+		if k < balanceNeeded {
+			continue
+		}
+
+		if k < lowestRightKey {
+			lowestRightKey = k
+		}
+	}
+
+	// If no guaranteed balance was bigger than the required balance, we return 0
+	if lowestRightKey == math.MaxFloat64 {
+		return 0
+	}
+
+	return lowestRightKey
 }

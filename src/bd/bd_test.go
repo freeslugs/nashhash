@@ -1,40 +1,71 @@
 package bd
 
 import (
-	"log"
-	"net/rpc"
-	"strconv"
+	"fmt"
 	"testing"
 )
 
 const (
-	GameContract = "0x8bcd426baa7a24e590a9cc65de7a273257163c35"
-	OwnerHexKey  = "76a23cff887b294bb60ccde7ad1eb800f0f6ede70d33b154a53eadb20681a4e3"
-	BotAllowance = 0.2
-	RPCPort      = 57543
-	RPCAddr      = "127.0.0.1"
+	GameContract    = "0x8bcd426baa7a24e590a9cc65de7a273257163c35"
+	OwnerHexKey     = "76a23cff887b294bb60ccde7ad1eb800f0f6ede70d33b154a53eadb20681a4e3"
+	RequiredBalance = 0.2
+	RPCPort         = 57543
+	RPCAddr         = "127.0.0.1"
 )
 
-func TestBotDispatcherRPC(t *testing.T) {
+func assertEqual(t *testing.T, a interface{}, b interface{}, message string) {
+	if a == b {
+		return
+	}
+	if len(message) == 0 {
+		message = fmt.Sprintf("%v != %v", a, b)
+	}
+	t.Fatal(message)
+}
+
+func assertNotEqual(t *testing.T, a interface{}, b interface{}, message string) {
+	if a != b {
+		return
+	}
+	if len(message) == 0 {
+		message = fmt.Sprintf("%v != %v", a, b)
+	}
+	t.Fatal(message)
+}
+
+// func TestBotDispatcherRPC(t *testing.T) {
+// 	var bd BotDispatcher
+// 	bd.Init(RPCAddr, RPCPort, OwnerHexKey)
+// 	defer bd.Kill()
+
+// 	bdAddr := RPCAddr + ":" + strconv.Itoa(RPCPort)
+
+// 	c, err := rpc.Dial("tcp", bdAddr)
+// 	if err != nil {
+// 		log.Fatal(err)
+// 	}
+
+// 	args := DispatchArgs{ContractAddress: GameContract, RequiredBalance: RequiredBalance, Number: 3}
+// 	reply := &DispatchReply{}
+
+// 	e := call(c, "BotDispatcher.Dispatch", args, reply)
+
+// }
+
+func TestFindBalance(t *testing.T) {
 	var bd BotDispatcher
 	bd.Init(RPCAddr, RPCPort, OwnerHexKey)
-	log.Println("init returned")
 	defer bd.Kill()
 
-	bdAddr := RPCAddr + ":" + strconv.Itoa(RPCPort)
-	log.Println(bdAddr)
+	bd.queues[1] = nil
+	bd.queues[0.1] = nil
+	bd.queues[0.5] = nil
+	bd.queues[0.8] = nil
 
-	c, err := rpc.Dial("tcp", bdAddr)
-	if err != nil {
-		log.Fatal(err)
-	}
-
-	args := DispatchArgs{ContractAddress: GameContract, BotAllowance: BotAllowance, Number: 3}
-	reply := &DispatchReply{}
-
-	e := call(c, "BotDispatcher.Dispatch", args, reply)
-	if e != nil {
-		log.Fatal(err)
-	}
+	assertEqual(t, bd.findRightBalance(0.99), 1.0, "wrong balance 1")
+	assertEqual(t, bd.findRightBalance(0.0001), 0.1, "wrong balance 2")
+	assertEqual(t, bd.findRightBalance(100), 0.0, "wrong balance 3")
+	assertEqual(t, bd.findRightBalance(0.5), 0.5, "wrong balance 4")
+	assertEqual(t, bd.findRightBalance(0.7), 0.8, "wrong balance 5")
 
 }
