@@ -12,15 +12,11 @@ type BotQ struct {
 	// Lock for consistency
 	qLock sync.Mutex
 
-	// The bot ques
-	available []*Bot
-	//busy      []*Bot
+	// The bot qs
+	ready  []*Bot
 	refill []*Bot
 
-	// Refill stuff
-	//refilldead        chan bool
 	guaranteedBalance float64
-	refillAmount      float64
 }
 
 // Dispatch sends the bots to the bots address
@@ -36,7 +32,6 @@ func (bq *BotQ) Init(guaranteedBalance float64, nbots uint) error {
 	bq.qLock.Lock()
 	defer bq.qLock.Unlock()
 
-	//bq.refilldead = make(chan bool)
 	bq.guaranteedBalance = guaranteedBalance
 
 	// Create all the bots and put them into the refill que

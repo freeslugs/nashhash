@@ -29,6 +29,7 @@ type BotDispatcher struct {
 	dead bool
 	l    net.Listener
 	port int
+	ip   string
 }
 
 // Dispatch asks the bot dispatcher to dispatch args.Number bots to do Bot.BotStuff at address
@@ -71,7 +72,9 @@ func (bd *BotDispatcher) Init(ipAddr string, port int, hexkey string) error {
 	}
 	bd.refillKey = privk
 
+	// Lets create the que
 	bd.queues = make(map[float64]*BotQ)
+	bd.initBotQsDefault()
 
 	// <=============================================>
 	// <=============================================>
@@ -80,33 +83,35 @@ func (bd *BotDispatcher) Init(ipAddr string, port int, hexkey string) error {
 
 	// Register our baby with net/rpc
 	bd.port = port
+	bd.ip = ipAddr
+	bd.initRPC()
 
-	rpcs := rpc.NewServer()
-	rpcs.Register(bd)
+	// rpcs := rpc.NewServer()
+	// rpcs.Register(bd)
 
-	// Create a TCP listener that will listen on `Port`
-	l, e := net.Listen("tcp", ipAddr+":"+strconv.Itoa(bd.port))
-	if e != nil {
-		log.Fatal("listen error: ", e)
-	}
-	bd.l = l
-	// Go routine that accepts and serves new procedure calls
-	go func() {
-		for bd.dead == false {
-			conn, err := bd.l.Accept()
-			if err == nil && bd.dead == false {
-				log.Println("serving connection")
-				go rpcs.ServeConn(conn)
-			} else if err == nil {
-				conn.Close()
-			}
-			if err != nil && bd.dead == false {
-				log.Printf("ERROR BotDispatcher accept: %v\n", err.Error())
-				bd.Kill()
-			}
-		}
-	}()
-	log.Printf("INFO BotDispatcher: Initialization succesful.\n")
+	// // Create a TCP listener that will listen on `Port`
+	// l, e := net.Listen("tcp", ipAddr+":"+strconv.Itoa(bd.port))
+	// if e != nil {
+	// 	log.Fatal("listen error: ", e)
+	// }
+	// bd.l = l
+	// // Go routine that accepts and serves new procedure calls
+	// go func() {
+	// 	for bd.dead == false {
+	// 		conn, err := bd.l.Accept()
+	// 		if err == nil && bd.dead == false {
+	// 			log.Println("serving connection")
+	// 			go rpcs.ServeConn(conn)
+	// 		} else if err == nil {
+	// 			conn.Close()
+	// 		}
+	// 		if err != nil && bd.dead == false {
+	// 			log.Printf("ERROR BotDispatcher accept: %v\n", err.Error())
+	// 			bd.Kill()
+	// 		}
+	// 	}
+	// }()
+	// log.Printf("INFO BotDispatcher: Initialization succesful.\n")
 
 	return nil
 }
@@ -173,4 +178,34 @@ func (bd *BotDispatcher) initBotQsDefault() error {
 	}
 
 	return nil
+}
+
+func (bd *BotDispatcher) initRPC() {
+
+	rpcs := rpc.NewServer()
+	rpcs.Register(bd)
+
+	// Create a TCP listener that will listen on `Port`
+	l, e := net.Listen("tcp", bd.ip+":"+strconv.Itoa(bd.port))
+	if e != nil {
+		log.Fatal("listen error: ", e)
+	}
+	bd.l = l
+	// Go routine that accepts and serves new procedure calls
+	go func() {
+		for bd.dead == false {
+			conn, err := bd.l.Accept()
+			if err == nil && bd.dead == false {
+				go rpcs.ServeConn(conn)
+			} else if err == nil {
+				conn.Close()
+			}
+			if err != nil && bd.dead == false {
+				log.Printf("ERROR BotDispatcher accept: %v\n", err.Error())
+				bd.Kill()
+			}
+		}
+	}()
+	log.Printf("INFO BotDispatcher: Initialization succesful.\n")
+
 }

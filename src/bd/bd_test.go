@@ -2,6 +2,9 @@ package bd
 
 import (
 	"fmt"
+	"log"
+	"net/rpc"
+	"strconv"
 	"testing"
 )
 
@@ -33,24 +36,19 @@ func assertNotEqual(t *testing.T, a interface{}, b interface{}, message string) 
 	t.Fatal(message)
 }
 
-// func TestBotDispatcherRPC(t *testing.T) {
-// 	var bd BotDispatcher
-// 	bd.Init(RPCAddr, RPCPort, OwnerHexKey)
-// 	defer bd.Kill()
+func TestBotDispatcherRPC(t *testing.T) {
+	var bd BotDispatcher
+	bd.Init(RPCAddr, RPCPort, OwnerHexKey)
+	defer bd.Kill()
 
-// 	bdAddr := RPCAddr + ":" + strconv.Itoa(RPCPort)
+	bdAddr := RPCAddr + ":" + strconv.Itoa(RPCPort)
 
-// 	c, err := rpc.Dial("tcp", bdAddr)
-// 	if err != nil {
-// 		log.Fatal(err)
-// 	}
+	_, err := rpc.Dial("tcp", bdAddr)
+	if err != nil {
+		log.Fatal(err)
+	}
 
-// 	args := DispatchArgs{ContractAddress: GameContract, RequiredBalance: RequiredBalance, Number: 3}
-// 	reply := &DispatchReply{}
-
-// 	e := call(c, "BotDispatcher.Dispatch", args, reply)
-
-// }
+}
 
 func TestFindBalance(t *testing.T) {
 	var bd BotDispatcher
