@@ -4,6 +4,7 @@ import { Route, Link } from "react-router-dom";
 import { Progress, Segment, Button, Checkbox, Header, Form } from 'semantic-ui-react'
 import styled from 'styled-components';
 import API from './api/Game.js'
+import GameRegistryAPI from './api/GameRegistryAPI.js'
 import srs from 'secure-random-string'
 
 var Web3Utils = require('web3-utils');
@@ -48,14 +49,21 @@ class Committed extends Component<props> {
     }
     const web3 = this.props.web3;
     const account = this.props.accounts[0];
-    const game = this.props.game;
-    const api = new API(web3.utils, () => {}, game);
+    const gametype = this.props.gametype;
+    const gameaddresses = this.props.gameaddresses;
+    const stake = this.props.stake;
+
+    const registryAPI = new GameRegistryAPI(web3, gameaddresses);
+    const game = await registryAPI.configureGame(gametype, stake);
+    const gameAPI = new API(web3.utils, () => {}, game);
     // poll contract for # of players 
-    let current, total, percent
+    let current, total, percent, cur_state
     this.setState({ inProgress: true })
     try {
-      current = await api.getCurrentCommits()
-      total = await api.getMaxPlayers()
+      //DISCUSS CHANGING THIS WITH KEVIN  
+      current = await gameAPI.getCurrentCommits()
+      total = await gameAPI.getMaxPlayers()
+      cur_state = await gameAPI.getGameState()  
       percent = (current / total) * 100;
     } catch(e) {
       console.log(e)
@@ -65,13 +73,18 @@ class Committed extends Component<props> {
     }
     console.info(`current: ${current}, total: ${total}, percent: ${percent}`)
     this.setState({ percent })
-    if(current == total) { // if complete
+    if(cur_state == 1) { // if game has transitioned to payout state
       setTimeout(()=>{
         clearInterval(this.state.interval);
         console.log('done')
         this.setState({interval: null})
         this.props.setParentState({ state: "REVEAL" })
-        this.props.history.push('/games/two-thirds/reveal')
+        if(gametype == "TwoThirds"){
+          this.props.history.push('/games/two-thirds/reveal')
+        }
+        else if(gametype == "LowestUnique"){
+          this.props.history.push('/games/lowest-unique/reveal')
+        }
       }, 2);
     }
   }

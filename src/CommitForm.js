@@ -77,8 +77,9 @@ class CommitForm extends Component<props> {
     if(gametype == "TwoThirds"){
       this.props.history.push('/games/two-thirds/committed')
     }
-    else if(gametype == "LowestUnique")
+    else if(gametype == "LowestUnique"){
       this.props.history.push('/games/lowest-unique/committed')
+    }
   }
 
   render() {
