@@ -44,10 +44,10 @@ func (b *Bot) Init() error {
 }
 
 // Kill the Bot and harvest its balance to the address
-func (b *Bot) Kill(address string) error {
+func (b *Bot) Kill(address common.Address) error {
 
 	// Lets send the remaining balance back
-	e := harvestAccount(b.key, common.HexToAddress(address))
+	e := harvestAccount(b.key, address)
 	if e != nil {
 		return e
 	}

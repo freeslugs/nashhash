@@ -5,11 +5,14 @@ import (
 	"math/big"
 	"testing"
 	"time"
+
+	"github.com/ethereum/go-ethereum/common"
 )
 
 const (
 	GameContract    = "0x8bcd426baa7a24e590a9cc65de7a273257163c35"
 	OwnerHexKey     = "76a23cff887b294bb60ccde7ad1eb800f0f6ede70d33b154a53eadb20681a4e3"
+	OwnerAddr       = "0x537CA571AEe8116575E8d7a79740c70f685EC856"
 	RequiredBalance = 0.2
 	RPCPort         = 57543
 	RPCAddr         = "127.0.0.1"
@@ -38,7 +41,6 @@ func assertNotEqual(t *testing.T, a interface{}, b interface{}, message string) 
 func TestBotDispatcherRPC(t *testing.T) {
 	var bd BotDispatcher
 	bd.Init(RPCAddr, RPCPort, OwnerHexKey, true)
-	defer bd.Kill()
 
 	// bdAddr := RPCAddr + ":" + strconv.Itoa(RPCPort)
 
@@ -47,14 +49,18 @@ func TestBotDispatcherRPC(t *testing.T) {
 	// 	log.Fatal(err)
 	// }
 
-	time.Sleep(5 * time.Second)
+	time.Sleep(40 * time.Second)
+
+	bd.Kill()
+
+	time.Sleep(30 * time.Second)
 
 }
 
 func TestFindBalance(t *testing.T) {
 	var bd BotDispatcher
-	bd.Init(RPCAddr, RPCPort, OwnerHexKey, false)
-	defer bd.Kill()
+
+	bd.queues = make(map[float64]*BotQ)
 
 	bd.queues[1] = nil
 	bd.queues[0.1] = nil
@@ -75,7 +81,7 @@ func TestBotQInit(t *testing.T) {
 	botn := uint(10)
 	amount := 0.001
 	bq.Init(amount, botn)
-	defer bq.Kill()
+	defer bq.Kill(common.HexToAddress(OwnerAddr))
 
 	assertEqual(t, len(bq.refill), int(botn), "incoorect initialization")
 	assertEqual(t, bq.guaranteedBalance, amount, "incorrect guarantee")

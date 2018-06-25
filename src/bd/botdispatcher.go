@@ -98,9 +98,16 @@ func (bd *BotDispatcher) Kill() {
 	bd.bdLock.Lock()
 	defer bd.bdLock.Unlock()
 
-	// Terminate the refill routine
+	// RPC stuff
 	bd.dead = true
 	bd.l.Close()
+
+	// Terminate the refill routine first.
+	bd.refilldead <- true
+
+	for _, bq := range bd.queues {
+		bq.Kill(ethcrypto.PubkeyToAddress(bd.refillKey.PublicKey))
+	}
 
 	log.Printf("INFO BotDispatcher: dead\n")
 

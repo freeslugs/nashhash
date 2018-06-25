@@ -4,6 +4,9 @@ import (
 	"crypto/ecdsa"
 	"log"
 	"sync"
+	"time"
+
+	"github.com/ethereum/go-ethereum/common"
 )
 
 // BotQ maintains the bots in three different queues: available, busy and refill
@@ -103,12 +106,14 @@ func (bq *BotQ) supervisor() {
 				// Restore the bots who's payment is still pending
 				bq.pending = pending
 
-				log.Printf("INFO BotQ.supervisor %f ether: %d bots pending\n",
-					bq.guaranteedBalance,
-					len(bq.pending))
+				// log.Printf("INFO BotQ.supervisor %f ether: %d bots pending\n",
+				// 	bq.guaranteedBalance,
+				// 	len(bq.pending))
 
 			}
 			bq.qLock.Unlock()
+
+			time.Sleep(10 * time.Second)
 		}
 	}
 
@@ -143,9 +148,26 @@ func (bq *BotQ) Init(guaranteedBalance float64, nbots uint) error {
 }
 
 // Kill BotQ
-func (bq *BotQ) Kill() error {
+func (bq *BotQ) Kill(harvestAddr common.Address) error {
+
+	bq.qLock.Lock()
+	defer bq.qLock.Unlock()
 
 	bq.supervisorDead <- true
 
+	// Kill all the bots
+	for _, bot := range bq.ready {
+		bot.Kill(harvestAddr)
+	}
+
+	for _, bot := range bq.pending {
+		bot.Kill(harvestAddr)
+	}
+
+	for _, bot := range bq.refill {
+		bot.Kill(harvestAddr)
+	}
+
+	log.Printf("INFO BotQ %f: dead\n", bq.guaranteedBalance)
 	return nil
 }
