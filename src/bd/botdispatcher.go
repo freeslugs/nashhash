@@ -174,31 +174,8 @@ func (bd *BotDispatcher) refill() {
 		default:
 
 			// We need to iterate over all the qs
-			for amount, bq := range bd.queues {
-
-				// We shall lock it before anything else
-				bq.qLock.Lock()
-
-				// We only need to do something if the refill q is not empty
-				if len(bq.refill) != 0 {
-
-					for i := 0; i < len(bq.refill); i++ {
-
-						// Pop
-						var bot *Bot
-						bot, bq.refill = bq.refill[len(bq.refill)-1], bq.refill[:len(bq.refill)-1]
-
-						// Send money
-						sendEth(bd.refillKey, bot.auth.From, toWei(amount))
-
-						// Push onto the pending q
-						bq.pending = append(bq.pending, bot)
-
-					}
-
-				}
-				bq.qLock.Unlock()
-
+			for _, bq := range bd.queues {
+				bq.Refill(bd.refillKey)
 			}
 
 			time.Sleep(refillSleepTime * time.Second)

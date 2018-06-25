@@ -86,6 +86,13 @@ func TestUtils(t *testing.T) {
 	eth := big.NewInt(1000000000000000000)
 	pointOne := big.NewInt(100000000000000000)
 
+	ethf := 1.0
+	pointOnef := 0.1
+
 	assertEqual(t, eth.Cmp(toWei(1.0)), 0, "incorrect toWei conversion")
 	assertEqual(t, pointOne.Cmp(toWei(0.1)), 0, "incorrect toWei conversion")
+
+	assertEqual(t, toEth(eth), ethf, "incorrect toEth conversion")
+	assertEqual(t, toEth(pointOne), pointOnef, "incorrect toEth conversion")
+
 }

@@ -1,6 +1,7 @@
 package bd
 
 import (
+	"context"
 	"crypto/ecdsa"
 	"crypto/rand"
 	"errors"
@@ -8,6 +9,7 @@ import (
 
 	"github.com/ethereum/go-ethereum/accounts/abi/bind"
 	"github.com/ethereum/go-ethereum/common"
+	"github.com/ethereum/go-ethereum/ethclient"
 
 	"github.com/ethereum/go-ethereum/crypto"
 )
@@ -57,4 +59,22 @@ func (b *Bot) DoBotStuff(address string) error {
 
 	log.Printf("beep bop bot doing bot stuff %s\n", address)
 	return nil
+}
+
+// Balance returns the balance of the Bot
+func (b *Bot) Balance() (float64, error) {
+
+	conn, err := ethclient.Dial(EthClientPath)
+	if err != nil {
+		return -1.0, err
+	}
+	defer conn.Close()
+
+	money, err := conn.BalanceAt(context.Background(), crypto.PubkeyToAddress(b.key.PublicKey), nil)
+	if err != nil {
+		return -1.0, err
+	}
+
+	return toEth(money), nil
+
 }

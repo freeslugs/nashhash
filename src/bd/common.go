@@ -144,3 +144,15 @@ func toWei(amount float64) *big.Int {
 	temp.Int(&res)
 	return &res
 }
+
+func toEth(amount *big.Int) float64 {
+
+	f := new(big.Float).SetInt(amount)
+
+	f.Quo(f, big.NewFloat(1000000000000000000))
+
+	res, _ := f.Float64()
+
+	return res
+
+}
