@@ -7,6 +7,7 @@ import (
 	"net/rpc"
 	"strconv"
 	"testing"
+	"time"
 )
 
 const (
@@ -39,7 +40,7 @@ func assertNotEqual(t *testing.T, a interface{}, b interface{}, message string) 
 
 func TestBotDispatcherRPC(t *testing.T) {
 	var bd BotDispatcher
-	bd.Init(RPCAddr, RPCPort, OwnerHexKey)
+	bd.Init(RPCAddr, RPCPort, OwnerHexKey, false)
 	defer bd.Kill()
 
 	bdAddr := RPCAddr + ":" + strconv.Itoa(RPCPort)
@@ -53,7 +54,7 @@ func TestBotDispatcherRPC(t *testing.T) {
 
 func TestFindBalance(t *testing.T) {
 	var bd BotDispatcher
-	bd.Init(RPCAddr, RPCPort, OwnerHexKey)
+	bd.Init(RPCAddr, RPCPort, OwnerHexKey, false)
 	defer bd.Kill()
 
 	bd.queues[1] = nil
@@ -75,9 +76,12 @@ func TestBotQInit(t *testing.T) {
 	botn := uint(10)
 	amount := 0.001
 	bq.Init(amount, botn)
+	defer bq.Kill()
 
 	assertEqual(t, len(bq.refill), int(botn), "incoorect initialization")
 	assertEqual(t, bq.guaranteedBalance, amount, "incorrect guarantee")
+
+	time.Sleep(3 * time.Second)
 
 }
 

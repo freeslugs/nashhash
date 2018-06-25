@@ -74,9 +74,30 @@ func (bq *BotQ) supervisor() {
 			bq.qLock.Lock()
 			if len(bq.pending) != 0 {
 
-				for i := 0; i < len(bq.pending); i++ {
-					// TODO
+				// Every Bot's current actual balance has to be checked
+				var pending []*Bot
+
+				for _, bot := range bq.pending {
+
+					bal, err := bot.Balance()
+					if err != nil {
+						log.Println(err)
+						continue
+					}
+
+					if bal >= bq.guaranteedBalance {
+						bq.ready = append(bq.ready, bot)
+					} else {
+						pending = append(pending, bot)
+					}
 				}
+
+				// Restore the bots who's payment is still pending
+				bq.pending = pending
+
+				log.Printf("INFO BotQ.supervisor %f ether: %d bots pending\n",
+					bq.guaranteedBalance,
+					len(bq.pending))
 
 			}
 			bq.qLock.Unlock()
@@ -107,7 +128,16 @@ func (bq *BotQ) Init(guaranteedBalance float64, nbots uint) error {
 	}
 
 	// Go roputine that manages the Qs
+	bq.supervisorDead = make(chan bool)
 	go bq.supervisor()
+
+	return nil
+}
+
+// Kill BotQ
+func (bq *BotQ) Kill() error {
+
+	bq.supervisorDead <- true
 
 	return nil
 }

@@ -62,7 +62,7 @@ func (bd *BotDispatcher) Dispatch(args DispatchArgs, res *DispatchReply) error {
 
 // Init initializes the BotDispatcher on ipAddr:port.
 // hexkey is the key to unlock the funding wallet
-func (bd *BotDispatcher) Init(ipAddr string, port int, hexkey string) error {
+func (bd *BotDispatcher) Init(ipAddr string, port int, hexkey string, def bool) error {
 
 	bd.bdLock.Lock()
 	defer bd.bdLock.Unlock()
@@ -77,7 +77,9 @@ func (bd *BotDispatcher) Init(ipAddr string, port int, hexkey string) error {
 
 	// Lets create the que
 	bd.queues = make(map[float64]*BotQ)
-	bd.initBotQsDefault()
+	if def {
+		bd.initBotQsDefault()
+	}
 
 	// RPC stuff
 	bd.port = port
@@ -86,33 +88,6 @@ func (bd *BotDispatcher) Init(ipAddr string, port int, hexkey string) error {
 
 	// Start the refill routine
 	go bd.refill()
-
-	// rpcs := rpc.NewServer()
-	// rpcs.Register(bd)
-
-	// // Create a TCP listener that will listen on `Port`
-	// l, e := net.Listen("tcp", ipAddr+":"+strconv.Itoa(bd.port))
-	// if e != nil {
-	// 	log.Fatal("listen error: ", e)
-	// }
-	// bd.l = l
-	// // Go routine that accepts and serves new procedure calls
-	// go func() {
-	// 	for bd.dead == false {
-	// 		conn, err := bd.l.Accept()
-	// 		if err == nil && bd.dead == false {
-	// 			log.Println("serving connection")
-	// 			go rpcs.ServeConn(conn)
-	// 		} else if err == nil {
-	// 			conn.Close()
-	// 		}
-	// 		if err != nil && bd.dead == false {
-	// 			log.Printf("ERROR BotDispatcher accept: %v\n", err.Error())
-	// 			bd.Kill()
-	// 		}
-	// 	}
-	// }()
-	// log.Printf("INFO BotDispatcher: Initialization succesful.\n")
 
 	return nil
 }
