@@ -135,3 +135,12 @@ func sendEth(key *ecdsa.PrivateKey, toAddr common.Address, value *big.Int) error
 	}
 	return nil
 }
+
+// Function converts ETH into Wei
+func toWei(amount float64) *big.Int {
+	var temp big.Float
+	var res big.Int
+	temp.Mul(big.NewFloat(1000000000000000000), big.NewFloat(amount))
+	temp.Int(&res)
+	return &res
+}

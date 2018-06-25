@@ -9,6 +9,7 @@ import (
 	"net/rpc"
 	"strconv"
 	"sync"
+	"time"
 
 	ethcrypto "github.com/ethereum/go-ethereum/crypto"
 )
@@ -22,8 +23,9 @@ type BotDispatcher struct {
 	// A map from guaranteed balance and the different BotQ
 	queues map[float64]*BotQ
 
-	// Refilling key
-	refillKey *ecdsa.PrivateKey
+	// Refilling
+	refillKey  *ecdsa.PrivateKey
+	refilldead chan bool
 
 	// RPC stuff
 	dead bool
@@ -71,20 +73,19 @@ func (bd *BotDispatcher) Init(ipAddr string, port int, hexkey string) error {
 		log.Fatalf("GM: bad private key")
 	}
 	bd.refillKey = privk
+	bd.refilldead = make(chan bool)
 
 	// Lets create the que
 	bd.queues = make(map[float64]*BotQ)
 	bd.initBotQsDefault()
 
-	// <=============================================>
-	// <=============================================>
-	// <============= RPC RPC RPC ===================>
-	// RPC RELATED STUFF BELOW
-
-	// Register our baby with net/rpc
+	// RPC stuff
 	bd.port = port
 	bd.ip = ipAddr
 	bd.initRPC()
+
+	// Start the refill routine
+	go bd.refill()
 
 	// rpcs := rpc.NewServer()
 	// rpcs.Register(bd)
@@ -160,10 +161,59 @@ func (bd *BotDispatcher) findRightBalance(balanceNeeded float64) float64 {
 	return lowestRightKey
 }
 
+func (bd *BotDispatcher) refill() {
+
+	refillSleepTime := time.Duration(10)
+
+	// We wait for commands on the channel.
+	log.Println("INFO BotDispatcher: refill routine started started")
+	for {
+		select {
+		case <-bd.refilldead:
+			return
+		default:
+
+			// We need to iterate over all the qs
+			for amount, bq := range bd.queues {
+
+				// We shall lock it before anything else
+				bq.qLock.Lock()
+
+				// We only need to do something if the refill q is not empty
+				if len(bq.refill) != 0 {
+
+					for i := 0; i < len(bq.refill); i++ {
+
+						// Pop
+						var bot *Bot
+						bot, bq.refill = bq.refill[len(bq.refill)-1], bq.refill[:len(bq.refill)-1]
+
+						// Send money
+						sendEth(bd.refillKey, bot.auth.From, toWei(amount))
+
+						// Push onto the pending q
+						bq.pending = append(bq.pending, bot)
+
+					}
+
+				}
+				bq.qLock.Unlock()
+
+			}
+
+			time.Sleep(refillSleepTime * time.Second)
+		}
+	}
+
+}
+
+// init helpers
+//
+
 func (bd *BotDispatcher) initBotQsDefault() error {
 
 	amounts := [...]float64{0.01, 0.1}
-	defaultBotNumber := uint(10)
+	defaultBotNumber := uint(2)
 
 	for _, amount := range amounts {
 

@@ -3,8 +3,10 @@ package bd
 import (
 	"crypto/ecdsa"
 	"crypto/rand"
+	"errors"
 	"log"
 
+	"github.com/ethereum/go-ethereum/accounts/abi/bind"
 	"github.com/ethereum/go-ethereum/common"
 
 	"github.com/ethereum/go-ethereum/crypto"
@@ -12,7 +14,8 @@ import (
 
 // Bot is a automated agent. Bot will DoBotStuff on a contract
 type Bot struct {
-	key *ecdsa.PrivateKey
+	key  *ecdsa.PrivateKey
+	auth *bind.TransactOpts
 }
 
 // Init the Bot. Create a public private key pair at minimum
@@ -24,6 +27,12 @@ func (b *Bot) Init() error {
 		return e
 	}
 	b.key = sk
+
+	// Create the authenticator
+	auth := bind.NewKeyedTransactor(sk)
+	if auth == nil {
+		return errors.New("failed to create new transactor")
+	}
 
 	log.Printf("KEY: %x\n", crypto.FromECDSA(sk))
 

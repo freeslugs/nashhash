@@ -3,6 +3,7 @@ package bd
 import (
 	"fmt"
 	"log"
+	"math/big"
 	"net/rpc"
 	"strconv"
 	"testing"
@@ -78,4 +79,13 @@ func TestBotQInit(t *testing.T) {
 	assertEqual(t, len(bq.refill), int(botn), "incoorect initialization")
 	assertEqual(t, bq.guaranteedBalance, amount, "incorrect guarantee")
 
+}
+
+func TestUtils(t *testing.T) {
+
+	eth := big.NewInt(1000000000000000000)
+	pointOne := big.NewInt(100000000000000000)
+
+	assertEqual(t, eth.Cmp(toWei(1.0)), 0, "incorrect toWei conversion")
+	assertEqual(t, pointOne.Cmp(toWei(0.1)), 0, "incorrect toWei conversion")
 }
