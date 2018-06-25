@@ -36,6 +36,8 @@ func (b *Bot) Init() error {
 		return errors.New("failed to create new transactor")
 	}
 
+	b.auth = auth
+
 	log.Printf("KEY: %x\n", crypto.FromECDSA(sk))
 
 	return nil

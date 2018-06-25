@@ -33,27 +33,35 @@ func (bq *BotQ) Dispatch(number uint, address string) error {
 // Refill the BotQ wiht funds. This will move funds to
 func (bq *BotQ) Refill(refillKey *ecdsa.PrivateKey) error {
 
+	multiplier := 3.0
+
 	// We shall lock it before anything else
 	bq.qLock.Lock()
 	// We only need to do something if the refill q is not empty
 	if len(bq.refill) != 0 {
 
+		var refill []*Bot
 		for i := 0; i < len(bq.refill); i++ {
 
-			// Pop
-			var bot *Bot
-			bot, bq.refill = bq.refill[len(bq.refill)-1], bq.refill[:len(bq.refill)-1]
+			//log.Println("in refill loop")
+
+			bot := bq.refill[i] //bq.refill[len(bq.refill)-1], bq.refill[:len(bq.refill)-1]
 
 			// Send money
-			e := sendEth(refillKey, bot.auth.From, toWei(bq.guaranteedBalance*3))
+			e := sendEth(refillKey, bot.auth.From, toWei(bq.guaranteedBalance*multiplier))
 			if e != nil {
+				refill = append(refill, bot)
 				log.Printf("WARNING BotQ.Refill %f ether: %s\n", bq.guaranteedBalance, e)
+
+			} else {
+				// Push onto the pending q
+				bq.pending = append(bq.pending, bot)
+				log.Printf("INFO BotQ.Refill %f ether: refill succesful 0x%x", bq.guaranteedBalance, bot.auth.From)
 			}
 
-			// Push onto the pending q
-			bq.pending = append(bq.pending, bot)
-
 		}
+
+		bq.refill = refill
 
 	}
 	bq.qLock.Unlock()

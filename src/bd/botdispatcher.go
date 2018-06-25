@@ -73,7 +73,6 @@ func (bd *BotDispatcher) Init(ipAddr string, port int, hexkey string, def bool) 
 		log.Fatalf("GM: bad private key")
 	}
 	bd.refillKey = privk
-	bd.refilldead = make(chan bool)
 
 	// Lets create the que
 	bd.queues = make(map[float64]*BotQ)
@@ -87,6 +86,7 @@ func (bd *BotDispatcher) Init(ipAddr string, port int, hexkey string, def bool) 
 	bd.initRPC()
 
 	// Start the refill routine
+	bd.refilldead = make(chan bool)
 	go bd.refill()
 
 	return nil
@@ -148,6 +148,7 @@ func (bd *BotDispatcher) refill() {
 			return
 		default:
 
+			log.Println("refilling qs")
 			// We need to iterate over all the qs
 			for _, bq := range bd.queues {
 				bq.Refill(bd.refillKey)
@@ -164,7 +165,7 @@ func (bd *BotDispatcher) refill() {
 
 func (bd *BotDispatcher) initBotQsDefault() error {
 
-	amounts := [...]float64{0.01, 0.1}
+	amounts := [...]float64{0.01}
 	defaultBotNumber := uint(2)
 
 	for _, amount := range amounts {
