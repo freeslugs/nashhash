@@ -1,3 +1,6 @@
+//go:generate abigen --sol ./../../contracts/Game.sol --pkg gm --out Game.go
+
+// Package bd gives you what you need to dispatch bots to your contracts.
 package bd
 
 import (
@@ -48,12 +51,11 @@ func (bd *BotDispatcher) Dispatch(args DispatchArgs, res *DispatchReply) error {
 	}
 	botq := bd.queues[bal]
 
+	// Step 2: Now that we have the correct BotQ we shall ask it to dispatch the bots
 	e := botq.Dispatch(args.Number, args.ContractAddress)
 	if e != nil {
 		return e
 	}
-
-	// Step 2: Now that we have the correct BotQ we shall ask it to dispatch the bots
 
 	log.Printf("INFO BotDispatcher.Dispatch: dispatching %d bots to %s, balance >= %f\n",
 		args.Number, args.ContractAddress, args.RequiredBalance)

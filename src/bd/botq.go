@@ -26,9 +26,83 @@ type BotQ struct {
 }
 
 // Dispatch sends the bots to the bots address
+// The locking here has to be careful, otherwise a serious bottleneck can arise.
 func (bq *BotQ) Dispatch(number uint, address string) error {
+
+	//// LOCK
 	bq.qLock.Lock()
-	defer bq.qLock.Unlock()
+	var wg sync.WaitGroup
+
+	// TODO: we might want to error out here?
+	botn := 0
+	if int(number) > len(bq.ready) {
+		log.Printf("WARNING BotQ.Dispatch %f ether: ready %d, need %d\n", bq.guaranteedBalance, len(bq.ready), number)
+		botn = len(bq.ready)
+	} else {
+		botn = int(number)
+	}
+
+	// Dispatch individual bots
+	toDispatch, ready := bq.ready[:botn], bq.ready[botn:len(bq.ready)]
+	bq.ready = ready
+
+	// We can unlock here because we removed
+	bq.qLock.Unlock()
+	// UNLOCK
+	//
+	//
+
+	// Dont have to lock anything here, because these bots are not going to be available
+	// to other routines as we removed them from bq.ready
+	// Dispatch the bots in parallel
+	for i := 0; i < botn; i++ {
+
+		// We send each bot in its goroutine to hopefully speedup the process
+		wg.Add(1)
+		go func(bot *Bot) {
+
+			e := bot.DoBotStuff(address)
+			if e != nil {
+				log.Printf("WARNING BotQ.Dispatch %f ether: DoBotStuff failed\n", bq.guaranteedBalance)
+			}
+			wg.Done()
+		}(toDispatch[i])
+	}
+	wg.Wait()
+
+	// Lets see if any bot is below the guaranteed balance, if so, move it into the refill Q
+	var forRefill []*Bot
+	var moreReady []*Bot
+	for i := 0; i < botn; i++ {
+
+		bot := toDispatch[i]
+
+		bal, err := bot.PendingBalance()
+		if err != nil {
+			log.Printf("WARNING BotQ.Dispatch %f ether: failed to get bot balance\n", bq.guaranteedBalance)
+			forRefill = append(forRefill, bot)
+			continue
+		}
+
+		// Some bots will be in for refill, some others will not
+		if bal < bq.guaranteedBalance {
+			forRefill = append(forRefill, bot)
+		} else {
+			// Back to ready Q
+			moreReady = append(moreReady, bot)
+		}
+
+	}
+
+	// Now we have to return the bots we borrowed into the Qs,  thus the lock
+	// LOCK
+	bq.qLock.Lock()
+	bq.refill = append(bq.refill, forRefill...)
+	bq.ready = append(bq.ready, moreReady...)
+	bq.qLock.Unlock()
+	// UNLOCK
+	//
+	//
 
 	return nil
 }
@@ -105,10 +179,6 @@ func (bq *BotQ) supervisor() {
 
 				// Restore the bots who's payment is still pending
 				bq.pending = pending
-
-				// log.Printf("INFO BotQ.supervisor %f ether: %d bots pending\n",
-				// 	bq.guaranteedBalance,
-				// 	len(bq.pending))
 
 			}
 			bq.qLock.Unlock()

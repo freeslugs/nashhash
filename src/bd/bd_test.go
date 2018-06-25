@@ -2,6 +2,7 @@ package bd
 
 import (
 	"fmt"
+	"log"
 	"math/big"
 	"testing"
 	"time"
@@ -103,5 +104,12 @@ func TestUtils(t *testing.T) {
 
 	assertEqual(t, toEth(eth), ethf, "incorrect toEth conversion")
 	assertEqual(t, toEth(pointOne), pointOnef, "incorrect toEth conversion")
+
+	temp := [...]uint{1, 2, 3}
+
+	all, nothing := temp[:3], temp[3:len(temp)]
+
+	log.Println(all)
+	log.Println(nothing)
 
 }
