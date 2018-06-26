@@ -18,11 +18,52 @@ const (
 	// BotQRefillSleepTime seconds between attempts for refill
 	BotQRefillSleepTime = 10
 
+	// The id of the Ethereum network
+	// 4 -- Rinkeby
 	NetworkID = 4
 
 	// EthClientPath is the path to the geth.ipc
-	EthClientPath = "/Users/me/Library/Ethereum/rinkeby/geth.ipc"
+	//EthClientPath = "/Users/me/Library/Ethereum/rinkeby/geth.ipc"
+	EthClientPath = "https://rinkeby.infura.io"
+
+	DisconnectOperator = 0
+	// EthClientPath is the path to the geth.ipc
+	//EthClientPath = "/Users/me/Library/Ethereum/rinkeby/geth.ipc"
+	EthClientPath = "https://rinkeby.infura.io"
+	// BotDispatcher stuff
+	NetworkID             = 4
+	MinimumBalanceInStake = 1
+	RefillAmountInStake   = 5
+	BotKeysFile           = "keys.txt"
 )
+
+type ExecuteCallArgs struct {
+	Message string
+}
+
+type ExecuteCallReply struct {
+	Response string
+}
+
+// ConnectCallArgs is a struct of arguments to the GM.Connect RPC
+type ConnectCallArgs struct {
+	ContractAddress string
+}
+
+// ConnectCallReply is the reply from GM.Connect RPC
+type ConnectCallReply struct {
+	Reply string
+}
+
+// DisconnectCallArgs is a struct of arguments to the GM.Connect RPC
+type DisconnectCallArgs struct {
+	ContractAddress string
+}
+
+// DisconnectCallReply is the reply from GM.Disconnect RPC
+type DisconnectCallReply struct {
+	Reply string
+}
 
 // DispatchArgs is the argument to the BotDispatcher.Dispatch rpc call
 type DispatchArgs struct {
@@ -68,6 +109,28 @@ func harvestAccount(key *ecdsa.PrivateKey, ownerAddr common.Address) error {
 		}
 	}
 
+	return nil
+}
+
+// Helper function that harvests balances
+func harvestAccounts(keys []*ecdsa.PrivateKey, ownerAddr common.Address) error {
+
+	for _, privk := range keys {
+
+		err := sendEth(privk, ownerAddr, nil)
+		if err == nil {
+			continue
+		}
+
+		// If we fail for some reason,
+		for attempt := 0; attempt < 5; attempt++ {
+			log.Println("WARNING harvestAccounts: retrying the harvest")
+			err := sendEth(privk, ownerAddr, nil)
+			if err == nil {
+				break
+			}
+		}
+	}
 	return nil
 }
 

@@ -4,6 +4,8 @@ import (
 	"fmt"
 	"log"
 	"math/big"
+	"net/rpc"
+	"strconv"
 	"testing"
 	"time"
 
@@ -12,7 +14,7 @@ import (
 
 const (
 	GameContract    = "0x8bcd426baa7a24e590a9cc65de7a273257163c35"
-	OwnerHexKey     = "76a23cff887b294bb60ccde7ad1eb800f0f6ede70d33b154a53eadb20681a4e3"
+	OwnerHexKey     = "4a6fd76e5dd2980266a241e23911a6b5870671d3475ed28a04eeadedc7082b6a"
 	OwnerAddr       = "0x537CA571AEe8116575E8d7a79740c70f685EC856"
 	RequiredBalance = 0.2
 	RPCPort         = 57543
@@ -39,7 +41,7 @@ func assertNotEqual(t *testing.T, a interface{}, b interface{}, message string) 
 	t.Fatal(message)
 }
 
-func TestBotDispatcherRPC(t *testing.T) {
+func TestBotDispatcherInit(t *testing.T) {
 	var bd BotDispatcher
 	bd.Init(RPCAddr, RPCPort, OwnerHexKey, true)
 
@@ -88,6 +90,29 @@ func TestBotQInit(t *testing.T) {
 	assertEqual(t, bq.guaranteedBalance, amount, "incorrect guarantee")
 
 	time.Sleep(3 * time.Second)
+
+}
+
+func TestBotDispatch(t *testing.T) {
+
+	var bd BotDispatcher
+	bd.Init(RPCAddr, RPCPort, OwnerHexKey, true)
+	time.Sleep(60 * time.Second)
+
+	bdAddr := RPCAddr + ":" + strconv.Itoa(RPCPort)
+	c, err := rpc.Dial("tcp", bdAddr)
+	if err != nil {
+		log.Fatal(err)
+	}
+
+	args1 := DispatchArgs{ContractAddress: "0x1", RequiredBalance: 0.01, Number: 1}
+	//args2 := DispatchArgs{ContractAddress: "0x1", RequiredBalance: 0.01, Number: 2}
+	reply := &DispatchReply{}
+
+	e := call(c, "BotDispatcher.Dispatch", args1, reply)
+	if e != nil {
+		log.Fatalln(e)
+	}
 
 }
 

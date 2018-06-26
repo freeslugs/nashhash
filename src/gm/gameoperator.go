@@ -152,8 +152,8 @@ func (gop *GameOperator) operate() error {
 
 			// We can que bots, initiate a transition or do nothing
 			if header.Number.Int64() > botDeadline && header.Number.Int64() <= transitionDeadline {
-				log.Printf("INFO GameOperator %s: adding bots\n", gop.contractAddress)
-				go gop.bd.Dispatch(3)
+				log.Printf("INFO GameOperator %s: supposeed to add bots but not doing such thing\n", gop.contractAddress)
+				//go gop.bd.Dispatch(3)
 			} else if header.Number.Int64() > transitionDeadline {
 				tx, txerr := game.ForceToRevealState(auth)
 				if txerr != nil {

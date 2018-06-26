@@ -20,8 +20,8 @@ const (
 	// DisconnectOperator command to stop a game
 	DisconnectOperator = 0
 	// EthClientPath is the path to the geth.ipc
-	EthClientPath = "/Users/me/Library/Ethereum/rinkeby/geth.ipc"
-
+	//EthClientPath = "/Users/me/Library/Ethereum/rinkeby/geth.ipc"
+	EthClientPath = "https://rinkeby.infura.io"
 	// BotDispatcher stuff
 	NetworkID             = 4
 	MinimumBalanceInStake = 1

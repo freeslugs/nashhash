@@ -1,6 +1,7 @@
 package gm
 
 import (
+	"bd"
 	"context"
 	"crypto/ecdsa"
 	"fmt"
@@ -22,6 +23,12 @@ const (
 	OwnerHexKey             = "76a23cff887b294bb60ccde7ad1eb800f0f6ede70d33b154a53eadb20681a4e3"
 	OwnerAddr               = "0x537CA571AEe8116575E8d7a79740c70f685EC856"
 	StakeSize               = 10000000000000000 // 0.01 ETH
+
+	DispatcherHexKey = "4a6fd76e5dd2980266a241e23911a6b5870671d3475ed28a04eeadedc7082b6a"
+	DispatcherAddr   = "0xa8dAAD283Ca538a3F27371a6f944a4Fa66025957"
+
+	RPCPort = 57543
+	RPCAddr = "127.0.0.1"
 )
 
 func assertEqual(t *testing.T, a interface{}, b interface{}, message string) {
@@ -641,5 +648,49 @@ func TestEthereumGM(t *testing.T) {
 	}
 
 	time.Sleep(3 * time.Minute)
+
+}
+
+func TestDispatch(t *testing.T) {
+
+	var gm GM
+	gm.Init("", 11112, OwnerHexKey, false)
+	defer gm.Kill()
+	gmAddr := ":" + strconv.Itoa(11112)
+
+	var bd bd.BotDispatcher
+	bd.Init(RPCAddr, RPCPort, DispatcherHexKey, true)
+
+	var clerk Clerk
+	clerk.Init(gmAddr)
+	defer clerk.Kill()
+
+	// Create an IPC based RPC connection to a remote node
+	conn, err := ethclient.Dial(EthClientPath)
+	if err != nil {
+		log.Fatalf("Failed to connect to the Ethereum client: %v", err)
+	}
+	// Instantiate the contract and display its name
+	game, err := NewGame(common.HexToAddress(GameContract), conn)
+	if err != nil {
+		log.Fatalf("Failed to instantiate a Game contract: %v", err)
+	}
+
+	// Reset the game
+	_, txerr := game.ResetGame(gm.auth)
+	assertEqual(t, txerr, nil, "error")
+
+	time.Sleep(60 * time.Second)
+
+	// Lets ask for a dispatch
+	args1 := bd.DispatchArgs{ContractAddress: GameContract, RequiredBalance: 0.01, Number: 2}
+	reply := &bd.DispatchReply{}
+
+	e := call(c, "BotDispatcher.Dispatch", args1, reply)
+	if e != nil {
+		log.Fatalln(e)
+	}
+
+	time.Sleep(5 * time.Minute)
 
 }
