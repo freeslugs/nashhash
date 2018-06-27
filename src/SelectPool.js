@@ -1,51 +1,11 @@
 // @flow
 import React, { Component } from 'react'
 import { Link } from "react-router-dom";
-import { Icon, Step, Button, Container, Header, Menu, Card } from 'semantic-ui-react'
-import styled from 'styled-components';
-  
-const Wrapper = styled.div`
-  display: flex;
-  flex-direction: column;
-  justify-content: center;
-  align-items: center;
-
-  h1.ui.header {
-    margin-top: 1em;
-    font-size: 2.7em;
-    font-weight: normal;
-    text-align: center;
-  }
-
-  h2.ui.header {
-    font-size: 1.7em;
-    margin-top: 1.5em;
-    font-weight: normal;
-    text-align: center;
-  }
-`;
-
-const Games = styled.div`
-  h2.ui.header {
-    font-style: italic;
-    font-size: 2em;
-    margin-top: 3em;
-    margin-bottom: 1.5em;
-    font-weight: normal;
-    text-align: center;
-  }
-
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  .ui.three.cards { 
-    min-width: 700px;
-  }
-
-  .ui.cards>.card>.content>.header:not(.ui) {
-    font-size: 2em;
-  }
-`;
+import { Icon, Step, Container, Header, Menu, Card } from 'semantic-ui-react'
+import { Well, Grid, Row, Col, FormGroup, FormControl, Button, ButtonToolbar, ToggleButton, ToggleButtonGroup } from 'react-bootstrap'
+import styled from 'styled-components' 
+import testLogo from './img/group.svg'
+import "./CommitForm.css"
 
 function gametitle(gtyp) {
   if(gtyp == "TwoThirds"){
@@ -65,34 +25,87 @@ function gameinfo(gtyp) {
   }
 }
 
-const SelectPool = ({setParentState, gameType, history}) => <Wrapper>
-  <Header as='h1'>{gametitle(gameType)}</Header>      
-  <Header as='h2'>{gameinfo(gameType)}</Header>      
+const SelectPool = ({setParentState, gameType, history}) => <div className="wrapper">
+{/*  <Header as='h1'>{gametitle(gameType)}</Header>      
+  <Header as='h2'>{gameinfo(gameType)}</Header>   */}    
 
-  <Step.Group unstackable>
-    <Step>
-      <Icon name='sign in' color='orange'/>
-      <Step.Content>
-        <Step.Title>Commit</Step.Title>
-        <Step.Description>Everyone submits a guess.</Step.Description>
-      </Step.Content>
-    </Step>
-    <Step>
-      <Icon name='unlock' color='purple' />
-      <Step.Content>
-        <Step.Title>Reveal</Step.Title>
-        <Step.Description>Everyone reveals their guess.</Step.Description>
-      </Step.Content>
-    </Step>
-    <Step>
-      <Icon name='child' color='green' />
-      <Step.Content>
-        <Step.Title>Payout</Step.Title>
-        <Step.Description>Find out who won!</Step.Description>
-      </Step.Content>
-    </Step>
-  </Step.Group>
+  <Grid className="game-info-grid">
+    <Col xs={12} sm={12} md={4}>
+      <Well bsClass="game-drawing-card">
+        <img src={testLogo} className="two-thirds-logo"/>
+      </Well>
+    </Col>
+    <Col xs={12} sm={12} md={8}>
+      <Well bsClass="game-info-card">
+        <h1>2/3 Average</h1>
+        <p>Select a number between 0-100 with the intention of guessing 2/3 of the average guess. </p>
+        <p>The winner receives the total prize pool (10 * game stake) minus a 5% platform commissio</p>
+        <p> Example:
+            The sum of the 10 players’ guesses is 653 
+            The average guess is therefore 650/10, 65
+            2/3 of the average guess is 65*2/3, 43.29
+            The winner is the person who guessed closest to 43.29
+        </p>
+      </Well>
+    </Col>
+  </Grid>
+  <form>
+    <FormGroup controlId="submit-commit-form">
+    <Well className="game-options">
+      <Grid>
+        <Row className="pick-number">
+          <Col className="pick-number-info" xs={12} sm={12} md={6}>
+            <Well className="number-info-card">
+              <h1>Pick a number from 1-100</h1>
+            </Well>
+          </Col>
+          <Col className="pick-number-entry" xs={12} sm={12} md={6}>
+            <Well className="number-entry-card">
+                <FormGroup controlId="number-entry-field">
+                  <FormControl
+                    type="text"
+                    placeholder="Enter guess"
+                  />
+                </FormGroup>
+            </Well>
+          </Col>
+        </Row>
+        <Row className="pick-stake">
+          <Col className="pick-stake-info" xs={12} sm={12} md={6}>
+            <Well className="stake-info-card">
+              <h1>Choose your stakes</h1>
+            </Well> 
+          </Col>
+          <Col className="pick-stake-entry" xs={12} sm={12} md={6}>
+            <Well className="stake-entry-card">
+              <ButtonToolbar>
+                <ToggleButtonGroup type="radio" name="options" defaultValue={1}>
+                  <ToggleButton className="stake-button" value={1}>0.01 ETH</ToggleButton>
+                  <ToggleButton className="stake-button" value={2}>0.1 ETH</ToggleButton>
+                  <ToggleButton className="stake-button" value={3}>1 ETH</ToggleButton>
+                </ToggleButtonGroup>
+              </ButtonToolbar>
+              {/*
+              <Button className="stake-button" type="radio">0.01 ETH</Button>
+              <Button className="stake-button" type="radio">0.1 ETH</Button>
+              <Button className="stake-button" type="radio">1 ETH</Button>
+            */}
+            </Well>
+          </Col>
+        </Row>
+      </Grid>
+    </Well>
 
+    <div className="submit-container">
+      <Button type="submit">Submit Guess</Button>
+      <p>You’ll see a MetaMask pop-up asking to approve a 
+      transaction for this amount, plus gas costs. Submit to 
+      send your bet to the blockchain.</p>
+    </div>
+    </FormGroup>
+  </form>
+
+{/*
   <Games>
     <Header as='h2'>Select your stake.</Header>  
 
@@ -119,6 +132,7 @@ const SelectPool = ({setParentState, gameType, history}) => <Wrapper>
       </Card>      
     </Card.Group>
   </Games>
-</Wrapper>
+*/}
+</div>
 
 export default SelectPool;
