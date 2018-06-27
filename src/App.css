@@ -8,27 +8,35 @@
 
 /* This is navbar at top */
 .navbar-inverse {
-  width: 1440px;
+  width: 100%;
   height: 136px;
   background-color: #5097a4 !important;
+  margin-bottom: 0px;
+  margin-top: 0px;
+  border: 1px dashed;
 }
 
+
+/* This is the logo */
 .navbar-inverse .navbar-brand {
   color: #ffffff;
   font-family: Bebas;
-  font-size: 40px;
-  text-align: center;
+  font-size: 30px;
 }
 
-.navbar-inverse .navbar-nav>li>a {
+/* These are the elements on the top right */
+.navbar-inverse .navbar-nav > li > a {
   font-family: Avenir Next;
-  font-size: 24px;
+  font-size: 18px;
   font-weight: bold;
-  text-align: center;
   color: #ffffff;
 }
 
 /*This is footer */
-.navbar-default { 
+.navbar-default {
     background-color: #ffffff;
+    font-family: Avenir Next;
+    font-weight: 600;
+    font-size: 18px;
+    border: 0px;
 }

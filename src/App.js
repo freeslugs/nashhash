@@ -42,7 +42,7 @@ class App extends Component<props> {
     gameaddresses: null
   }
 
-  async componentDidMount() { 
+  async componentDidMount() {
     const results = await getWeb3;
     const web3 = results.web3;
     this.setState({ web3 })
@@ -73,8 +73,8 @@ class App extends Component<props> {
       return false
     }
     if(network === "private") { // localhost:9545
-      //instance = await Game.deployed(); 
-      instance = await GameRegistryContract.deployed(); 
+      //instance = await Game.deployed();
+      instance = await GameRegistryContract.deployed();
       addresses = await instance.getGameAdresses();
       toast('Configured with local network. Success!', {
         position: "top-right",
@@ -85,7 +85,7 @@ class App extends Component<props> {
         draggablePercent: 0
       })
     } else if(network === "rinkeby") {
-      //instance = Game.at("0xec9a2508a775d34d49625a860829f5733fbd4bc6") 
+      //instance = Game.at("0xec9a2508a775d34d49625a860829f5733fbd4bc6")
       instance = await GameRegistryContract.deployed();
       toast('Configured with Rinkeby network. Success!', {
         position: "top-right",
@@ -95,7 +95,7 @@ class App extends Component<props> {
         draggable: false,
         draggablePercent: 0
       })
-    } else {  
+    } else {
       toast.error('Make sure Metamask is set to Rinkeby.', {
         position: "top-right",
         autoClose: false,
@@ -131,6 +131,7 @@ class App extends Component<props> {
         <div className="fullpage">
           <ToastContainer />
           <div className="fullcontainer">
+
             <Navbar inverse collapseOnSelect>
               <Navbar.Header>
                 <Navbar.Brand>
@@ -149,7 +150,8 @@ class App extends Component<props> {
                 </Nav>
               </Navbar.Collapse>
             </Navbar>
-        
+            
+
             <Route exact path="/" render={(props) => ( <Landing {...props} {...this.state} /> )} />
             <Route path="/games/two-thirds" render={(props) => ( <Game GameType={"TwoThirds"} {...props} {...this.state} /> )} />
             <Route path="/games/lowest-unique" render={(props) => ( <Game GameType={"LowestUnique"} {...props} {...this.state} /> )} />
@@ -173,10 +175,10 @@ class App extends Component<props> {
                   <NavItem eventKey={2} href="#">
                     Twitter
                   </NavItem>
-                  <NavItem eventKey={2} href="#">
+                  <NavItem eventKey={3} href="#">
                     GitHub
                   </NavItem>
-                  <NavItem eventKey={2} href="#">
+                  <NavItem eventKey={4} href="#">
                     Made with __ in NYC
                   </NavItem>
                 </Nav>
