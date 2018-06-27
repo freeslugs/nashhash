@@ -6,11 +6,14 @@ import getWeb3 from './utils/getWeb3';
 import Landing from './Landing'
 import Game from './Game'
 
-import { Button, Container, Header, Menu, Card, Divider, Icon } from 'semantic-ui-react'
+import { Button, Container, Header, Card, Divider, Icon } from 'semantic-ui-react'
+import { Navbar, Nav, NavItem, MenuItem, NavDropdown } from 'react-bootstrap'
 import styled from 'styled-components';
 
 import { ToastContainer, toast } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
+
+import "./App.css"
 
 import API from './api/Game.js'
 
@@ -20,20 +23,14 @@ const GameABI = require('./contracts/Game.json');
 const GameRegistryABI = require('./contracts/GameRegistry.json')
 const contract = require('truffle-contract');
 
-const Logo = styled(Menu.Item)`
+/* const Logo = styled(Menu.Item)`
   font-family: 'Lobster Two', cursive;
   font-size: 2rem;
   padding-bottom: 12px !important;
 `;
+*/
 
 const activeItem = 'home'
-
-const FullPage = styled.div`
-  height: 100%;
-  min-height: 100vh;
-  width: 100%;
-  padding: 3em 0;
-`;
 
 type props = {};
 
@@ -131,17 +128,27 @@ class App extends Component<props> {
   render() {
     return (
       <Router>
-        <FullPage>
+        <div className="fullpage">
           <ToastContainer />
-          <Container>
-            <Menu pointing secondary>
-              <Logo name='NashHash' as={Link} to="/" />
-              <Menu.Menu position='right'>
-                <Menu.Item name='FAQ' active={activeItem === 'FAQ'} as={Link} to="/games/two-thirds/payout" />
-                <Menu.Item name='friends' active={activeItem === 'friends'} />
-                <Menu.Item name='logout' onClick={this.resetGame} active={activeItem === 'logout'} />
-              </Menu.Menu>
-            </Menu>
+          <div className="fullcontainer">
+            <Navbar inverse collapseOnSelect>
+              <Navbar.Header>
+                <Navbar.Brand>
+                  <a href="#brand">Nashhash</a>
+                </Navbar.Brand>
+                <Navbar.Toggle />
+              </Navbar.Header>
+              <Navbar.Collapse>
+                <Nav pullRight>
+                  <NavItem eventKey={1} href="#">
+                    FAQ
+                  </NavItem>
+                  <NavItem eventKey={2} href="#">
+                    Wallet
+                  </NavItem>
+                </Nav>
+              </Navbar.Collapse>
+            </Navbar>
         
             <Route exact path="/" render={(props) => ( <Landing {...props} {...this.state} /> )} />
             <Route path="/games/two-thirds" render={(props) => ( <Game GameType={"TwoThirds"} {...props} {...this.state} /> )} />
@@ -149,20 +156,35 @@ class App extends Component<props> {
 
             <Divider section />
             <div>
-              <p>Nash Hash</p>
-              <div onClick={() => window.open("http://google.com", "_new") }>  
-                <Icon link size='large' name='telegram plane'  />
-              </div>
-              <div onClick={() => window.open("http://google.com", "_new") }>  
-                <Icon link size='large' name='twitter'  />
-              </div>
-              <div onClick={() => window.open("http://google.com", "_new") }>  
-                <Icon link size='large' name='mail'  />
-              </div>
-
+            <Navbar collapseOnSelect>
+              <Navbar.Collapse>
+                <Nav>
+                  <NavItem eventKey={1} href="#">
+                    Privacy Policy
+                  </NavItem>
+                  <NavItem eventKey={2} href="#">
+                    Terms of Use
+                  </NavItem>
+                </Nav>
+                <Nav pullRight>
+                  <NavItem eventKey={1} href="#">
+                    Telegram
+                  </NavItem>
+                  <NavItem eventKey={2} href="#">
+                    Twitter
+                  </NavItem>
+                  <NavItem eventKey={2} href="#">
+                    GitHub
+                  </NavItem>
+                  <NavItem eventKey={2} href="#">
+                    Made with __ in NYC
+                  </NavItem>
+                </Nav>
+              </Navbar.Collapse>
+            </Navbar>
             </div>
-          </Container>
-        </FullPage>
+          </div>
+        </div>
       </Router>
     );
   }

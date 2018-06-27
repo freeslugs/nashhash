@@ -1,90 +1,93 @@
 // @flow
 import React, { Component } from 'react'
 import { Link } from "react-router-dom";
-import { Button, Container, Header, Menu, Card } from 'semantic-ui-react'
+import { LinkContainer } from "react-router-bootstrap"
+import { Container, Header, Menu, Card } from 'semantic-ui-react'
 import styled from 'styled-components';
+import { Well, Button, Grid, Row, Col } from 'react-bootstrap'
 import './Landing.css'
+import fairLogo from './img/group.svg'
 
-const Banner = styled(Container)`
-  h1.ui.header {
-    margin-top: 3em;
-    margin-bottom: 0;
-    font-size: 3em;
-    font-weight: normal;
-    text-align: center;
-  }
-
-  h2.ui.header {
-    font-size: 1.7em;
-    margin-top: 1.5em;
-    font-weight: normal;
-    text-align: center;
-  }
-`;
-
-const Games = styled.div`
-  h2.ui.header {
-    font-style: italic;
-    font-size: 2em;
-    margin-top: 3em;
-    margin-bottom: 1.5em;
-    font-weight: normal;
-    text-align: center;
-  }
-
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-`;
-
-const MoreComingSoon = styled(Card)`
-  .content {
-    display: flex;
-    align-items: center;
-    justify-content: center;
-  }
-  background: repeating-linear-gradient(
-    -55deg,
-    #ffffff,
-    #ffffff 10px,
-    #E0E1E2 10px,
-    #E0E1E2 20px
-  ) !important;
-`;
+import styles from './test.css';
 
 const Landing = () => <div>
-  <Banner>
+  <div class="banner">
     <Header as='h1'>Game theory Games on Ethereum</Header>      
     <Header as='h2'>If we asked them what they wanted, they would have said more interns.</Header>      
-  </Banner>
+  </div>
+  <div class="games">
+    <Header as='h2'>Play now!</Header>   
+    <div class="cardcontainer">
+     
+      <Well bsClass="card">  
+        <div class="cardcontent">
+          <h1>2/3 Average</h1>
+          <h3>10 player game</h3>
+          <h3>Select a number between 0-100 with the intention of guessing 2/3 of the average guess.</h3>
+          <LinkContainer to="/games/two-thirds">
+            <Button bsClass="play">Play Game</Button>
+          </LinkContainer>
+        </div>
+      </Well>
 
-  <Games>
-    <Header as='h2'>Play now!</Header>  
-
-    <Card.Group itemsPerRow={4}>
-      <Card color='blue' as={Link} to="/games/two-thirds">  
-        <Card.Content>
-          <Card.Header>2/3 Average</Card.Header>
-          <Card.Meta>10 player game</Card.Meta>
-          <Card.Description>Select a number between 0-100 with the intention of guessing 2/3 of the average guess.</Card.Description>
-        </Card.Content>
-      </Card>
-
-      <Card color='green' as={Link} to="/games/lowest-unique">
-        <Card.Content>
-          <Card.Header>Lowest Unique Number</Card.Header>
-          <Card.Meta>10 player game</Card.Meta>
-          <Card.Description>Choose the lowest number that no one else has picked.</Card.Description>
-        </Card.Content>
-      </Card>
-
-      <MoreComingSoon color='red' className="invalid">
-        <Card.Content>
-          <Card.Header>More coming soon</Card.Header>
-        </Card.Content>
-      </MoreComingSoon>
-    </Card.Group>
-  </Games>
+      <Well bsClass="card">
+        <div class="cardcontent">
+          <h1>Lowest Unique Number</h1>
+          <h3>10 player game</h3>
+          <h3>Choose the lowest number that no one else has picked.</h3>
+          <LinkContainer to="/potato">
+            <Button bsClass="play">Play Game</Button>
+          </LinkContainer>
+        </div>
+      </Well>
+    </div>
+  </div>
+  <br/>
+  <br/>
+  <br/>
+  <div>
+  <Grid>
+    <Row className="show-grid">
+      <Col sm={6} md={5}>
+        <Well bsClass=".facts-drawing-card">
+        <img src={fairLogo} bsClass="faq-logos"/>
+        </Well>
+      </Col>
+      <Col sm={6} md={5}>
+        <Well bsClass="facts-card">
+        <h1>Provably Fair Games</h1>
+        <h2>Open source game mechanics for all to look at.</h2>
+        </Well>
+      </Col>
+    </Row>
+    <Row className="show-grid">
+      <Col sm={6} md={5}>
+        <Well bsClass="facts-card">
+        <h1>User Funds Safe</h1>
+        <h2>No third party custody of user assets. Winners are paid automatically.</h2>
+        </Well>
+      </Col>
+       <Col sm={6} md={5}>
+        <Well bsClass=".facts-drawing-card">
+        <img src={fairLogo} bsClass="faq-logos"/>
+        </Well>
+      </Col>
+    </Row>
+    <Row className="show-grid">
+      <Col sm={6} md={5}>
+        <Well bsClass=".facts-drawing-card">
+        <img src={fairLogo} bsClass="faq-logos"/>
+        </Well>
+      </Col>
+      <Col sm={6} md={5}>
+        <Well bsClass="facts-card">
+        <h1>Win NashPoints</h1>
+        <h2>All players receive NPS, with top 100 NPS holders entered into a weekly prize pool.</h2>
+        </Well>
+      </Col>
+    </Row>
+  </Grid>
+  </div>
 </div>
 
 export default Landing;
