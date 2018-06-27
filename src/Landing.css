@@ -1,6 +1,6 @@
 .banner {
 	background-color: #5097a4;
-	padding-bottom: 100px;
+	padding-bottom: 150px;
 
 }
 
@@ -38,6 +38,7 @@ background-image: linear-gradient(top, #5097a4 50%, #FFFFFF 50%);
 border: 4px dashed red;
 
 
+
 }
 
 .individual-card-container {
@@ -45,24 +46,42 @@ border: 4px dashed red;
 	display: flex;
 	justify-content: center;
 
+
 }
 
 
 .card {
 	background-color: #FFFFFF;
-	height: 400px;
+	height: 420px;
 	width: 320px;
 	border-radius: 50px;
 	box-shadow: 5px 10px 10px 5px rgba(194, 194, 194, 0.5);
 	justify-content: center !important;
 	align-items: center !important;
 	text-align: center;
-	padding: 5%;
+	padding: 0% 5% 5%;
 	display: flex;
+
+
 	flex-direction: column;
 }
 
+.card .gradient-rectangle {
+	width: 320px;
+	height: 110px;
+	margin-bottom: auto;
+	z-index: 0;
+	clip-path: inset(0 0 65px 0 round 0 0);
+	border-radius: 50px;
+  background-image: linear-gradient(to left, rgba(80, 151, 164, 0.5), rgba(87, 117, 169, 0.5));
+}
 
+.card-logo {
+	background-color: black;
+	width: 100px;
+	height: 100px;
+	z-index: 1;
+}
 
 .card h1 {
 
@@ -71,6 +90,7 @@ border: 4px dashed red;
 	font-weight: bold;
 	color: #000000 !important;
 	align-self: center;
+	margin: 0px;
 }
 
 .card h3 {
@@ -92,6 +112,22 @@ border: 4px dashed red;
 	font-size: 24px;
 	text-align: center;
 	color: #ffffff;
+}
+
+.more-games-coming {
+	font-family: Avenir Next;
+  font-size: 18px;
+  font-weight: 400;
+  text-align: center;
+  color: #a2a2a2;
+	border: 1px dotted green;
+	margin-top: 50px;
+}
+
+.list-group {
+	width: 50vw;
+	
+	margin: auto;
 }
 
 .value-props-row {

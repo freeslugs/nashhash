@@ -4,7 +4,7 @@ import { Link } from "react-router-dom";
 import { LinkContainer } from "react-router-bootstrap"
 
 import styled from 'styled-components';
-import { Well, Button, Grid, Row, Col } from 'react-bootstrap'
+import { Well, ListGroup, ListGroupItem, Button, Grid, Row, Col } from 'react-bootstrap'
 import './Landing.css'
 import fairLogo from './img/group.svg'
 
@@ -22,6 +22,8 @@ const Landing = () => <div>
 
       <Col className="individual-card-container" xs={12} md={6}>
           <Well bsClass="card">
+            <div className="gradient-rectangle">
+            </div>
 
              <h1>2/3 Average</h1>
              <h3>10 player game </h3>
@@ -34,6 +36,10 @@ const Landing = () => <div>
 
       <Col className="individual-card-container" xs={12} md={6}>
            <Well bsClass="card">
+           <div className="gradient-rectangle">
+           </div>
+           <div className="card-logo">
+           </div>
 
                <h1>Lowest Unique Number</h1>
                <h3>10 player game</h3>
@@ -49,7 +55,14 @@ const Landing = () => <div>
  </Grid>
 
 
+ <p className="more-games-coming"> More exciting games in progress! </p>
 
+
+ <ListGroup>
+   <ListGroupItem>Item 1</ListGroupItem>
+   <ListGroupItem>Item 2</ListGroupItem>
+   <ListGroupItem>...</ListGroupItem>
+ </ListGroup>
 
   <div>
   <Grid className="value-props">
