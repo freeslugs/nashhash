@@ -658,7 +658,7 @@ func TestDispatch(t *testing.T) {
 	defer gm.Kill()
 	gmAddr := ":" + strconv.Itoa(11112)
 
-	var bd bd.BotDispatcher
+	var bdd bd.BotDispatcher
 	bd.Init(RPCAddr, RPCPort, DispatcherHexKey, true)
 
 	var clerk Clerk

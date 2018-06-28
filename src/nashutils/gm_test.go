@@ -682,6 +682,11 @@ func TestDispatch(t *testing.T) {
 
 	time.Sleep(60 * time.Second)
 
+	// Connect the game, start the operator
+	clerk.ConnectGame(GameContract)
+
+	time.Sleep(60 * time.Second)
+
 	bdAddr := RPCAddr + ":" + strconv.Itoa(RPCPort)
 	c, err := rpc.Dial("tcp", bdAddr)
 	if err != nil {

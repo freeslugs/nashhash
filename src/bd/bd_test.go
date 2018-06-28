@@ -15,7 +15,7 @@ import (
 const (
 	GameContract    = "0x8bcd426baa7a24e590a9cc65de7a273257163c35"
 	OwnerHexKey     = "4a6fd76e5dd2980266a241e23911a6b5870671d3475ed28a04eeadedc7082b6a"
-	OwnerAddr       = "0x537CA571AEe8116575E8d7a79740c70f685EC856"
+	OwnerAddr       = "0xa8dAAD283Ca538a3F27371a6f944a4Fa66025957"
 	RequiredBalance = 0.2
 	RPCPort         = 57543
 	RPCAddr         = "127.0.0.1"

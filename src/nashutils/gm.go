@@ -24,8 +24,10 @@ type GM struct {
 	// Ethereum stuff
 	auth     *bind.TransactOpts
 	authLock sync.Mutex
+	key      *ecdsa.PrivateKey
 
-	key *ecdsa.PrivateKey
+	// Bot dispatcher
+	bd *BotDispatcher
 
 	// debug mode
 	debug bool

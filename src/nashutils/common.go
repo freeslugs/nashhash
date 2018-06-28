@@ -31,6 +31,10 @@ const (
 	MinimumBalanceInStake = 1
 	RefillAmountInStake   = 5
 	BotKeysFile           = "keys.txt"
+
+	// These are the ports the GM and BotDispatcher listen on
+	GMPort = 54301
+	BDPort = 54302
 )
 
 type ExecuteCallArgs struct {
