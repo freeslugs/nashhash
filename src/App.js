@@ -179,7 +179,7 @@ class App extends Component<props> {
                     GitHub
                   </NavItem>
                   <NavItem eventKey={4} href="#">
-                    Made with __ in NYC
+                    Made with ♥ in NYC
                   </NavItem>
                 </Nav>
               </Navbar.Collapse>

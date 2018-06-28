@@ -85,11 +85,6 @@ const SelectPool = ({setParentState, gameType, history}) => <div className="wrap
                   <ToggleButton className="stake-button" value={3}>1 ETH</ToggleButton>
                 </ToggleButtonGroup>
               </ButtonToolbar>
-              {/*
-              <Button className="stake-button" type="radio">0.01 ETH</Button>
-              <Button className="stake-button" type="radio">0.1 ETH</Button>
-              <Button className="stake-button" type="radio">1 ETH</Button>
-            */}
             </Well>
           </Col>
         </Row>

@@ -1,0 +1,25 @@
+.payout-page > h2{
+	font-family: Avenir Next;
+	font-size: 36px;
+	font-weight: bold;
+	text-align: center;
+	color: #000000;
+}
+
+.colored-num {
+  color: #5097a4;
+}
+
+.play-again {
+	width: 268px;
+	height: 58px;
+	border-radius: 42px;
+	background-color: #5775a9;
+	box-shadow: 0 3px 10px 0 rgba(135, 135, 135, 0.5);
+
+	font-family: Avenir Next;
+	font-size: 24px;
+	font-weight: bold;
+	text-align: center;
+	color: #ffffff;
+}

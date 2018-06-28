@@ -1,14 +1,27 @@
 // @flow
 import React, { Component } from 'react'
 import { Route, Link } from "react-router-dom";
-import { Button, Header, Checkbox, Form } from 'semantic-ui-react'
+import { Button } from 'react-bootstrap';
+
+import "./PayoutPage.css"
 
 type props = {};
+
+function PayoutMessage(props) {
+  console.log(props.yournum);
+  if(props.diff > 0){
+    return <h2>Congratulations! You won. ETH! Why don't you keep your streak going and play again?</h2>;
+  } else {
+    return <h2>Your number was <span className="colored-num">{props.yourNum}</span>, unfortunately you didn't win. Better luck next time.</h2>;
+  }
+}
 
 class PayoutPage extends Component<props> {
 
   state = {
-    text: "loading..."
+    winningnumber: "50",
+    yournum: "0",
+    diff: "0"
   }
   
   componentDidMount = async () => {
@@ -23,48 +36,16 @@ class PayoutPage extends Component<props> {
     const balance = await web3.eth.getBalance(account);
     console.log('balance : ' + balance)
 
-    const diff = (this.props.balance - balance) / 1000000000000000000;
-
-    // this.setState({text: `diff: ${diff}`})
-
-    if(diff > 0) {
-      this.setState({text: `Congrats, you won ${diff} ETH!`})
-    } else {
-      this.setState({text: `You lost.`});
-    }
-
-    // console.log(web3)
-
-    // console.log(game.num_last_winners)
-
-    // var prize = await game.get_();
-    // console.log('prize: ' + prize);
-
-
-    // // var prize = await game.last_prize();
-    // // console.log('prize: ' + prize);
-
-    // console.log(game)
-
-    // var number_of_winners = await game.num_last_winners();
-    // for (var i = 0; i < number_of_winners; i++){
-    //   var winner = await game.last_winners(i);
-    //   // if(winner == account){
-    //   //   var prize = await game.last_prize();
-    //   //   this.setState({text: `congrats, you won ${prize} ETH!`})
-    //   // }
-
-
-    //   console.log("winner: " + winner)
-    // }
-
+    const temp_diff = (this.props.balance - balance) / 1000000000000000000;
+    this.setState({diff: temp_diff});
   }
 
   render() {
     return (
-      <div>
-        <Header as='h2'>{this.state.text}</Header>      
-        {/*<Button onClick={() => this.props.history.push('/games/two-thirds/payout') }type='submit'>Reveal</Button>*/}
+      <div className="payout-page">
+        <h2>The winning number was...<span className="colored-num">{this.state.winningnumber}</span>!</h2>
+        <PayoutMessage diff={this.state.diff} yourNum={this.state.yournum}/>      
+        <Button className="play-again" onClick={() => this.props.history.push('/games/two-thirds/') }type='submit'>Play Again</Button>
       </div>
     )
   }
