@@ -1,5 +1,5 @@
 //go:generate abigen --sol ./../../contracts/Game.sol --pkg gm --out Game.go
-package gm
+package nashutils
 
 import (
 	"crypto/ecdsa"
@@ -24,8 +24,10 @@ type GM struct {
 	// Ethereum stuff
 	auth     *bind.TransactOpts
 	authLock sync.Mutex
+	key      *ecdsa.PrivateKey
 
-	key *ecdsa.PrivateKey
+	// Bot dispatcher
+	bd *BotDispatcher
 
 	// debug mode
 	debug bool
@@ -38,7 +40,7 @@ type GM struct {
 
 // Init initializes the game master. In particular, it should register the
 // game master for RPC.
-func (gm *GM) Init(ipAddr string, port int, hexkey string, debug bool) error {
+func (gm *GM) Init(ipAddr string, port int, hexkey string, debug bool, bd *BotDispatcher) error {
 
 	gm.gmLock.Lock()
 	defer gm.gmLock.Unlock()
@@ -61,6 +63,9 @@ func (gm *GM) Init(ipAddr string, port int, hexkey string, debug bool) error {
 
 		gm.key = privk
 	}
+
+	// This could be nil. In that case bots will not be dispatched
+	gm.bd = bd
 
 	gm.operatedGames = make(map[string]*GameOperator)
 

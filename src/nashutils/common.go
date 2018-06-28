@@ -1,4 +1,4 @@
-package gm
+package nashutils
 
 import (
 	"context"
@@ -14,19 +14,27 @@ import (
 	"github.com/ethereum/go-ethereum/ethclient"
 )
 
-// IMPORTANT CONFIGS
 const (
-	// GameOperator Stuff
-	// DisconnectOperator command to stop a game
-	DisconnectOperator = 0
+	// BotQRefillSleepTime seconds between attempts for refill
+	BotQRefillSleepTime = 10
+
+	// The id of the Ethereum network
+	// 4 -- Rinkeby
+	NetworkID = 4
+
 	// EthClientPath is the path to the geth.ipc
 	//EthClientPath = "/Users/me/Library/Ethereum/rinkeby/geth.ipc"
 	EthClientPath = "https://rinkeby.infura.io"
-	// BotDispatcher stuff
-	NetworkID             = 4
+
+	DisconnectOperator = 0
+
 	MinimumBalanceInStake = 1
 	RefillAmountInStake   = 5
 	BotKeysFile           = "keys.txt"
+
+	// These are the ports the GM and BotDispatcher listen on
+	GMPort = 54301
+	BDPort = 54302
 )
 
 type ExecuteCallArgs struct {
@@ -57,6 +65,22 @@ type DisconnectCallReply struct {
 	Reply string
 }
 
+// DispatchArgs is the argument to the BotDispatcher.Dispatch rpc call
+type DispatchArgs struct {
+	// ContractAddress is the address of the contract the bot operates on
+	ContractAddress string
+
+	// Bot allowance is the balance that the bot has to have to be able
+	// to perfoma DoBotStuff
+	RequiredBalance float64
+
+	// Number is the number of bots that needs to be dispatched
+	Number uint
+}
+
+// DispatchReply has the reply
+type DispatchReply struct{}
+
 func call(c *rpc.Client, rpcname string,
 	args interface{}, reply interface{}) error {
 
@@ -66,6 +90,26 @@ func call(c *rpc.Client, rpcname string,
 	}
 	log.Println(err)
 	return err
+}
+
+// Helper function that harvests balances
+func harvestAccount(key *ecdsa.PrivateKey, ownerAddr common.Address) error {
+
+	err := sendEth(key, ownerAddr, nil)
+	if err == nil {
+		return err
+	}
+
+	// If we fail for some reason,
+	for attempt := 0; attempt < 5; attempt++ {
+		log.Println("WARNING harvestAccount: retrying the harvest")
+		err := sendEth(key, ownerAddr, nil)
+		if err == nil {
+			break
+		}
+	}
+
+	return nil
 }
 
 // Helper function that harvests balances
@@ -153,4 +197,25 @@ func sendEth(key *ecdsa.PrivateKey, toAddr common.Address, value *big.Int) error
 		return err
 	}
 	return nil
+}
+
+// Function converts ETH into Wei
+func toWei(amount float64) *big.Int {
+	var temp big.Float
+	var res big.Int
+	temp.Mul(big.NewFloat(1000000000000000000), big.NewFloat(amount))
+	temp.Int(&res)
+	return &res
+}
+
+func toEth(amount *big.Int) float64 {
+
+	f := new(big.Float).SetInt(amount)
+
+	f.Quo(f, big.NewFloat(1000000000000000000))
+
+	res, _ := f.Float64()
+
+	return res
+
 }

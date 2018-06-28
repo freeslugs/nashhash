@@ -35,13 +35,12 @@ contract Game is Pausable, GameHelper {
     // This is the idea.
     struct State {
         GameState gameState;
-        uint256 gameStateDebug;
-        uint256 currNumberCommits;
-        uint256 currNumberReveals;
-        uint256 commitStageStartBlock;
-        uint256 revealStageStartBlock;
-        uint256 round; // not implemented
-
+        uint gameStateDebug;
+        uint currNumberCommits;
+        uint currNumberReveals;
+        uint commitStageStartBlock;
+        uint revealStageStartBlock;
+        uint round;
     }
 
     struct Config {
@@ -115,6 +114,10 @@ contract Game is Pausable, GameHelper {
 
     }
 
+    function getRound() public view returns(uint) {
+        return state.round;
+    }
+
     // Contrcact public API
     function getGameState() public view returns(uint256) {
         return state.gameStateDebug;
@@ -174,6 +177,37 @@ contract Game is Pausable, GameHelper {
         config.NPT_ADDRESS = npt_addr;
     }
 
+    //A broder game state report useful to the game master
+    function getGameStateInfo() public view returns (
+        uint _state,
+        uint _currNumberCommits,
+        uint _currNumberReveals,
+        uint _commitStageStartBlock,
+        uint _revealStageStartBlock,
+        uint _stageLength
+    ){
+        return (state.gameStateDebug,
+        state.currNumberCommits,
+        state.currNumberReveals,
+        state.commitStageStartBlock,
+        state.revealStageStartBlock,
+        config.GAME_STAGE_LENGTH);
+    }
+    // function getGameStateInfo() public view returns (
+    //     uint,uint,uint,uint,uint,uint
+    // ){
+    //     return (state.gameStateDebug,
+    //     state.currNumberCommits,
+    //     state.currNumberReveals,
+    //     state.commitStageStartBlock,
+    //     state.revealStageStartBlock,
+    //     config.GAME_STAGE_LENGTH);
+    // }
+
+    function getGameStageLength() public view returns(uint) {
+        return config.GAME_STAGE_LENGTH;
+    }
+
     /*
         The following two functions are the users gaming interface.
             -- Call commit to commit a hash of your guess for the game. Its a hash, since
@@ -223,7 +257,7 @@ contract Game is Pausable, GameHelper {
         require(commits[msg.sender] == keccak256(abi.encodePacked(guess, random)));
 
         //Prevents user from revealing twice because above require will fail.
-        delete commits[msg.sender];
+        //delete commits[msg.sender];
 
         // When they do, we add the revealed guess to game data
         gameData[msg.sender] = guess;
@@ -243,13 +277,13 @@ contract Game is Pausable, GameHelper {
     */
     function forceToRevealState() public onlyOwner whenNotPaused {
         require(state.gameState == GameState.COMMIT_STATE);
-        //require(state.commitStageStartBlock + config.GAME_STAGE_LENGTH <= block.number);
+        require(state.commitStageStartBlock + config.GAME_STAGE_LENGTH <= block.number);
         toRevealState();
     }
 
     function forceToPayoutState() public onlyOwner whenNotPaused {
         require(state.gameState == GameState.REVEAL_STATE);
-        //require(state.revealStageStartBlock + config.GAME_STAGE_LENGTH <= block.number);
+        require(state.revealStageStartBlock + config.GAME_STAGE_LENGTH <= block.number);
         toPayoutState();
     }
 
@@ -273,6 +307,8 @@ contract Game is Pausable, GameHelper {
             delete info.lastWinners[i];
         }
         info.lastWinnersLength = 0;
+
+        state.round = 0;
     }
 
 
@@ -330,6 +366,7 @@ contract Game is Pausable, GameHelper {
         // Set state
         state.gameState = GameState.COMMIT_STATE;
         state.gameStateDebug = 0;
+        state.round++;
 
         // Cleanup the commits
         for(uint256 i = 0; i < state.currNumberCommits; i++){

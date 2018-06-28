@@ -77,17 +77,29 @@ P2.5:
 ## Build and test the package
 
 1. Install golang        
+
         brew install go
-3. Setup the GOPATH
+
+2. Setup the GOPATH
+
         export GOPATH=$(pwd)
+
 You want to set it up to some/path/nashhash/src
-4. Genereate the go binding for the Game.sol
+
+3. Genereate the go binding for the Game.sol
+
         cd gm
         go generate
-5. In a separate terminal window, starth geth on rinkeby. It might take sometime to sync.
+
+4. In a separate terminal window, starth geth on rinkeby. It might take sometime to sync.
+
         geth --rinkeby
+
 5. Run tests
-        go test -v
+
+        go test -v -timeout 5m
+
+The timeout is important. Some tests will not run under the default constrsaint. This will result in test failure.
 
 
 ## Description
