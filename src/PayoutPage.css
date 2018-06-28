@@ -10,6 +10,61 @@
   color: #5097a4;
 }
 
+/* This is for the bet pricing table we show on Payout */
+.table-secondary-row {
+	border-bottom: 2px dotted #e7e6e4 !important;
+
+}
+
+.table-bottom-row {
+	font-weight: 600;
+}
+
+
+.list-group {
+	width: 70vw;
+	margin: auto;
+ 	border-radius: 30px;
+	padding: 0 30px;
+
+	border: 2px solid #f3f1ee;
+}
+
+.list-group-item {
+	align-items: center;
+
+
+	 display: flex;
+	 padding: 20px;
+	 margin-bottom: 0;
+	 border: 0;
+
+}
+
+
+.list-group-item p {
+	font-family: Avenir Next;
+	font-size: 18px;
+	color: #a2a2a2;
+	align-self: baseline;
+	margin: 0;
+}
+
+.list-group-item .table-right-values {
+	margin-left: auto;
+	font-weight: 600;
+}
+.list-group-item .net-result-value {
+	color: green; /* or red if they lose */
+}
+
+
+.value-props-row {
+	margin: 100px;
+	height: 300px;
+	border: 1px solid yellow;
+}
+
 .play-again {
 	width: 268px;
 	height: 58px;

@@ -124,18 +124,6 @@ border: 4px dashed red;
 	margin-top: 50px;
 }
 
-.list-group {
-	width: 50vw;
-	
-	margin: auto;
-}
-
-.value-props-row {
-	margin: 100px;
-	height: 300px;
-	border: 1px solid yellow;
-}
-
 .facts-drawing-card {
 	border-radius: 50px;
 	background-color: #fbfbfb;
@@ -144,8 +132,6 @@ border: 4px dashed red;
 	align-items: center;
 	border: 1px dashed;
 }
-
-
 
 .faq-logos {
 	padding: 50px;

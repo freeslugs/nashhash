@@ -55,14 +55,7 @@ const Landing = () => <div>
  </Grid>
 
 
- <p className="more-games-coming"> More exciting games in progress! </p>
-
-
- <ListGroup>
-   <ListGroupItem>Item 1</ListGroupItem>
-   <ListGroupItem>Item 2</ListGroupItem>
-   <ListGroupItem>...</ListGroupItem>
- </ListGroup>
+  <p className="more-games-coming"> More exciting games in progress! </p>
 
   <div>
   <Grid className="value-props">

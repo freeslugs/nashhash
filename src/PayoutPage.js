@@ -1,7 +1,7 @@
 // @flow
 import React, { Component } from 'react'
 import { Route, Link } from "react-router-dom";
-import { Button } from 'react-bootstrap';
+import { Button, ListGroup, ListGroupItem } from 'react-bootstrap';
 
 import "./PayoutPage.css"
 
@@ -45,6 +45,24 @@ class PayoutPage extends Component<props> {
       <div className="payout-page">
         <h2>The winning number was...<span className="colored-num">{this.state.winningnumber}</span>!</h2>
         <PayoutMessage diff={this.state.diff} yourNum={this.state.yournum}/>      
+        <ListGroup>
+
+          <ListGroupItem className="table-secondary-row">
+            <p>Total pool</p>
+            <p className="table-right-values">1 ETH</p>
+          </ListGroupItem>
+
+          <ListGroupItem className="table-secondary-row">
+            <p>Your bet</p>
+            <p className="table-right-values">1 ETH</p>
+          </ListGroupItem>
+
+          <ListGroupItem className="table-bottom-row">
+            <p>Net result</p>
+            <p className="table-right-values net-result-value">1 ETH</p>
+          </ListGroupItem>
+
+        </ListGroup>
         <Button className="play-again" onClick={() => this.props.history.push('/games/two-thirds/') }type='submit'>Play Again</Button>
       </div>
     )
