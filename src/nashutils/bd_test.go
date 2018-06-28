@@ -1,6 +1,7 @@
 package nashutils
 
 import (
+	"fmt"
 	"log"
 	"math/big"
 	"net/rpc"
@@ -9,6 +10,7 @@ import (
 	"time"
 
 	"github.com/ethereum/go-ethereum/common"
+	"github.com/ethereum/go-ethereum/crypto"
 )
 
 const (
@@ -95,6 +97,7 @@ func TestBotDispatch(t *testing.T) {
 
 func TestUtils(t *testing.T) {
 
+	// test toWei and toEth
 	eth := big.NewInt(1000000000000000000)
 	pointOne := big.NewInt(100000000000000000)
 
@@ -107,11 +110,17 @@ func TestUtils(t *testing.T) {
 	assertEqual(t, toEth(eth), ethf, "incorrect toEth conversion")
 	assertEqual(t, toEth(pointOne), pointOnef, "incorrect toEth conversion")
 
-	temp := [...]uint{1, 2, 3}
+	// Test the keccak equivalence to solidity
+	guess := []byte("10")
+	secret := []byte("3")
+	h := crypto.Keccak256(guess, secret)
+	fmt.Println(h)
+	var hassh [32]byte
+	copy(hassh[:], h[:32])
+	hash := fmt.Sprintf("0x%x", h)
+	res := "0xf3e73e27cf4cda7ebc973aa432f8a54a97200c0745d43e1bc9c2879ffe79cc53"
+	assertEqual(t, hash, res, hash)
 
-	all, nothing := temp[:3], temp[3:len(temp)]
-
-	log.Println(all)
-	log.Println(nothing)
+	//fmt.Println(string(guess[:]))
 
 }

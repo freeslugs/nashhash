@@ -174,8 +174,8 @@ func (bd *BotDispatcher) refill() {
 
 func (bd *BotDispatcher) initBotQsDefault() error {
 
-	amounts := [...]float64{0.01}
-	defaultBotNumber := uint(2)
+	amounts := [...]float64{0.05}
+	defaultBotNumber := uint(7)
 
 	for _, amount := range amounts {
 

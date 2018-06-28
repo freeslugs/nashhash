@@ -21,7 +21,7 @@ func (gmk *Clerk) Init(srv string) error {
 	}
 
 	gmk.c = c
-	log.Printf("Clerk: initialization succesful\n")
+	log.Printf("INFO INFO INFO INFO Clerk: initialization succesful\n")
 
 	return nil
 }

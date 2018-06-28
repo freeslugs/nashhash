@@ -40,7 +40,7 @@ type GM struct {
 
 // Init initializes the game master. In particular, it should register the
 // game master for RPC.
-func (gm *GM) Init(ipAddr string, port int, hexkey string, debug bool) error {
+func (gm *GM) Init(ipAddr string, port int, hexkey string, debug bool, bd *BotDispatcher) error {
 
 	gm.gmLock.Lock()
 	defer gm.gmLock.Unlock()
@@ -63,6 +63,9 @@ func (gm *GM) Init(ipAddr string, port int, hexkey string, debug bool) error {
 
 		gm.key = privk
 	}
+
+	// This could be nil. In that case bots will not be dispatched
+	gm.bd = bd
 
 	gm.operatedGames = make(map[string]*GameOperator)
 

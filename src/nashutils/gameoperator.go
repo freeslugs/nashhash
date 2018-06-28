@@ -16,9 +16,6 @@ type GameOperator struct {
 	controlChannel  chan int
 	playing         bool
 
-	// Bot Dispatcher to run bots
-	//bd *BotDispatcher
-
 	// GM controlling us
 	gm *GM
 }
@@ -41,14 +38,6 @@ func (gop *GameOperator) Init(addr string, gm *GM) {
 	gop.controlChannel = make(chan int)
 	gop.playing = false
 	gop.gm = gm
-
-	// gop.bd = &BotDispatcher{}
-	// err := gop.bd.Init(5, gop.contractAddress, gm.auth, gm.key, &gm.authLock)
-	// if err != nil {
-	// 	log.Printf("ERROR GameOperator %s: init failed %s\n", gop.contractAddress, err.Error())
-	// }
-
-	//time.Sleep(10 * time.Second)
 
 }
 
@@ -125,6 +114,10 @@ func (gop *GameOperator) operate() error {
 	}
 
 	auth := gop.gm.auth
+	stake, err := game.GetStakeSize(nil)
+	if err != nil {
+		return err
+	}
 
 	state, err := game.GetGameStateInfo(nil)
 	if err != nil {
@@ -152,8 +145,29 @@ func (gop *GameOperator) operate() error {
 
 			// We can que bots, initiate a transition or do nothing
 			if header.Number.Int64() > botDeadline && header.Number.Int64() <= transitionDeadline {
+
+				// If there is no botdispatcher, we cannot do anything here
+				if gop.gm.bd == nil {
+					return nil
+				}
+
+				// We need to calculate how many bots to dispatch
+				maxp, err := game.GetMaxPlayers(nil)
+				if err != nil {
+					return err
+				}
+				botn := maxp.Int64() - state.CurrNumberCommits.Int64()
+
 				log.Printf("INFO GameOperator %s: supposeed to add bots but not doing such thing\n", gop.contractAddress)
-				//go gop.bd.Dispatch(3)
+
+				// Lets ask the dispatcher to send out the bots
+				args := DispatchArgs{
+					ContractAddress: gop.contractAddress,
+					RequiredBalance: toEth(stake),
+					Number:          uint(botn)}
+				go gop.gm.bd.Dispatch(args, &DispatchReply{})
+
+				// The transition deadline is here, so we initiate a transition
 			} else if header.Number.Int64() > transitionDeadline {
 				tx, txerr := game.ForceToRevealState(auth)
 				if txerr != nil {
@@ -217,10 +231,5 @@ func (gop *GameOperator) Stop() error {
 	gop.controlChannel <- DisconnectOperator
 	gop.playing = false
 
-	// Kill the dispatcher
-	// err := gop.bd.Kill()
-	// if err != nil {
-	// 	return err
-	// }
 	return nil
 }
