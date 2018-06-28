@@ -2,6 +2,7 @@ package nashutils
 
 import (
 	"crypto/ecdsa"
+	"errors"
 	"log"
 	"sync"
 	"time"
@@ -40,6 +41,13 @@ func (bq *BotQ) Dispatch(number uint, address string) error {
 		botn = len(bq.ready)
 	} else {
 		botn = int(number)
+	}
+
+	if botn == 0 {
+		log.Printf("WARNING BotQ.Dispatch %f ether: no ready bots\n",
+			bq.guaranteedBalance)
+		bq.qLock.Unlock()
+		return errors.New("no bots ready")
 	}
 
 	// Dispatch individual bots
@@ -142,6 +150,7 @@ func (bq *BotQ) Refill(refillKey *ecdsa.PrivateKey) error {
 
 	}
 	bq.qLock.Unlock()
+
 	return nil
 }
 
@@ -176,6 +185,8 @@ func (bq *BotQ) supervisor() {
 						pending = append(pending, bot)
 					}
 				}
+
+				log.Printf("INFO BotQ %f ether: %d bots transferred to ready q\n", bq.guaranteedBalance, len(bq.pending)-len(pending))
 
 				// Restore the bots who's payment is still pending
 				bq.pending = pending

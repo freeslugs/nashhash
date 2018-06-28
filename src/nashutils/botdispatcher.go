@@ -157,7 +157,6 @@ func (bd *BotDispatcher) refill() {
 			return
 		default:
 
-			log.Println("refilling qs")
 			// We need to iterate over all the qs
 			for _, bq := range bd.queues {
 				bq.Refill(bd.refillKey)
@@ -175,7 +174,7 @@ func (bd *BotDispatcher) refill() {
 func (bd *BotDispatcher) initBotQsDefault() error {
 
 	amounts := [...]float64{0.05}
-	defaultBotNumber := uint(7)
+	defaultBotNumber := uint(5)
 
 	for _, amount := range amounts {
 

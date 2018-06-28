@@ -9,7 +9,6 @@ import (
 	"time"
 
 	"github.com/ethereum/go-ethereum/common"
-	"github.com/ethereum/go-ethereum/crypto"
 	"github.com/ethereum/go-ethereum/ethclient"
 )
 
@@ -47,21 +46,6 @@ func assertNotEqual(t *testing.T, a interface{}, b interface{}, message string) 
 	t.Fatal(message)
 }
 
-func TestKeccak(t *testing.T) {
-	guess := []byte("10")
-	secret := []byte("3")
-
-	h := crypto.Keccak256(guess, secret)
-	fmt.Println(h)
-	var hassh [32]byte
-	copy(hassh[:], h[:32])
-	hash := fmt.Sprintf("0x%x", h)
-	res := "0xf3e73e27cf4cda7ebc973aa432f8a54a97200c0745d43e1bc9c2879ffe79cc53"
-	assertEqual(t, hash, res, hash)
-
-	fmt.Println(string(guess[:]))
-}
-
 func TestDispatch(t *testing.T) {
 
 	var bd BotDispatcher
@@ -71,7 +55,7 @@ func TestDispatch(t *testing.T) {
 	}
 
 	var gm GM
-	e = gm.Init(RPCAddr, GMPort, OwnerHexKey, false, nil)
+	e = gm.Init(RPCAddr, GMPort, OwnerHexKey, false, &bd)
 	if e != nil {
 		log.Fatal(e)
 	}
@@ -102,7 +86,7 @@ func TestDispatch(t *testing.T) {
 	_, txerr := game.ResetGame(gm.auth)
 	assertEqual(t, txerr, nil, "error")
 
-	time.Sleep(30 * time.Second)
+	time.Sleep(50 * time.Second)
 
 	// Connect the game, start the operator
 	clerk.ConnectGame(GameContract)
@@ -117,7 +101,10 @@ func TestDispatch(t *testing.T) {
 	}
 
 	// Lets ask for a dispatch
-	args1 := DispatchArgs{ContractAddress: GameContract, RequiredBalance: 0.01, Number: 2}
+	args1 := DispatchArgs{
+		ContractAddress: GameContract,
+		RequiredBalance: 0.01,
+		Number:          2}
 	reply := &DispatchReply{}
 
 	e = call(c, "BotDispatcher.Dispatch", args1, reply)
