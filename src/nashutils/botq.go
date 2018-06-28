@@ -46,7 +46,7 @@ func (bq *BotQ) Dispatch(number uint, address string) error {
 	if botn == 0 {
 		log.Printf("WARNING BotQ.Dispatch %f ether: no ready bots\n",
 			bq.guaranteedBalance)
-		bq.qLock.Unlock()
+		bq.qLock.Unlock() // UNLOCK..
 		return errors.New("no bots ready")
 	}
 
