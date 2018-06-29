@@ -135,22 +135,22 @@ class App extends Component<props> {
             <Navbar inverse collapseOnSelect>
               <Navbar.Header>
                 <Navbar.Brand>
-                  <a href="#brand">Nashhash</a>
+                  <a href="/">Nashhash</a>
                 </Navbar.Brand>
                 <Navbar.Toggle />
               </Navbar.Header>
               <Navbar.Collapse>
-                <Nav pullRight>
+                <Nav className="nash-nav-right" pullRight>
                   <NavItem eventKey={1} href="#">
                     FAQ
                   </NavItem>
                   <NavItem eventKey={2} href="#">
-                    Wallet
+                    WALLET
                   </NavItem>
                 </Nav>
               </Navbar.Collapse>
             </Navbar>
-            
+
 
             <Route exact path="/" render={(props) => ( <Landing {...props} {...this.state} /> )} />
             <Route path="/games/two-thirds" render={(props) => ( <Game GameType={"TwoThirds"} {...props} {...this.state} /> )} />
@@ -158,28 +158,31 @@ class App extends Component<props> {
 
             <Divider section />
             <div>
-            <Navbar collapseOnSelect>
+            <Navbar className="nash-footer" collapseOnSelect>
               <Navbar.Collapse>
                 <Nav>
-                  <NavItem eventKey={1} href="#">
-                    Privacy Policy
+                  <NavItem eventKey={1}>
+                    © 2018 NASH HASH, INC
                   </NavItem>
                   <NavItem eventKey={2} href="#">
-                    Terms of Use
-                  </NavItem>
-                </Nav>
-                <Nav pullRight>
-                  <NavItem eventKey={1} href="#">
-                    Telegram
-                  </NavItem>
-                  <NavItem eventKey={2} href="#">
-                    Twitter
+                    TERMS OF USE
                   </NavItem>
                   <NavItem eventKey={3} href="#">
-                    GitHub
+                    PRIVACY POLICY
+                  </NavItem>
+                </Nav>
+                <Nav className="nash-right-footer-container" pullRight>
+                  <NavItem eventKey={1} href="#">
+                    TELEGRAM
+                  </NavItem>
+                  <NavItem eventKey={2} href="#">
+                    TWITTER
+                  </NavItem>
+                  <NavItem eventKey={3} href="#">
+                    GITHUB
                   </NavItem>
                   <NavItem eventKey={4} href="#">
-                    Made with ♥ in NYC
+                    MADE WITH __ IN NYC
                   </NavItem>
                 </Nav>
               </Navbar.Collapse>

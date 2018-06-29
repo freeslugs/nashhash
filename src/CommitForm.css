@@ -1,60 +1,178 @@
 .wrapper {
-	margin-top: 100px;
-	margin-bottom: 100px;
+	margin-top: 50px;
+	margin-bottom: 50px;
 	display: flex;
 	flex-direction: column;
 	justify-content: center;
 	align-items: center;
 }
 
-.game-info-card > h1{
+/* This is related to the rules and logo for 2/3 Average, at the top of the page. */
+
+
+.game-info-grid.container {
+	height: 600px;
+	margin: 20px;
+	padding: 20px;
+}
+
+.game-info-logo {
+	height: 100%;
+	display: flex;
+	justify-content: center;
+	align-items: center;
+}
+
+.game-info-text {
+	height: 100%;
+	display: flex;
+	justify-content: center;
+	align-items: center;
+}
+
+.game-info-card h1 {
 	font-family: Avenir Next;
-	font-size: 36px;
+	padding-bottom: 30px;
+	font-size: 40px;
 	font-weight: bold;
 	color: #000000;
+
 }
 
-.game-info-card > p{
+.game-info-card p {
 	font-family: Avenir Next;
-	font-size: 24px;
-	font-weight: 500;
+	font-size: 22px;
+	font-weight: 400;
+	padding-right: 10%;
 	color: #000000;
 }
 
-.game-options{
-	width: 1323px;
-	height: 587px;
-	opacity: 0.5;
+p span {
+	font-style: italic;
+}
+
+/* This is related to the lower area of the page that lets you pick a number, choose stakes and submit. */
+
+form {
+	width: 100%;
+}
+
+.form-group {
+	height: 100%;
+	width: 100%;
+}
+
+
+
+.container {
+	height: 100%;
+	width: 100%;
+}
+
+.game-options {
+	width: 80%;
+	height: 300px;
+	margin: auto;
+	border: 1px dashed violet;
+
 	border-radius: 20px;
 	box-shadow: 5px 10px 10px 5px rgba(194, 194, 194, 0.5);
 	background-color: #fbfbfb;
 	border: solid 1px #c7c7c7;
 }
+.pick-number {
+	height: 50%;
+	display: flex;
+	flex-wrap: wrap;
+	align-items: center;
+	border: 1px dashed blue;
+}
+.pick-stake {
+	height: 50%;
+	display: flex;
+	flex-wrap: wrap;
+	align-items: center;
+	border: 1px dashed blue;
+}
 
-.stake-button {
-	margin-right: 20px;
-	width: 138px;
-	height: 141px;
-	border-radius: 50px !important;
-	background-color: #5775a9 !important;	
+.pick-number-info, .pick-stake-info {
+	border: 0;
+	font-family: Avenir Next;
+	font-size: 30px;
+	color: #000000;
+	font-weight: 500;
 
-	font-family: Avenir Next !important;
-	font-size: 24px !important;
-	font-weight: bold !important;
-	text-align: center !important;
+}
+
+
+
+.pick-stake-entry {
+	margin-left: auto;
+	display: flex;
+	justify-content: flex-end;
+}
+
+.pick-number-info, .pick-number-entry, .pick-stake-info {
+	border: 1px solid orange;
+	display: flex;
+	justify-content: center;
+
+}
+
+.btn-toolbar .stake-button {
+	width: 120px;
+	height: 120px;
+	border-radius: 40px !important;
+	background-color: #5097a4;
+	margin: 15px;
+	border: 0;
+	display: flex;
+	justify-content: center;
+	align-items: center;
+
+	font-family: Avenir Next;
+	font-size: 24px;
+	font-weight: 600;
+	text-align: center;
 	color: #ffffff;
 }
 
-.stake-button .active {
-	background-color: #3d5277;	
+.stake-button:hover, .stake-button.active:hover {
+	background-color: blue;
+	color: #ffffff;
 }
-/*
+
+
+.stake-button.active {
+	background-color: blue;
+}
+
+/* These classes deal with the styling of the Submit Guess button, and the text below it */
+
 .submit-container {
-	width: 606px;
-	height: 99px;
+	height: 150px;
+	display: flex;
+	flex-direction: column;
+	justify-content: space-between;
+	align-items: center;
+	margin: 100px;
+
+	font-weight: 400;
 	font-family: Avenir Next;
-	font-size: 24px;
-	font-weight: 500;
+	font-size: 18px;
 	text-align: center;
 	color: #a2a2a2;
-} */
+
+}
+
+.submit-guess-button {
+	padding: 10px 60px;
+	border-radius: 50px;
+	background-color: #5775a9;
+	box-shadow: 0 3px 10px 0 rgba(135, 135, 135, 0.5);
+	font-weight: bold;
+	font-family: Avenir Next;
+	font-size: 24px;
+	text-align: center;
+	color: #ffffff;
+}

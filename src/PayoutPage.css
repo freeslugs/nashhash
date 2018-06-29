@@ -1,9 +1,25 @@
-.payout-page > h2{
+
+/* This is for the container and child elements of the payout page */
+
+.payout-page {
+	display: flex;
+	flex-direction: column;
+	justify-content: flex-start;
+	align-items: center;
+
+	height: 800px;
+	width: 90vw;
+	margin: 50px auto;
+	border: 2px solid yellow;
+}
+
+.payout-page h2 {
 	font-family: Avenir Next;
 	font-size: 36px;
 	font-weight: bold;
-	text-align: center;
 	color: #000000;
+	margin-top: 5%;
+	text-align: center;
 }
 
 .colored-num {
@@ -13,17 +29,15 @@
 /* This is for the bet pricing table we show on Payout */
 .table-secondary-row {
 	border-bottom: 2px dotted #e7e6e4 !important;
-
 }
 
 .table-bottom-row {
 	font-weight: 600;
 }
 
-
 .list-group {
 	width: 70vw;
-	margin: auto;
+	margin: 5% 0;
  	border-radius: 30px;
 	padding: 0 30px;
 
@@ -32,15 +46,11 @@
 
 .list-group-item {
 	align-items: center;
-
-
 	 display: flex;
 	 padding: 20px;
 	 margin-bottom: 0;
 	 border: 0;
-
 }
-
 
 .list-group-item p {
 	font-family: Avenir Next;
@@ -58,7 +68,6 @@
 	color: green; /* or red if they lose */
 }
 
-
 .value-props-row {
 	margin: 100px;
 	height: 300px;
@@ -71,7 +80,6 @@
 	border-radius: 42px;
 	background-color: #5775a9;
 	box-shadow: 0 3px 10px 0 rgba(135, 135, 135, 0.5);
-
 	font-family: Avenir Next;
 	font-size: 24px;
 	font-weight: bold;
