@@ -19,8 +19,8 @@ The specific game will have to only define two functions:
 
 */
 
-import "openzeppelin-solidity/contracts/lifecycle/Pausable.sol";
-import "openzeppelin-solidity/contracts/math/SafeMath.sol";
+import "./Pausable.sol";
+import "./SafeMath.sol";
 import "./GameHelper.sol";
 import "./NPT.sol";
 

@@ -1,5 +1,3 @@
-//go:generate abigen --sol ./../../contracts/Game.sol --pkg gm --out Game.go
-
 // Package bd gives you what you need to dispatch bots to your contracts.
 package nashutils
 

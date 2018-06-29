@@ -1,4 +1,4 @@
-//go:generate abigen --sol ./../../contracts/Game.sol --pkg gm --out Game.go
+//go:generate abigen --sol ./../../contracts/Game.sol --pkg nashutils --out Game.go
 package nashutils
 
 import (
