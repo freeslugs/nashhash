@@ -6,19 +6,9 @@ import styled from 'styled-components';
 import API from './api/Game.js'
 import GameRegistryAPI from './api/GameRegistryAPI.js'
 import srs from 'secure-random-string'
+import './Committed.css'
 
 var Web3Utils = require('web3-utils');
-
-const Wrapper = styled(Segment)`
-  max-width: 500px;
-  margin: 0 auto !important; 
-  margin-top: 10% !important;
-
-  h2.ui.header {
-    font-size: 1.7em;
-    font-weight: normal;
-  }
-`;
 
 type props = {};
 
@@ -91,12 +81,11 @@ class Committed extends Component<props> {
 
   render() {
     return (
-      <Wrapper>
-        <Form>
-          <Header as='h2'>Waiting for other to guess.</Header>     
-          <Progress percent={this.state.percent} indicating progress />
-        </Form>      
-      </Wrapper>
+      <div className="committed-wrapper">
+          <div className="commit-animation"></div>
+          <h2>Your guess is in!</h2>
+          <p>Now we wait a little for everyone else’s bets to be processed. Once that is complete, you will see the reveal button above, to see how well you did this time around!</p>
+      </div>
     )
   }
 }
