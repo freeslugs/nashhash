@@ -1,7 +1,6 @@
 // @flow
 import React, { Component } from 'react'
 import { Route, Link } from "react-router-dom";
-import SelectPool from './SelectPool'
 import CommitForm from './CommitForm'
 import Committed from './Committed'
 import RevealForm from './RevealForm'
@@ -61,10 +60,7 @@ class Game extends Component<props> {
     return (
       <div>
         <Route exact path="/games/two-thirds/" render={(props) => ( 
-          <SelectPool setParentState={this.setParentState} gameType={this.state.gametype} {...props} {...this.state} /> 
-        )} />
-        <Route exact path="/games/two-thirds/commit" render={(props) => ( 
-          <CommitForm setParentState={this.setParentState} {...this.props} {...this.state} /> 
+          <CommitForm setParentState={this.setParentState} gameType={this.state.gametype} {...props} {...this.state} /> 
         )} />
         <Route exact path="/games/two-thirds/committed" render={(props) => ( <Committed setParentState={this.setParentState} GameType={this.state.gametype} {...props} {...this.props} {...this.state} /> )} />
         <Route exact path="/games/two-thirds/reveal" render={(props) => ( <RevealForm {...this.props} {...this.state} /> )} />
@@ -72,13 +68,8 @@ class Game extends Component<props> {
         <Route exact path="/games/two-thirds/payout" render={(props) => ( <PayoutPage {...this.props} {...this.state} /> )} />
 
         <Route exact path="/games/lowest-unique/" render={(props) => ( 
-          <SelectPool setParentState={this.setParentState} gameType={this.state.gametype} {...props} {...this.state} /> 
+          <CommitForm setParentState={this.setParentState} gameType={this.state.gametype} {...props} {...this.state} /> 
         )} />
-        <Route exact path="/games/lowest-unique/commit" render={(props) => ( 
-          <CommitForm setParentState={this.setParentState} {...this.props} {...this.state} /> 
-        )} />
-
-
       </div>
     )
   }

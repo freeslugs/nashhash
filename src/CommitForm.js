@@ -1,29 +1,33 @@
 // @flow
 import React, { Component } from 'react'
-import { Route, Link } from "react-router-dom";
-import { Segment, Button, Checkbox, Header, Form } from 'semantic-ui-react'
-import styled from 'styled-components';
-import API from './api/Game.js'
+import { Link } from "react-router-dom";
+import { Icon, Step, Container, Header, Menu, Card } from 'semantic-ui-react'
+import { Well, Grid, Row, Col, FormGroup, FormControl, Button, ButtonToolbar, ToggleButton, ToggleButtonGroup } from 'react-bootstrap'
+import styled from 'styled-components'
+import testLogo from './img/group.svg'
+
 import GameRegistryAPI from './api/GameRegistryAPI.js'
-import srs from 'secure-random-string'
+import "./CommitForm.css"
 
-import GameABI from './contracts/Game.json'
-
-const contract = require('truffle-contract');
-var Web3Utils = require('web3-utils');
-
-const Wrapper = styled(Segment)`
-  max-width: 500px;
-  margin: 0 auto !important; 
-  margin-top: 10% !important;
-
-  h2.ui.header {
-    font-size: 1.7em;
-    font-weight: normal;
+function gametitle(gtyp) {
+  if(gtyp == "TwoThirds"){
+    return "2/3 Average"
   }
-`;
+  else if(gtyp == "LowestUnique"){
+    return "Lowest Unique Number"
+  }
+}
 
-type props = {};
+function gameinfo(gtyp) {
+  if(gtyp == "TwoThirds"){
+    return "Select a number between 0-100 with the intention of guessing 2/3 of the average guess."
+  }
+  else if(gtyp == "LowestUnique"){
+    return "Select the lowest number (0 or greater) that no one else has picked."
+  }
+}
+
+
 
 class CommitForm extends Component<props> {
   state = {
@@ -84,18 +88,82 @@ class CommitForm extends Component<props> {
 
   render() {
     return (
-      <Wrapper>
-        <Form>
-          <Header as='h2'>Make a guess!</Header>     
-          <Form.Field>
-            <label>Guess</label>
-            <input placeholder='5' type="number" onChange={(e) => this.setState({guess: e.target.value})} />
-          </Form.Field>
-          <Button disabled={this.loading()} loading={this.state.loading} color="purple" onClick={this.commit} type='submit'>Submit</Button>
-        </Form>      
-      </Wrapper>
+      <div className="wrapper">
+      {/*  <Header as='h1'>{gametitle(gameType)}</Header>
+        <Header as='h2'>{gameinfo(gameType)}</Header>   */}
+
+        <Grid className="game-info-grid">
+          <Col className="game-info-logo" xs={12} sm={12} md={4}>
+            <Well bsClass="game-drawing-card">
+              <img src={testLogo} className="two-thirds-logo"/>
+            </Well>
+          </Col>
+          <Col className="game-info-text" xs={12} sm={12} md={8}>
+            <Well bsClass="game-info-card">
+              <h1>2/3 Average</h1>
+              <p>Select a number between 0-100 with the intention of guessing 2/3 of the average guess. </p>
+              <p>The winner receives the total prize pool (10 * game stake) minus a 5% platform commission. </p>
+              <p> <span>Example:</span> <br/>
+                  The sum of the 10 players’ guesses is 653.
+                  The average guess is therefore 650/10, 65.
+                  2/3 of the average guess is 65*2/3, 43.29.
+                  The winner is the person who guessed closest to 43.29.
+              </p>
+            </Well>
+          </Col>
+        </Grid>
+
+        <form>
+          <FormGroup controlId="submit-commit-form">
+          <Well className="game-options">
+            <Grid>
+              <Row className="pick-number">
+                <Col className="pick-number-info" xs={12} sm={12} md={6}>
+                    <h1>Pick a number from 1-100</h1>
+                </Col>
+
+                <Col className="pick-number-entry" xs={12} sm={12} md={6}>
+                      <FormGroup controlId="number-entry-field">
+                        <FormControl
+                          type="text"
+                          placeholder="Enter guess"
+                        />
+                      </FormGroup>
+                </Col>
+
+              </Row>
+
+              <Row className="pick-stake">
+                <Col className="pick-stake-info" xs={12} sm={12} md={6}>
+
+                    <h1>Choose your stakes</h1>
+
+                </Col>
+                <Col className="pick-stake-entry" xs={12} sm={12} md={6}>
+
+                    <ButtonToolbar>
+                      <ToggleButtonGroup type="radio" name="options" defaultValue={1}>
+                        <ToggleButton className="stake-button" value={1}>0.01 ETH</ToggleButton>
+                        <ToggleButton className="stake-button" value={2}>0.1 ETH</ToggleButton>
+                        <ToggleButton className="stake-button" value={3}>1 ETH</ToggleButton>
+                      </ToggleButtonGroup>
+                    </ButtonToolbar>
+
+                </Col>
+              </Row>
+            </Grid>
+          </Well>
+
+          <div className="submit-container">
+            <Button className="submit-guess-button" type="submit">Submit Guess</Button>
+            <p>You’ll see a MetaMask pop-up asking to approve a
+            transaction for this amount, plus gas costs. <br/>Submit to
+            send your bet to the blockchain.</p>
+          </div>
+          </FormGroup>
+        </form>
+      </div>
     )
   }
 }
-
 export default CommitForm;
