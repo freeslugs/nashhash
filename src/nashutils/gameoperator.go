@@ -4,6 +4,7 @@ import (
 	"context"
 	"errors"
 	"log"
+	"net/rpc"
 	"time"
 
 	"github.com/ethereum/go-ethereum/common"
@@ -147,7 +148,7 @@ func (gop *GameOperator) operate() error {
 			if header.Number.Int64() > botDeadline && header.Number.Int64() <= transitionDeadline {
 
 				// If there is no botdispatcher, we cannot do anything here
-				if gop.gm.bd == nil {
+				if gop.gm.bdAddr == "" {
 					return nil
 				}
 
@@ -161,11 +162,13 @@ func (gop *GameOperator) operate() error {
 				log.Printf("INFO GameOperator %s: supposeed to add bots but not doing such thing\n", gop.contractAddress)
 
 				// Lets ask the dispatcher to send out the bots
-				args := DispatchArgs{
-					ContractAddress: gop.contractAddress,
-					RequiredBalance: toEth(stake),
-					Number:          uint(botn)}
-				go gop.gm.bd.Dispatch(args, &DispatchReply{})
+				// args := DispatchArgs{
+				// 	ContractAddress: gop.contractAddress,
+				// 	RequiredBalance: toEth(stake),
+				// 	Number:          uint(botn)}
+				// go gop.gm.bd.Dispatch(args, &DispatchReply{})
+
+				go gop.dispatch(gop.gm.bdAddr, uint(botn), toEth(stake))
 
 				// The transition deadline is here, so we initiate a transition
 			} else if header.Number.Int64() > transitionDeadline {
@@ -230,6 +233,32 @@ func (gop *GameOperator) Stop() error {
 	}
 	gop.controlChannel <- DisconnectOperator
 	gop.playing = false
+
+	return nil
+}
+
+// Function dispatches bots
+func (gop *GameOperator) dispatch(bdAddr string, botn uint, amount float64) error {
+
+	c, err := rpc.Dial("tcp", bdAddr)
+	if err != nil {
+		log.Println(err)
+		return err
+	}
+	defer c.Close()
+
+	// Lets ask for a dispatch
+	args1 := DispatchArgs{
+		ContractAddress: gop.contractAddress,
+		RequiredBalance: amount,
+		Number:          botn}
+	reply := &DispatchReply{}
+
+	e := call(c, "BotDispatcher.Dispatch", args1, reply)
+	if e != nil {
+		log.Println(e)
+		return e
+	}
 
 	return nil
 }

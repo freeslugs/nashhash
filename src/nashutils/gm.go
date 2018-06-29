@@ -27,7 +27,8 @@ type GM struct {
 	key      *ecdsa.PrivateKey
 
 	// Bot dispatcher
-	bd *BotDispatcher
+	//bd     *BotDispatcher
+	bdAddr string
 
 	// debug mode
 	debug bool
@@ -40,7 +41,7 @@ type GM struct {
 
 // Init initializes the game master. In particular, it should register the
 // game master for RPC.
-func (gm *GM) Init(ipAddr string, port int, hexkey string, debug bool, bd *BotDispatcher) error {
+func (gm *GM) Init(ipAddr string, port int, hexkey string, debug bool, bdAddr string) error {
 
 	gm.gmLock.Lock()
 	defer gm.gmLock.Unlock()
@@ -64,8 +65,8 @@ func (gm *GM) Init(ipAddr string, port int, hexkey string, debug bool, bd *BotDi
 		gm.key = privk
 	}
 
-	// This could be nil. In that case bots will not be dispatched
-	gm.bd = bd
+	//gm.bd = bd
+	gm.bdAddr = bdAddr
 
 	gm.operatedGames = make(map[string]*GameOperator)
 
@@ -100,16 +101,6 @@ func (gm *GM) Init(ipAddr string, port int, hexkey string, debug bool, bd *BotDi
 	}()
 	log.Printf("INFO GM: Initialization succesful.\n")
 
-	return nil
-}
-
-// Execute is a test
-func (gm *GM) Execute(req ExecuteCallArgs, res *ExecuteCallReply) error {
-	if req.Message == "" {
-		return errors.New("You must give me a message")
-	}
-
-	res.Response = "This is your message: " + req.Message
 	return nil
 }
 

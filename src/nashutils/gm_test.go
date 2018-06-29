@@ -53,14 +53,14 @@ func TestDispatch(t *testing.T) {
 	if e != nil {
 		log.Fatal(e)
 	}
+	bdAddr := RPCAddr + ":" + strconv.Itoa(BDPort)
 
 	var gm GM
-	e = gm.Init(RPCAddr, GMPort, OwnerHexKey, false, &bd)
+	e = gm.Init(RPCAddr, GMPort, OwnerHexKey, false, bdAddr)
 	if e != nil {
 		log.Fatal(e)
 	}
 
-	//defer gm.Kill()
 	gmAddr := RPCAddr + ":" + strconv.Itoa(GMPort)
 
 	var clerk Clerk
@@ -68,8 +68,6 @@ func TestDispatch(t *testing.T) {
 	if e != nil {
 		log.Fatal(e)
 	}
-
-	//defer clerk.Kill()
 
 	// Create an IPC based RPC connection to a remote node
 	conn, err := ethclient.Dial(EthClientPath)
@@ -94,7 +92,6 @@ func TestDispatch(t *testing.T) {
 
 	time.Sleep(5 * time.Second)
 
-	bdAddr := RPCAddr + ":" + strconv.Itoa(BDPort)
 	c, err := rpc.Dial("tcp", bdAddr)
 	if err != nil {
 		log.Fatal(err)
@@ -116,6 +113,7 @@ func TestDispatch(t *testing.T) {
 
 	gm.Kill()
 	bd.Kill()
+	clerk.Kill()
 
 	time.Sleep(2 * time.Minute)
 

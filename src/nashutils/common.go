@@ -37,14 +37,6 @@ const (
 	BDPort = 54302
 )
 
-type ExecuteCallArgs struct {
-	Message string
-}
-
-type ExecuteCallReply struct {
-	Response string
-}
-
 // ConnectCallArgs is a struct of arguments to the GM.Connect RPC
 type ConnectCallArgs struct {
 	ContractAddress string
