@@ -8,7 +8,6 @@ import "./PayoutPage.css"
 type props = {};
 
 function PayoutMessage(props) {
-  console.log(props.yournum);
   if(props.diff > 0){
     return <h2>Congratulations! You won. ETH! Why don't you keep your streak going and play again?</h2>;
   } else {

@@ -23,13 +23,6 @@ const GameABI = require('./contracts/Game.json');
 const GameRegistryABI = require('./contracts/GameRegistry.json')
 const contract = require('truffle-contract');
 
-/* const Logo = styled(Menu.Item)`
-  font-family: 'Lobster Two', cursive;
-  font-size: 2rem;
-  padding-bottom: 12px !important;
-`;
-*/
-
 const activeItem = 'home'
 
 type props = {};

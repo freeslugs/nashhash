@@ -7,6 +7,8 @@ import styled from 'styled-components'
 import testLogo from './img/group.svg'
 
 import GameRegistryAPI from './api/GameRegistryAPI.js'
+import API from './api/Game.js'
+import srs from 'secure-random-string'
 import "./CommitForm.css"
 
 function gametitle(gtyp) {
@@ -20,10 +22,48 @@ function gametitle(gtyp) {
 
 function gameinfo(gtyp) {
   if(gtyp == "TwoThirds"){
-    return "Select a number between 0-100 with the intention of guessing 2/3 of the average guess."
+    return (<Grid className="game-info-grid">
+          <Col className="game-info-logo" xs={12} sm={12} md={4}>
+            <Well bsClass="game-drawing-card">
+              <img src={testLogo} className="two-thirds-logo"/>
+            </Well>
+          </Col>
+          <Col className="game-info-text" xs={12} sm={12} md={8}>
+            <Well bsClass="game-info-card">
+              <h1>2/3 Average</h1>
+              <p>Select a number between 0-100 with the intention of guessing 2/3 of the average guess. </p>
+              <p>The winner receives the total prize pool (10 * game stake) minus a 5% platform commission. </p>
+              <p> <span>Example:</span> <br/>
+                  The sum of the 10 players’ guesses is 653.
+                  The average guess is therefore 650/10, 65.
+                  2/3 of the average guess is 65*2/3, 43.29.
+                  The winner is the person who guessed closest to 43.29.
+              </p>
+            </Well>
+          </Col>
+        </Grid>);
   }
   else if(gtyp == "LowestUnique"){
-    return "Select the lowest number (0 or greater) that no one else has picked."
+    return (<Grid className="game-info-grid">
+          <Col className="game-info-logo" xs={12} sm={12} md={4}>
+            <Well bsClass="game-drawing-card">
+              <img src={testLogo} className="two-thirds-logo"/>
+            </Well>
+          </Col>
+          <Col className="game-info-text" xs={12} sm={12} md={8}>
+            <Well bsClass="game-info-card">
+              <h1>Lowest Unique Number</h1>
+              <p>Select a number between 0-100 with the intention of guessing 2/3 of the average guess.</p>
+              <p>The winner receives the total prize pool (10 * game stake) minus a 5% platform commission.</p>
+              <p> <span>Example:</span> <br/>
+                The sum of the 10 players’ guesses is 653 
+                The average guess is therefore 650/10, 65
+                2/3 of the average guess is 65*2/3, 43.29
+                The winner is the person who guessed closest to 43.29
+              </p>
+            </Well>
+          </Col>
+        </Grid>);
   }
 }
 
@@ -41,6 +81,8 @@ class CommitForm extends Component<props> {
 
   loading() {
     const { web3, accounts, gameregistry, gameaddresses } = this.props;
+
+    console.log(accounts);
     return !(web3 && accounts && accounts.length > 0 && gameaddresses.length > 0)
     //Add statement to reroute if gameaddresses is null
   }
@@ -93,24 +135,7 @@ class CommitForm extends Component<props> {
         <Header as='h2'>{gameinfo(gameType)}</Header>   */}
 
         <Grid className="game-info-grid">
-          <Col className="game-info-logo" xs={12} sm={12} md={4}>
-            <Well bsClass="game-drawing-card">
-              <img src={testLogo} className="two-thirds-logo"/>
-            </Well>
-          </Col>
-          <Col className="game-info-text" xs={12} sm={12} md={8}>
-            <Well bsClass="game-info-card">
-              <h1>2/3 Average</h1>
-              <p>Select a number between 0-100 with the intention of guessing 2/3 of the average guess. </p>
-              <p>The winner receives the total prize pool (10 * game stake) minus a 5% platform commission. </p>
-              <p> <span>Example:</span> <br/>
-                  The sum of the 10 players’ guesses is 653.
-                  The average guess is therefore 650/10, 65.
-                  2/3 of the average guess is 65*2/3, 43.29.
-                  The winner is the person who guessed closest to 43.29.
-              </p>
-            </Well>
-          </Col>
+          {gameinfo(this.props.gametype)}
         </Grid>
 
         <form>
@@ -127,6 +152,7 @@ class CommitForm extends Component<props> {
                         <FormControl
                           type="text"
                           placeholder="Enter guess"
+                          onChange={(e) => this.setState({guess: e.target.value})}
                         />
                       </FormGroup>
                 </Col>
@@ -155,7 +181,7 @@ class CommitForm extends Component<props> {
           </Well>
 
           <div className="submit-container">
-            <Button className="submit-guess-button" type="submit">Submit Guess</Button>
+            <Button className="submit-guess-button" disabled={this.loading() || this.state.loading} onClick={this.commit}>{this.state.loading ? 'Loading...' : 'Submit Guess'}</Button>
             <p>You’ll see a MetaMask pop-up asking to approve a
             transaction for this amount, plus gas costs. <br/>Submit to
             send your bet to the blockchain.</p>

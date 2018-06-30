@@ -60,7 +60,7 @@ class Game extends Component<props> {
     return (
       <div>
         <Route exact path="/games/two-thirds/" render={(props) => ( 
-          <CommitForm setParentState={this.setParentState} gameType={this.state.gametype} {...props} {...this.state} /> 
+          <CommitForm setParentState={this.setParentState} gameType={this.state.gametype} {...this.props} {...this.state} /> 
         )} />
         <Route exact path="/games/two-thirds/committed" render={(props) => ( <Committed setParentState={this.setParentState} GameType={this.state.gametype} {...props} {...this.props} {...this.state} /> )} />
         <Route exact path="/games/two-thirds/reveal" render={(props) => ( <RevealForm {...this.props} {...this.state} /> )} />

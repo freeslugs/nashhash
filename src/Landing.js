@@ -44,7 +44,7 @@ const Landing = () => <div>
                <h1>Lowest Unique Number</h1>
                <h3>10 player game</h3>
                <h3>Choose the lowest number that no one else has picked.</h3>
-               <LinkContainer to="/potato">
+               <LinkContainer to="/games/lowest-unique">
                  <Button bsClass="play">Play</Button>
                </LinkContainer>
            </Well>
